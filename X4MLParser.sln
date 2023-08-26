@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33829.357
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "X4MLParser", "X4MLParser\X4MLParser.fsproj", "{2061C0EE-4C4F-4A86-876B-9A55AB3C965A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2061C0EE-4C4F-4A86-876B-9A55AB3C965A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2061C0EE-4C4F-4A86-876B-9A55AB3C965A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2061C0EE-4C4F-4A86-876B-9A55AB3C965A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2061C0EE-4C4F-4A86-876B-9A55AB3C965A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {318F9707-3640-470E-9237-62D1B2BCB5E4}
+	EndGlobalSection
+EndGlobal
