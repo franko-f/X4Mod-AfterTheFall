@@ -6,11 +6,20 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="mod_templates\factionlogic_stations.xml" />
+    <Content Include="mod_templates\gamestarts.xml" />
+    <Content Include="mod_templates\god.xml" />
+    <Content Include="mod_templates\macros.xml" />
+    <None Include="mod_templates\ReadMe.md" />
     <Compile Include="Program.fs" />
   </ItemGroup>
+
+  <ItemGroup />
 
   <ItemGroup>
     <PackageReference Include="FSharp.Data" Version="6.2.0" />
   </ItemGroup>
+
+  <ItemGroup />
 
 </Project>

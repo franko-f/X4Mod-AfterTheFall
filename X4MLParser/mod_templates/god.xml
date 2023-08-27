@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+<!-- These samples borrowed from egosoft forums topic: https://forum.egosoft.com/viewtopic.php?t=442250 -->
+<add sel="//god/stations">
+  <!-- Hatikvah Wharf -->
+  <station id="wharf_hatikvah" race="argon" owner="hatikvah" type="factory">
+    <quotas>
+      <quota galaxy="1" zone="1" />
+    </quotas>
+    <location class="zone" macro="Zone004_Cluster_29_Sector001_macro" matchextension="false" />
+    <station>
+      <select faction="hatikvah" tags="[wharf]" />
+      <loadout>
+        <level exact="0.7" />
+      </loadout>
+    </station>
+  </station>
+
+  <!-- Hatikvah Shipyard -->
+  <station id="shipyard_hatikvah" race="argon" owner="hatikvah" type="factory">
+    <quotas>
+      <quota galaxy="1" zone="1" />
+    </quotas>
+    <location class="zone" macro="Zone003_Cluster_44_Sector001_macro" matchextension="false" />
+    <station>
+      <select faction="hatikvah" tags="[shipyard]" />
+      <loadout>
+        <level exact="0.8" />
+      </loadout>
+    </station>
+  </station>
+
+  <!-- Hatikvah equipmentdock -->
+  <station id="equipmentdock_hatikvah_01" race="argon" owner="hatikvah" type="factory">
+    <quotas>
+      <quota galaxy="1" zone="1" />
+    </quotas>
+    <location class="zone" macro="Zone005_Cluster_44_Sector001_macro" matchextension="false"/>
+    <station>
+      <select faction="hatikvah" tags="[equipmentdock]" />
+      <loadout>
+        <level exact="1.0" />
+      </loadout>
+    </station>
+  </station>
+
+  <station id="hat_defence_cluster_44_sector001" race="argon" owner="hatikvah" type="factory">
+    <quotas>
+      <quota galaxy="1" zone="1" />
+    </quotas>
+    <location class="zone" macro="Zone002_Cluster_44_Sector001_macro" matchextension="false"/>
+    <station>
+      <select faction="hatikvah" tags="[defence]" />
+    </station>
+  </station>
+
+
+
+  <!-- Scaleplate Shipyard -->
+  <station id="shipyard_scaleplate" race="teladi" owner="scaleplate" type="factory">
+    <quotas>
+      <quota galaxy="1" zone="1" />
+    </quotas>
+    <location class="sector" macro="Cluster_42_Sector002_macro" matchextension="false">
+      <corerange min="1.2" max="1.4"/>
+    </location>
+    <station>
+      <select faction="scaleplate" tags="[shipyard]" />
+      <loadout>
+        <level exact="1.0" />
+      </loadout>
+    </station>
+  </station>
+
+  <!-- Scaleplate Wharfs -->
+  <station id="wharf_scaleplate_0" race="teladi" owner="scaleplate" type="factory">
+    <quotas>
+      <quota galaxy="1" zone="1" />
+    </quotas>
+    <location class="sector" macro="Cluster_42_Sector002_macro" matchextension="false">
+      <corerange min="1.2" max="1.4"/>
+    </location>
+    <station>
+      <select faction="scaleplate" tags="[wharf]" />
+      <loadout>
+        <level exact="1.0" />
+      </loadout>
+    </station>
+  </station>
+  <station id="wharf_scaleplate_1" race="teladi" owner="scaleplate" type="factory">
+    <quotas>
+      <quota galaxy="1" zone="1" />
+    </quotas>
+    <location class="sector" macro="Cluster_04_Sector001_macro" matchextension="false">
+      <corerange min="1.2" max="1.4"/>
+    </location>
+    <station>
+      <select faction="scaleplate" tags="[wharf]" />
+      <loadout>
+        <level exact="1.0" />
+      </loadout>
+    </station>
+  </station>
+  <!-- Scaleplate tradestation -->
+  <station id="ringstation_04" race="teladi" owner="scaleplate" type="tradingstation">
+    <quotas>
+      <quota galaxy="1" />
+    </quotas>
+    <location class="zone" macro="Zone002_Cluster_42_Sector002_macro" matchextension="false" />
+    <position x="8" y="-2" z="1" pitch="0" roll="0" />
+    <station ref="tradestation_tel_ring">
+      <loadout>
+        <level exact="0.75"/>
+      </loadout>
+    </station>
+  </station>
+
+  <!-- Scaleplate equipmentdock -->
+  <station id="equipmentdock_hatikvah_0111" race="teladi" owner="scaleplate" type="factory">
+    <quotas>
+      <quota galaxy="1" zone="1" />
+    </quotas>
+    <location class="sector" macro="Cluster_42_Sector002_macro" matchextension="false"/>
+    <station>
+      <select faction="scaleplate" tags="[equipmentdock]" />
+      <loadout>
+        <level exact="1.0" />
+      </loadout>
+    </station>
+  </station>
+
+
+  <!-- Yaki Station -->
+  <station id="station_yaki_0" race="argon" owner="yaki" type="yakistation">
+    <quotas>
+      <quota galaxy="1" zone="1" />
+    </quotas>
+    <location class="sector" macro="Cluster_26_Sector002_macro" matchextension="false">
+      <corerange min="1.2" max="1.4"/>
+    </location>
+    <station>
+      <select faction="yaki" tags="[wharf]" />
+      <loadout>
+        <level exact="1.0" />
+      </loadout>
+    </station>
+  </station>
+
+
+  <!-- Xenon examples taken from vanilla source -->
+  <station id="shipyard_xenon_cluster" race="xenon" owner="xenon" type="shipyard">
+    <quotas>
+      <quota galaxy="1" zone="1" />
+    </quotas>
+    <location class="zone" macro="zone003_cluster_33_sector001_macro" />
+    <station>
+      <select faction="xenon" tags="[shipyard]" />
+      <loadout>
+        <level exact="1.0" />
+        <variation exact="0"/>
+      </loadout>
+    </station>
+  </station>
+
+  <station id="wharf_xenon_cluster" race="xenon" owner="xenon" type="shipyard">
+    <quotas>
+      <quota galaxy="1" zone="1" />
+    </quotas>
+    <location class="zone" macro="zone001_cluster_33_sector001_macro" />
+    <station>
+      <select faction="xenon" tags="[wharf]" />
+      <loadout>
+        <level exact="1.0" />
+        <variation exact="0"/>
+      </loadout>
+    </station>
+  </station>
+
+  <station id="xen_defence_cluster" race="xenon" owner="xenon" type="defence">
+    <quotas>
+      <quota galaxy="1" zone="1" />
+    </quotas>
+    <location class="zone" macro="zone001_cluster_16_sector001_macro" />
+    <station>
+      <select faction="xenon" tags="[defence]" />
+      <loadout>
+        <level exact="1.0" />
+        <variation exact="0"/>
+      </loadout>
+    </station>
+  </station>
+
+</add>
+
+
+<!-- some remove/replace examples -->
+<remove sel="root/bar/foo[@a='1']"/>
+<remove sel="root/bar/foo[@a='1']/@a"/>
+<remove sel="root/bar/foo[@a='1']" ws="after"/>
+  
+<replace sel="root/bar/foo[@a='1']/@a">3</replace>
+
+<!-- replace quota/quantity values for product factories examples -->
+<replace sel="/god/products/product[@id='ID_OF_PRODUCT']/@quotas">
+   <quotas>
+      <quota galaxy="2"/>
+   </quotas>
+</replace>
+
+<!-- Example replace that changes (in theory) number of xenon solar factories
+from the default 12 to 42: 3.5 times the normal number.-->
+<replace sel="/god/products/product[@id='xen_energycells']/@quotas">
+   <quotas>
+      <quota galaxy="42" cluster="3"/>
+   </quotas>
+</replace>
+
+
+<!-- add specific properties with selectors example. 
+Will need to update this when I have an example I need with x4 objects.
+
+<add sel="*/foo[@a='1']">
+  <cat a="3"/>
+</add>  
+-->
+
+  <!-- remove specific properties with selectors example. 
+Will need to update this when I have an example I need with x4 objects.
+
+<replace sel="*/foo[@a='1']">
+    <cat a="3"/>
+</replace>  
+<replace sel="root/bar/foo[@a='1']/@a">3</replace>
+-->
+
+</diff>
