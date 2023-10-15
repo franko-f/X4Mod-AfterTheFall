@@ -3,16 +3,12 @@ open System.Xml.Linq
 open FSharp.Data
 
 [<Literal>]
-let BaseFolder = "g:/development/X4 modding/"
+let X4UnpackedDataFolder = __SOURCE_DIRECTORY__ + "/X4_unpacked_data"
 [<Literal>]
-let X4UnpackedFolder = BaseFolder + "X4 Foundations/unpacked/"
-[<Literal>]
-let X4WorldStartDataFile = X4UnpackedFolder + "libraries/god.xml"
+let X4Core_WorldStartDataFile = X4UnpackedDataFolder + "/core/libraries/god.xml" // Core game data.
 
 [<Literal>]
-let X4MLParserFolder = BaseFolder + "X4ML_Parser/X4MLParser/X4MLParser/"
-[<Literal>]
-let X4GodModFile = X4MLParserFolder + "mod_templates/god.xml"
+let X4GodModFile = __SOURCE_DIRECTORY__ + "/mod_templates/god.xml"
 
 
 // Technically, this is all derived from the 'god.xml' file, but it reflects the starting
@@ -42,10 +38,18 @@ let X4GodModFile = X4MLParserFolder + "mod_templates/god.xml"
 // Later, I may add a few more abandoned destroyers/carriers and smaller ships around the galaxy
 // for the player to find.
 
-type X4WorldStart = XmlProvider<X4WorldStartDataFile>
+type X4WorldStart = XmlProvider<X4Core_WorldStartDataFile>
 type X4GodMod = XmlProvider<X4GodModFile>
 
-let x4WorldStartData = X4WorldStart.Load(X4WorldStartDataFile)
+// DU that will allow us to build up a list of mod items that we'll convert to
+// an XML diff file for output.  
+type X4Mod =
+    | Add     of selector: string * item:X4GodMod.Add
+    | Replace of X4GodMod.Replace
+    | Remove  of X4GodMod.Remove
+
+
+let x4WorldStartData = X4WorldStart.Load(X4Core_WorldStartDataFile)
 //let X4GodModData = X4GodMod.Load( stream: Application.GetContentStream Uri "god.xml" )   // It's a type provider AND has some template data we want
 let X4GodModData = X4GodMod.Load(X4GodModFile)   // It's a type provider AND has some template data we want
 
@@ -123,7 +127,10 @@ let processStation (station:X4WorldStart.Station) =
             replacement.Location.XElement.SetAttributeValue(XName.Get("macro"), locationMacro)
 
             logAddStation replacement
-            (Some replacement, None)  // return an add/remove options,
+
+            // Todo: Handle station REMOVE
+            let remove = None
+            (Some replacement, remove)  // return an add/remove options,
 
 
 let godModStations = 
