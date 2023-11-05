@@ -190,6 +190,62 @@
     </station>
   </station>
 
+  <products>
+    <!-- Argon Economy -->
+    <product id="arg_advancedcomposites" ware="advancedcomposites" owner="argon" type="factory">
+      <quotas>
+        <quota galaxy="2" />
+      </quotas>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="[argon, hatikvah]" relation="self" comparison="ge">
+        <economy max="0.75" maxbound="false" />
+      </location>
+      <module>
+        <select ware="advancedcomposites" race="argon" faction="argon"/>
+      </module>
+    </product>
+
+    <product id="arg_antimattercells" ware="antimattercells" owner="argon" type="factory">
+      <quotas>
+        <quota galaxy="3" />
+      </quotas>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="[argon, hatikvah]" relation="self" comparison="ge">
+        <region ware="hydrogen" max="100000" />
+      </location>
+      <module>
+        <select ware="antimattercells" race="argon"/>
+      </module>
+    </product>
+
+
+    <product id="arg_energycells" ware="energycells" owner="argon" type="factory">
+      <quotas>
+        <quota galaxy="10" sector="6" />
+      </quotas>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="[argon, hatikvah]" relation="self" comparison="ge">
+        <economy max="0.6" maxbound="false" />
+        <sunlight min="0.5" />
+      </location>
+      <module>
+        <select ware="energycells" race="argon"/>
+      </module>
+    </product>
+
+
+    <product id="arg_meat" ware="meat" owner="argon" type="factory">
+      <quotas>
+        <quota galaxy="2" />
+      </quotas>
+      <location class="galaxy" macro="xu_ep2_universe_macro" faction="[argon, hatikvah]" relation="self" comparison="ge">
+        <economy max="0.25" />
+      </location>
+      <module>
+        <select ware="meat" race="argon"/>
+      </module>
+    </product>
+
+
+  </products>
+
 </add>
 
 

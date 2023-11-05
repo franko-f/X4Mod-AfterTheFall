@@ -11,14 +11,14 @@ let X4Core_WorldStartDataFile = X4UnpackedDataFolder + "/core/libraries/god.xml"
 let X4GodModFile = __SOURCE_DIRECTORY__ + "/mod_templates/god.xml"
 
 
-// Technically, this is all derived from the 'god.xml' file, but it reflects the starting
+// The 'god.xml' file defines the starting state of the universe, in particular the starting
 // unique stations and random factories for each faction that are scattered around the
 // map. I'll call it 'world start' to make it a little clearer.
 // There are two primary sets of data in this file we're interested in:
 // 1. STATIONS : These are manually placed unique stations, shipyards, tradeposts and defense stations.
 //  My understanding that it's the placement of these stations that will determine faction ownership
 // of the sectors. Unlike 'products', they're given an explicit sector they spawn in, and sometimes
-// a specific location in the sector. Product factories do not.
+// a specific location in the sector. This is different from Product factories which are goverened by:
 // 2. PRODUCTS: This defines the production factories in the universe. Unlike STATIONS, they are
 // given a descriptor that describes the product they will produce, the faction they belong to,
 // and the maximum that can exist for the faction in the galaxy. Then the game randomly creates
@@ -50,7 +50,6 @@ type X4Mod =
 
 
 let x4WorldStartData = X4WorldStart.Load(X4Core_WorldStartDataFile)
-//let X4GodModData = X4GodMod.Load( stream: Application.GetContentStream Uri "god.xml" )   // It's a type provider AND has some template data we want
 let X4GodModData = X4GodMod.Load(X4GodModFile)   // It's a type provider AND has some template data we want
 
 // Extract the Xenon stations from the GodModTemplate. We'll use these as templates when we add new xenon stations
@@ -58,24 +57,32 @@ let XenonShipyard = Array.find (fun (elem:X4GodMod.Station) -> elem.Id = "shipya
 let XenonWharf = Array.find (fun (elem:X4GodMod.Station) -> elem.Id = "wharf_xenon_cluster") X4GodModData.Add.Stations
 let XenonDefence = Array.find (fun (elem:X4GodMod.Station) -> elem.Id = "xen_defence_cluster") X4GodModData.Add.Stations
 
+// the 'log' functions just extract a bit of data about a station, and log it
+// to the terminal for debugging and tracking purposes.
 let logStation (station:X4WorldStart.Station) =
-    let locationClass= match station.Location.Class with | Some x -> x | None -> "none"
-    let locationMacro= match station.Location.Macro with | Some x -> x | None -> "none"
-    let stationType  = match station.Type           with | Some x -> x | None -> "none"
+    let locationClass= station.Location.Class |> Option.defaultValue "none"
+    let locationMacro= station.Location.Macro |> Option.defaultValue "none"
+    let stationType  = station.Type           |> Option.defaultValue "none"
+    let stationMacro = station.Station.Macro  |> Option.defaultValue "none"
     let tags         = match station.Station.Select with | Some tag -> tag.Tags | _ -> "[none]"
-    let stationMacro = match station.Station.Macro  with | Some x -> x | None -> "none"
     printfn "PROCESSING STATION %s race: %s, owner: %s, type: %s, location: %s:%s, id: %s, station: %s   " tags station.Race station.Owner stationType locationClass locationMacro station.Id stationMacro
 
 let logAddStation (station:X4GodMod.Station) =
     let locationClass= station.Location.Class
     let locationMacro= station.Location.Macro
-
-    let stationType  =station.Type 
+    let stationType  = station.Type 
     let tags         = match station.Station.Select with | Some tag -> tag.Tags | _ -> "[none]"
     let stationMacro = "none"
     printfn "   REPLACE STATION %s race: %s, owner: %s, type: %s, location: %s:%s, id: %s, station: %s   " tags station.Race station.Owner stationType locationClass locationMacro station.Id stationMacro
 
+let logProduct (product:X4WorldStart.Product) =
+    let prodModule = product.Module.Select
+    let faction    = prodModule.Faction |> Option.defaultValue "none"
+    let quotaSector      = product.Quota
+    printfn "PROCESSING PRODUCT [%s:%s] %s/%s with quotas %i/%i" product.Owner product.Location.Faction product.Type product.Ware product.Quota.Galaxy (product.Quota.Sector |> Option.defaultValue -1)
 
+// Given a station, process it according to our rules. We may replace it
+// with a Xenon one, remove it, etc. This function is call once per station
 let processStation (station:X4WorldStart.Station) =
     logStation station
 
@@ -132,13 +139,21 @@ let processStation (station:X4WorldStart.Station) =
             let remove = None
             (Some replacement, remove)  // return an add/remove options,
 
+let processProduct (product:X4WorldStart.Product) =
+    logProduct product
+    (Some product, None)
 
 let godModStations = 
-        [| for station in x4WorldStartData.Stations.Stations do
-               let (add, remove) = processStation station
-               match add    with Some station -> yield station | _ -> ()
-               match remove with Some station -> yield station | _ -> ()
-        |]
+    [| for station in x4WorldStartData.Stations.Stations do
+            let (add, remove) = processStation station
+            match add    with Some station -> yield station | _ -> ()
+            match remove with Some station -> yield station | _ -> ()
+    |]
 
-
+let godModProducts = 
+    [| for product in x4WorldStartData.Products do
+            let (add, remove) = processProduct product
+            match add    with Some product -> yield product | _ -> ()
+            match remove with Some product -> yield product | _ -> ()
+    |]
 

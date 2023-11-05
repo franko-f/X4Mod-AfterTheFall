@@ -1,0 +1,22 @@
+
+
+From https://www.nexusmods.com/x4foundations/mods/1126?tab=posts :
+
+upiterKasparov
+member73 posts2 kudos
+24 May 2023, 9:04PM
+Hello there!
+
+I think I've found the answer to your problems.
+Your mod may miss a minor detail like this Ralston one does, and that may be the reason to why god.xml may not work.
+
+In order to ensure that god.xml spawns your stuff, all 'location' tags must include the matchextension="false" attribute!
+I don't say that this is your problem with 100% probability, but this is highly probable, that this is the only problem.
+
+So, instead of this:
+<location class="sector" macro="homebrew_cluster08_sector001_macro"  />
+
+Use this:
+<location class="sector" macro="homebrew_cluster08_sector001_macro" matchextension="false"  />
+
+This rule is also true for the jobs.xml, should you wish to add new jobs!
