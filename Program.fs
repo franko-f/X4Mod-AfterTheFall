@@ -7,6 +7,10 @@ let X4UnpackedDataFolder = __SOURCE_DIRECTORY__ + "/X4_unpacked_data"
 [<Literal>]
 let X4Core_WorldStartDataFile = X4UnpackedDataFolder + "/core/libraries/god.xml" // Core game data.
 
+// The default GOD.xml file, etc, don't have an 'add/replace' XML section, so they can't
+// be used as type providers for our output XML. So we've created a template that has
+// versions of our types that we need (like station, product) as well as the XML selectors
+// for replace/add
 [<Literal>]
 let X4GodModFile = __SOURCE_DIRECTORY__ + "/mod_templates/god.xml"
 

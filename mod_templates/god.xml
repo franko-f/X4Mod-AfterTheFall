@@ -1,4 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+// The default GOD.xml file, etc, don't have an 'add/replace' XML section, so they can't
+// be used as type providers for our output XML. So we've created a template that has
+// versions of our types that we need (like station, product) as well as the XML selectors
+// for replace/add
+// Apologies to egosoft if there's a problem with copying in a few station and factory
+// configs here from their files to act as demo data for the type provider to parse
+// and generate our type from. This data never makes it in to the mod itself.
+-->
 <diff>
 <!-- These samples borrowed from egosoft forums topic: https://forum.egosoft.com/viewtopic.php?t=442250 -->
 <add sel="//god/stations">
@@ -53,8 +62,6 @@
       <select faction="hatikvah" tags="[defence]" />
     </station>
   </station>
-
-
 
   <!-- Scaleplate Shipyard -->
   <station id="shipyard_scaleplate" race="teladi" owner="scaleplate" type="factory">
