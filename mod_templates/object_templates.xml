@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+// This template file contains simple base objects that we want as templates to insert in to our
+// final output. Like Xenon stations and other similar things.
+-->
+<!-- These samples borrowed from egosoft forums topic: https://forum.egosoft.com/viewtopic.php?t=442250 -->
+<stations>
+  <!-- Xenon examples taken from vanilla source -->
+  <station id="shipyard_xenon_cluster" race="xenon" owner="xenon" type="shipyard">
+    <quotas>
+      <quota galaxy="1" zone="1" />
+    </quotas>
+    <location class="zone" macro="zone003_cluster_33_sector001_macro" />
+    <station>
+      <select faction="xenon" tags="[shipyard]" />
+      <loadout>
+        <level exact="1.0" />
+        <variation exact="0"/>
+      </loadout>
+    </station>
+  </station>
+
+  <station id="wharf_xenon_cluster" race="xenon" owner="xenon" type="shipyard">
+    <quotas>
+      <quota galaxy="1" zone="1" />
+    </quotas>
+    <location class="zone" macro="zone001_cluster_33_sector001_macro" />
+    <station>
+      <select faction="xenon" tags="[wharf]" />
+      <loadout>
+        <level exact="1.0" />
+        <variation exact="0"/>
+      </loadout>
+    </station>
+  </station>
+
+  <station id="xen_defence_cluster" race="xenon" owner="xenon" type="defence">
+    <quotas>
+      <quota galaxy="1" zone="1" />
+    </quotas>
+    <location class="zone" macro="zone001_cluster_16_sector001_macro" />
+    <station>
+      <select faction="xenon" tags="[defence]" />
+      <loadout>
+        <level exact="1.0" />
+        <variation exact="0"/>
+      </loadout>
+    </station>
+  </station>
+
+</stations>

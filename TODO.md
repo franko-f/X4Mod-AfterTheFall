@@ -1,12 +1,15 @@
 ## TODO:
  * Handle STATION
-   ** write output ADD XML
-   ** write output REPLACE xml
+   ** write output ADD XML for stations we're added
+   ** write output REPLACE xml for stations we're removing.
+   ** add 'matchextension="false"' to location tags.
  * Handle PRODUCT
-   * Reduce QUOTAS. Factor 4? 3?
-   * Alter sector max to be same as galaxy max
-   * INCREASE Xenon product quota
-   * write output REPLACE xml
+   ** Reduce QUOTAS. Factor 4? 3?
+   ** Alter sector max to be same as galaxy max
+   ** INCREASE Xenon product quota
+   ** write output REPLACE xml
+   ** add 'matchextension="false"' to location tags.
+
  * Systems:
    * Assign 2 systems per faction
      * place ALI near HOP

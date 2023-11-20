@@ -13,6 +13,8 @@ let X4Core_WorldStartDataFile = X4UnpackedDataFolder + "/core/libraries/god.xml"
 // for replace/add
 [<Literal>]
 let X4GodModFile = __SOURCE_DIRECTORY__ + "/mod_templates/god.xml"
+[<Literal>]
+let X4ObjectTemplatesFile = __SOURCE_DIRECTORY__ + "/mod_templates/object_templates.xml"
 
 
 // The 'god.xml' file defines the starting state of the universe, in particular the starting
@@ -42,8 +44,15 @@ let X4GodModFile = __SOURCE_DIRECTORY__ + "/mod_templates/god.xml"
 // Later, I may add a few more abandoned destroyers/carriers and smaller ships around the galaxy
 // for the player to find.
 
+// TODO: Should we 'unify' all the types using 'Global=true,' parameter?
+// This means, for example, every instance of 'Location' type is trested as the same type, no matter
+// where it appears in the sample data file. It results in a lot of fields being set to an 'option'
+// type, as some will appear in some cases of location, but not in others. So requires some tweaks
+// to the parsing code.
+// https://fsprojects.github.io/FSharp.Data/library/XmlProvider.html#Global-inference-mode
 type X4WorldStart = XmlProvider<X4Core_WorldStartDataFile>
-type X4GodMod = XmlProvider<X4GodModFile>
+type X4GodMod = XmlProvider<X4GodModFile >
+type X4ObjectTemplates = XmlProvider<X4ObjectTemplatesFile>
 
 // DU that will allow us to build up a list of mod items that we'll convert to
 // an XML diff file for output.  
@@ -55,11 +64,12 @@ type X4Mod =
 
 let x4WorldStartData = X4WorldStart.Load(X4Core_WorldStartDataFile)
 let X4GodModData = X4GodMod.Load(X4GodModFile)   // It's a type provider AND has some template data we want
+let X4ObjectTemplatesData = X4ObjectTemplates.Load(X4ObjectTemplatesFile)
 
 // Extract the Xenon stations from the GodModTemplate. We'll use these as templates when we add new xenon stations
-let XenonShipyard = Array.find (fun (elem:X4GodMod.Station) -> elem.Id = "shipyard_xenon_cluster") X4GodModData.Add.Stations
-let XenonWharf = Array.find (fun (elem:X4GodMod.Station) -> elem.Id = "wharf_xenon_cluster") X4GodModData.Add.Stations
-let XenonDefence = Array.find (fun (elem:X4GodMod.Station) -> elem.Id = "xen_defence_cluster") X4GodModData.Add.Stations
+let XenonShipyard = Array.find (fun (elem:X4ObjectTemplates.Station) -> elem.Id = "shipyard_xenon_cluster") X4ObjectTemplatesData.Stations
+let XenonWharf = Array.find (fun (elem:X4ObjectTemplates.Station) -> elem.Id = "wharf_xenon_cluster") X4ObjectTemplatesData.Stations
+let XenonDefence = Array.find (fun (elem:X4ObjectTemplates.Station) -> elem.Id = "xen_defence_cluster") X4ObjectTemplatesData.Stations
 
 // the 'log' functions just extract a bit of data about a station, and log it
 // to the terminal for debugging and tracking purposes.
@@ -144,6 +154,7 @@ let processStation (station:X4WorldStart.Station) =
             (Some replacement, remove)  // return an add/remove options,
 
 let processProduct (product:X4WorldStart.Product) =
+    // TODO: Update the product quantities/settings before returning.
     logProduct product
     (Some product, None)
 
@@ -161,3 +172,51 @@ let godModProducts =
             match remove with Some product -> yield product | _ -> ()
     |]
 
+
+// Now that everything has been processed, and we've got new stations and products, 
+// we generate the modded XML, and write it out.
+
+// This is our template output file structure, with the broad sections already created.
+// We have set up the 'add' 'replace' sections with appropriate selectors. We can then
+// extract each Add section by the selector element value, and populate it's underlying
+// XElement in place. eg, search for "//god/stations" to find the 'add' XElement for
+// stations.
+let outGodFile = X4GodMod.Parse("<?xml version=\"1.0\" encoding=\"utf-8\"?>
+    <diff>
+        <add sel=\"//god/stations\">
+        </add>
+        <add sel=\"//god/products\">
+        </add>
+    </diff>
+"
+)
+
+// Given a selector ID, search an instance of a GodMod xml file for the 'ADD' section
+// with that 'sel' value. This will be the XElement we will manipulate.
+let find_add_selector sel xml =
+   Array.find (fun (elem:X4GodMod.Add) -> elem.Sel = sel) xml
+
+
+// convert our list of stations in to a list of XElements, so we can add it to our
+// output document. The XMK type provider doesn't provide manipulation functions, so we
+// can only manipulate the raw xelements.
+let outputStations = [|
+    for station in godModStations do yield station.XElement
+|]
+let outputProducts = [|
+    for product in godModProducts do yield product.XElement
+|]
+
+// TODO: Only some stations should be added, others should be replaced!
+let stationsAdd = find_add_selector "//god/stations" outGodFile.Adds
+stationsAdd.XElement.Add(outputStations)
+let productsAdd = find_add_selector "//god/products" outGodFile.Adds
+productsAdd.XElement.Add(outputProducts)
+let dump = outGodFile.XElement.ToString()
+
+// https://stackoverflow.com/questions/67172960/parsing-xml-file-with-fsharp-xmlprovider 
+//  If you wanted to add the new changeSet to the existing document, the way to do this would be to do something like this:
+// doc.XElement.Add(changeSet.XElement)
+// doc.XElement.Save("sample.xml")
+
+printfn "XML::::\n %s" dump

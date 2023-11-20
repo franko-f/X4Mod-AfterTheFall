@@ -3,8 +3,11 @@
 // The default GOD.xml file, etc, don't have an 'add/replace' XML section, so they can't
 // be used as type providers for our output XML. So we've created a template that has
 // versions of our types that we need (like station, product) as well as the XML selectors
-// for replace/add
-// Apologies to egosoft if there's a problem with copying in a few station and factory
+// for replace/add.
+// This template is loaded by the fsharp.data XML type provider to autogenerate a
+// compile time type for us.
+//
+// Apologies to egosoft/others if there's a problem with copying in a few station and factory
 // configs here from their files to act as demo data for the type provider to parse
 // and generate our type from. This data never makes it in to the mod itself.
 -->
@@ -94,6 +97,7 @@
       </loadout>
     </station>
   </station>
+
   <station id="wharf_scaleplate_1" race="teladi" owner="scaleplate" type="factory">
     <quotas>
       <quota galaxy="1" zone="1" />
@@ -108,6 +112,7 @@
       </loadout>
     </station>
   </station>
+
   <!-- Scaleplate tradestation -->
   <station id="ringstation_04" race="teladi" owner="scaleplate" type="tradingstation">
     <quotas>
@@ -197,61 +202,59 @@
     </station>
   </station>
 
-  <products>
-    <!-- Argon Economy -->
-    <product id="arg_advancedcomposites" ware="advancedcomposites" owner="argon" type="factory">
-      <quotas>
-        <quota galaxy="2" />
-      </quotas>
-      <location class="galaxy" macro="xu_ep2_universe_macro" faction="[argon, hatikvah]" relation="self" comparison="ge">
-        <economy max="0.75" maxbound="false" />
-      </location>
-      <module>
-        <select ware="advancedcomposites" race="argon" faction="argon"/>
-      </module>
-    </product>
+</add>
+<add sel="//god/products">
+  <!-- Argon Economy -->
+  <product id="arg_advancedcomposites" ware="advancedcomposites" owner="argon" type="factory">
+    <quotas>
+      <quota galaxy="2" />
+    </quotas>
+    <location class="galaxy" macro="xu_ep2_universe_macro" faction="[argon, hatikvah]" relation="self" comparison="ge">
+      <economy max="0.75" maxbound="false" />
+    </location>
+    <module>
+      <select ware="advancedcomposites" race="argon" faction="argon"/>
+    </module>
+  </product>
 
-    <product id="arg_antimattercells" ware="antimattercells" owner="argon" type="factory">
-      <quotas>
-        <quota galaxy="3" />
-      </quotas>
-      <location class="galaxy" macro="xu_ep2_universe_macro" faction="[argon, hatikvah]" relation="self" comparison="ge">
-        <region ware="hydrogen" max="100000" />
-      </location>
-      <module>
-        <select ware="antimattercells" race="argon"/>
-      </module>
-    </product>
-
-
-    <product id="arg_energycells" ware="energycells" owner="argon" type="factory">
-      <quotas>
-        <quota galaxy="10" sector="6" />
-      </quotas>
-      <location class="galaxy" macro="xu_ep2_universe_macro" faction="[argon, hatikvah]" relation="self" comparison="ge">
-        <economy max="0.6" maxbound="false" />
-        <sunlight min="0.5" />
-      </location>
-      <module>
-        <select ware="energycells" race="argon"/>
-      </module>
-    </product>
+  <product id="arg_antimattercells" ware="antimattercells" owner="argon" type="factory">
+    <quotas>
+      <quota galaxy="3" />
+    </quotas>
+    <location class="galaxy" macro="xu_ep2_universe_macro" faction="[argon, hatikvah]" relation="self" comparison="ge">
+      <region ware="hydrogen" max="100000" />
+    </location>
+    <module>
+      <select ware="antimattercells" race="argon"/>
+    </module>
+  </product>
 
 
-    <product id="arg_meat" ware="meat" owner="argon" type="factory">
-      <quotas>
-        <quota galaxy="2" />
-      </quotas>
-      <location class="galaxy" macro="xu_ep2_universe_macro" faction="[argon, hatikvah]" relation="self" comparison="ge">
-        <economy max="0.25" />
-      </location>
-      <module>
-        <select ware="meat" race="argon"/>
-      </module>
-    </product>
+  <product id="arg_energycells" ware="energycells" owner="argon" type="factory">
+    <quotas>
+      <quota galaxy="10" sector="6" />
+    </quotas>
+    <location class="galaxy" macro="xu_ep2_universe_macro" faction="[argon, hatikvah]" relation="self" comparison="ge">
+      <economy max="0.6" maxbound="false" />
+      <sunlight min="0.5" />
+    </location>
+    <module>
+      <select ware="energycells" race="argon"/>
+    </module>
+  </product>
 
 
-  </products>
+  <product id="arg_meat" ware="meat" owner="argon" type="factory">
+    <quotas>
+      <quota galaxy="2" />
+    </quotas>
+    <location class="galaxy" macro="xu_ep2_universe_macro" faction="[argon, hatikvah]" relation="self" comparison="ge">
+      <economy max="0.25" />
+    </location>
+    <module>
+      <select ware="meat" race="argon"/>
+    </module>
+  </product>
 
 </add>
 
