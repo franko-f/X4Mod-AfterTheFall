@@ -1,4 +1,11 @@
 
+https://stackoverflow.com/questions/67172960/parsing-xml-file-with-fsharp-xmlprovider 
+If you wanted to add the new changeSet to the existing document, the way to do this would be to do something like this:
+    doc.XElement.Add(changeSet.XElement)
+    doc.XElement.Save("sample.xml")
+
+
+
 
 From https://www.nexusmods.com/x4foundations/mods/1126?tab=posts :
 

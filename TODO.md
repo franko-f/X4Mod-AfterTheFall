@@ -1,9 +1,9 @@
 ## TODO:
  * Handle STATION
-   ** write output ADD XML for stations we're added
-   ** write output REPLACE xml for stations we're removing.
    ** add 'matchextension="false"' to location tags.
+   ** CHECK: Do I need to add 'matchextension' for 'REMOVE' tags?
  * Handle PRODUCT
+   ** I don't think we need REMOVE for products, so clean this code up.
    ** Reduce QUOTAS. Factor 4? 3?
    ** Alter sector max to be same as galaxy max
    ** INCREASE Xenon product quota
@@ -52,3 +52,7 @@
     * Loot drops?
     * Lower prices?
 
+# DONE
+ * Handle STATION
+   ** write output ADD XML for stations we're added
+   ** write output REPLACE xml for stations we're removing.

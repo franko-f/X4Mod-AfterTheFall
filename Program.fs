@@ -1,5 +1,7 @@
 ﻿// For more information see https://aka.ms/fsharp-console-apps
+open System.Linq
 open System.Xml.Linq
+open System.Xml.XPath
 open FSharp.Data
 
 [<Literal>]
@@ -138,8 +140,17 @@ let processStation (station:X4WorldStart.Station) =
         match stationClone with
         | None -> (None, None)
         | Some stationClone ->
+
+            let id = station.Id
+
+            // remove the old station
+            let remove = new XElement( "remove",
+                new XAttribute("sel", $"//god/stations/station[@id='{id}']") // XML remove tag for the station we're replacing with Xenon.
+            )
+            
+            // create a new Xenon station to replace it
             let replacement = new X4GodMod.Station(stationClone)
-            replacement.XElement.SetAttributeValue(XName.Get("id"), replacement.Id + "_" + station.Id)   // Give it a new unique ID
+            replacement.XElement.SetAttributeValue(XName.Get("id"), replacement.Id + "_x_" + id)   // Give it a new unique ID
             // update location. As they're different types (as far as the type provider is concerned), we have to manually set
             // the important zone and macro fields.
             let locationClass= match station.Location.Class with | Some x -> x | None -> "none"
@@ -149,21 +160,33 @@ let processStation (station:X4WorldStart.Station) =
 
             logAddStation replacement
 
-            // Todo: Handle station REMOVE
-            let remove = None
-            (Some replacement, remove)  // return an add/remove options,
+            (Some replacement, Some remove)  // return an add/remove options,
 
 let processProduct (product:X4WorldStart.Product) =
     // TODO: Update the product quantities/settings before returning.
     logProduct product
     (Some product, None)
 
+
+// Write our XML output to a directory called 'mod'. If the directrory doesn't exist, create it.
+let write_xml_file (filename:string) (xml:XElement) =
+    let modDir = __SOURCE_DIRECTORY__ + "/mod"
+    if not (System.IO.Directory.Exists(modDir)) then
+        System.IO.Directory.CreateDirectory(modDir) |> ignore   // Should really catch the failure here. TODO
+    let path = modDir + "/" + filename
+    xml.Save(path)
+
+// Given a list of 2 element tuples, split them in to two lists.
+// The first list contains all the first elements, the second list contains all the second elements.
+// It will strip out any 'None' values.
+let splitTuples (tuples:('a option * 'b option)[]) =
+    let firsts = [| for (a,_) in tuples do match a with Some x -> yield x | _ -> () |]
+    let seconds = [| for (_,b) in tuples do match b with Some x -> yield x | _ -> () |]
+    (firsts, seconds)
+
 let godModStations = 
-    [| for station in x4WorldStartData.Stations.Stations do
-            let (add, remove) = processStation station
-            match add    with Some station -> yield station | _ -> ()
-            match remove with Some station -> yield station | _ -> ()
-    |]
+    [| for station in x4WorldStartData.Stations.Stations do yield processStation station |] |> splitTuples
+
 
 let godModProducts = 
     [| for product in x4WorldStartData.Products do
@@ -200,23 +223,24 @@ let find_add_selector sel xml =
 // convert our list of stations in to a list of XElements, so we can add it to our
 // output document. The XMK type provider doesn't provide manipulation functions, so we
 // can only manipulate the raw xelements.
+let (addStations, removeStations) = godModStations 
 let outputStations = [|
-    for station in godModStations do yield station.XElement
+    for station in addStations do yield station.XElement
 |]
+
 let outputProducts = [|
     for product in godModProducts do yield product.XElement
 |]
 
-// TODO: Only some stations should be added, others should be replaced!
 let stationsAdd = find_add_selector "//god/stations" outGodFile.Adds
 stationsAdd.XElement.Add(outputStations)
 let productsAdd = find_add_selector "//god/products" outGodFile.Adds
 productsAdd.XElement.Add(outputProducts)
-let dump = outGodFile.XElement.ToString()
 
-// https://stackoverflow.com/questions/67172960/parsing-xml-file-with-fsharp-xmlprovider 
-//  If you wanted to add the new changeSet to the existing document, the way to do this would be to do something like this:
-// doc.XElement.Add(changeSet.XElement)
-// doc.XElement.Save("sample.xml")
+// Add out 'remove' tags to the end of the diff block.
+let diff = outGodFile.XElement // the root element is actually the 'diff' tag.
+diff.Add(removeStations)    // Add will append to the end of the diff children,
+write_xml_file "god.xml" outGodFile.XElement
 
-printfn "XML::::\n %s" dump
+// let dump = outGodFile.XElement.ToString()
+
