@@ -70,8 +70,8 @@ let X4ObjectTemplatesData = X4ObjectTemplates.Load(X4ObjectTemplatesFile)
 
 // Extract the Xenon stations from the GodModTemplate. We'll use these as templates when we add new xenon stations
 let XenonShipyard = Array.find (fun (elem:X4ObjectTemplates.Station) -> elem.Id = "shipyard_xenon_cluster") X4ObjectTemplatesData.Stations
-let XenonWharf = Array.find (fun (elem:X4ObjectTemplates.Station) -> elem.Id = "wharf_xenon_cluster") X4ObjectTemplatesData.Stations
-let XenonDefence = Array.find (fun (elem:X4ObjectTemplates.Station) -> elem.Id = "xen_defence_cluster") X4ObjectTemplatesData.Stations
+let XenonWharf    = Array.find (fun (elem:X4ObjectTemplates.Station) -> elem.Id = "wharf_xenon_cluster") X4ObjectTemplatesData.Stations
+let XenonDefence  = Array.find (fun (elem:X4ObjectTemplates.Station) -> elem.Id = "xen_defence_cluster") X4ObjectTemplatesData.Stations
 
 // the 'log' functions just extract a bit of data about a station, and log it
 // to the terminal for debugging and tracking purposes.
@@ -167,14 +167,18 @@ let processProduct (product:X4WorldStart.Product) =
     logProduct product
     (Some product, None)
 
+// Given a filename with full path, create all the parent directories recursively if they don't exist.
+let check_and_create_dir (filename:string) =
+    let dir = System.IO.Path.GetDirectoryName(filename)
+    if not (System.IO.Directory.Exists(dir)) then
+        System.IO.Directory.CreateDirectory(dir) |> ignore   // Should really catch the failure here. TODO
 
 // Write our XML output to a directory called 'mod'. If the directrory doesn't exist, create it.
 let write_xml_file (filename:string) (xml:XElement) =
-    let modDir = __SOURCE_DIRECTORY__ + "/mod"
-    if not (System.IO.Directory.Exists(modDir)) then
-        System.IO.Directory.CreateDirectory(modDir) |> ignore   // Should really catch the failure here. TODO
-    let path = modDir + "/" + filename
-    xml.Save(path)
+    let modDir = __SOURCE_DIRECTORY__ + "/mod/after_the_fall"
+    let fullname = modDir + "/" + filename
+    check_and_create_dir fullname
+    xml.Save(fullname)
 
 // Given a list of 2 element tuples, split them in to two lists.
 // The first list contains all the first elements, the second list contains all the second elements.
@@ -240,7 +244,10 @@ productsAdd.XElement.Add(outputProducts)
 // Add out 'remove' tags to the end of the diff block.
 let diff = outGodFile.XElement // the root element is actually the 'diff' tag.
 diff.Add(removeStations)    // Add will append to the end of the diff children,
-write_xml_file "god.xml" outGodFile.XElement
+write_xml_file "libraries/god.xml" outGodFile.XElement
+
+// Copy the content.xml file that describes the mod to the output directory.
+System.IO.File.Copy(__SOURCE_DIRECTORY__ + "/mod_templates/content.xml", __SOURCE_DIRECTORY__ + "/mod/after_the_fall/content.xml", true) |> ignore
 
 // let dump = outGodFile.XElement.ToString()
 

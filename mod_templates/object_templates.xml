@@ -10,7 +10,7 @@
     <quotas>
       <quota galaxy="1" zone="1" />
     </quotas>
-    <location class="zone" macro="zone003_cluster_33_sector001_macro" />
+    <location class="zone" macro="zone003_cluster_33_sector001_macro"  matchextension="false" />
     <station>
       <select faction="xenon" tags="[shipyard]" />
       <loadout>
@@ -24,7 +24,7 @@
     <quotas>
       <quota galaxy="1" zone="1" />
     </quotas>
-    <location class="zone" macro="zone001_cluster_33_sector001_macro" />
+    <location class="zone" macro="zone001_cluster_33_sector001_macro"  matchextension="false" />
     <station>
       <select faction="xenon" tags="[wharf]" />
       <loadout>
@@ -38,7 +38,7 @@
     <quotas>
       <quota galaxy="1" zone="1" />
     </quotas>
-    <location class="zone" macro="zone001_cluster_16_sector001_macro" />
+    <location class="zone" macro="zone001_cluster_16_sector001_macro"  matchextension="false" />
     <station>
       <select faction="xenon" tags="[defence]" />
       <loadout>

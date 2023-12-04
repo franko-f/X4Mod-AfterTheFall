@@ -1,5 +1,6 @@
 ## TODO:
  * Handle STATION
+   ** MOVE/REPLACE some shipyards/wharves rather than just removing.
    ** add 'matchextension="false"' to location tags.
    ** CHECK: Do I need to add 'matchextension' for 'REMOVE' tags?
  * Handle PRODUCT
