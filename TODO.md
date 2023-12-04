@@ -32,6 +32,7 @@
         ownerless sector somewhere for them.
         This actually is probably good: 
         WE SHOULD CREATE AT LEAST ONE 'SAFE' OWNERLESS FOR THE PLAYER!
+
  * DLC:
   * Check if DLC exists
   * Load/process each DLC
@@ -39,11 +40,12 @@
     * SPLIT
     * Terran
     * Pirate
-  * Configure GAME START options.
-   * Strong/easy start
-   * Hard start
-   * Each faction.
-   * Include DLC
+
+* Configure GAME START options.
+  * Strong/easy start
+  * Hard start
+  * Each faction.
+  * Include DLC
 
 ## Optional/Maybe do/other ideas:
   * Add more derelict ships around

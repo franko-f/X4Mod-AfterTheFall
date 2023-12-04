@@ -56,14 +56,6 @@ type X4WorldStart = XmlProvider<X4Core_WorldStartDataFile>
 type X4GodMod = XmlProvider<X4GodModFile >
 type X4ObjectTemplates = XmlProvider<X4ObjectTemplatesFile>
 
-// DU that will allow us to build up a list of mod items that we'll convert to
-// an XML diff file for output.  
-type X4Mod =
-    | Add     of selector: string * item:X4GodMod.Add
-    | Replace of X4GodMod.Replace
-    | Remove  of X4GodMod.Remove
-
-
 let x4WorldStartData = X4WorldStart.Load(X4Core_WorldStartDataFile)
 let X4GodModData = X4GodMod.Load(X4GodModFile)   // It's a type provider AND has some template data we want
 let X4ObjectTemplatesData = X4ObjectTemplates.Load(X4ObjectTemplatesFile)
@@ -140,10 +132,8 @@ let processStation (station:X4WorldStart.Station) =
         match stationClone with
         | None -> (None, None)
         | Some stationClone ->
-
             let id = station.Id
-
-            // remove the old station
+            // create XML tag that will remove the old station
             let remove = new XElement( "remove",
                 new XAttribute("sel", $"//god/stations/station[@id='{id}']") // XML remove tag for the station we're replacing with Xenon.
             )
@@ -157,10 +147,10 @@ let processStation (station:X4WorldStart.Station) =
             let locationMacro= match station.Location.Macro with | Some x -> x | None -> "none"
             replacement.Location.XElement.SetAttributeValue(XName.Get("class"), locationClass)
             replacement.Location.XElement.SetAttributeValue(XName.Get("macro"), locationMacro)
-
             logAddStation replacement
 
             (Some replacement, Some remove)  // return an add/remove options,
+
 
 let processProduct (product:X4WorldStart.Product) =
     // TODO: Update the product quantities/settings before returning.
@@ -177,7 +167,7 @@ let check_and_create_dir (filename:string) =
 let write_xml_file (filename:string) (xml:XElement) =
     let modDir = __SOURCE_DIRECTORY__ + "/mod/after_the_fall"
     let fullname = modDir + "/" + filename
-    check_and_create_dir fullname
+    check_and_create_dir fullname   // filename may contain parent folder, so we use fullname when checking/creating dirs.
     xml.Save(fullname)
 
 // Given a list of 2 element tuples, split them in to two lists.
