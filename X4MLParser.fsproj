@@ -1,11 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net7.0</TargetFramework>
   </PropertyGroup>
-
   <ItemGroup>
+    <Compile Include="data.fs" />
     <Content Include="mod_templates\factionlogic_stations.xml" />
     <Content Include="mod_templates\gamestarts.xml" />
     <Content Include="mod_templates\god.xml" />
@@ -13,13 +12,9 @@
     <None Include="mod_templates\ReadMe.md" />
     <Compile Include="Program.fs" />
   </ItemGroup>
-
   <ItemGroup />
-
   <ItemGroup>
     <PackageReference Include="FSharp.Data" Version="6.3.0" />
   </ItemGroup>
-
   <ItemGroup />
-
 </Project>

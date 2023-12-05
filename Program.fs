@@ -89,6 +89,13 @@ let logProduct (product:X4WorldStart.Product) =
     let quotaSector      = product.Quota
     printfn "PROCESSING PRODUCT [%s:%s] %s/%s with quotas %i/%i" product.Owner product.Location.Faction product.Type product.Ware product.Quota.Galaxy (product.Quota.Sector |> Option.defaultValue -1)
 
+
+// Find and return the first occurrence of a station with the given faction and type.
+// Used to find things like faction defence stations, wharfs, etc, so that we can move
+// the first instance to the factions 'safe' location, while removing the rest.
+let find_station (faction:string) (stationType:string) (stations:X4WorldStart.Station[]) =
+    Array.find (fun (station:X4WorldStart.Station) -> station.Owner = faction && station.Type = Some stationType) stations
+
 // Given a station, process it according to our rules. We may replace it
 // with a Xenon one, remove it, etc. This function is call once per station
 let processStation (station:X4WorldStart.Station) =
