@@ -44,7 +44,7 @@ let territories = [
 
     { Territory.Default with faction = "paranid"; sector = "Cluster_47_Sector001_macro" }   // Trinity Sanctum VII
     { Territory.Default with faction = "paranid"; sector = "Cluster_18_Sector001_macro" }   // Trinity Sanctum III
-    { Territory.Default with faction = "alliance"; sector = "Cluster_18_Sector001_macro" }  // Trinity Sanctum III
+    { Territory.Default with faction = "alliance"; sector = "Cluster_47_Sector001_macro" }  // Trinity Sanctum VII
     { Territory.Default with faction = "holyorder"; sector = "Cluster_24_Sector001_macro" }  // Holy Vision
     { Territory.Default with faction = "holyorder"; sector = "Cluster_11_Sector001_macro" }  // Pontifex Claim
 

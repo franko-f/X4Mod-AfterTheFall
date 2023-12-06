@@ -1,7 +1,7 @@
 ﻿// For more information see https://aka.ms/fsharp-console-apps
-open System.Linq
+//open System.Linq
 open System.Xml.Linq
-open System.Xml.XPath
+//open System.Xml.XPath
 open FSharp.Data
 open X4MLParser.Data
 
