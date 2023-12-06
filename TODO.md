@@ -1,24 +1,39 @@
+up next:
+ * fix ALI bug
+ * move faction shipyards to their new sector; and replace old one with xenon
+ * add DLC support => this give MVP
+ * add a gamestart to show entire universe/basic settings so that testing is easier.
+
 ## TODO:
  * Handle STATION
-   ** MOVE/REPLACE some shipyards/wharves rather than just removing.
-   *** Need to find a zone for these moved items. Or create. Some won't need it.
+   ** MOVE/REPLACE one shipyards/wharves/trade station per faction rather than just removing.
+   *** Replace at old location with xenon equivalent.
+   *** Need to find a zone for these moved items. Or create. Some won't need it. 
+      Looks like I might be able to just specify a sector as location, and have it auto placed in sector.
+
+   BUG: ALI wharf in Trinity has been replaced by Xenon wharf. Check faction sector mapping/ALI name
    
  * Handle PRODUCT
    ** I don't think we need REMOVE for products, so clean this code up.
-   ** Reduce QUOTAS. Factor 4? 3?
-   ** Alter sector max to be same as galaxy max
-   ** INCREASE Xenon product quota
+   ** Reduce QUOTAS. Factor: try 1/3 of current allocation rounded up to start.
+   ** Alter sector max to be same as galaxy max - I'm not sure this is necessary now we're giving them two sectors per faction
+   ** INCREASE Xenon product quota - so that new sectors are filled with stations and generation resources. 3x? 
    ** write output REPLACE xml
    ** add 'matchextension="false"' to location tags.
    ** Give TER a few more solar stations: they're energy starved with the asteroid belt and mars
+
+ * FLEETS: 
+  * Reduce faction starting fleet sizes
+   * Military
+   * Civilian
+  * Increase XENON starting fleet size
+
 
  * Systems:
   * Place GATE DEFENCE station
    * Each faction needs a strong station guarding it's gate.
    * check ZONES.xml file: seems to define zones for gates, and their connections
-  * FLEETS: Reduce starting fleet sizes
-   * Military
-   * Civilian
+
   * Neutral/pirate factions:
    * SCALE: Figure out where/how their stations are placed.
      * Looks like SOME factories/product are set to 'ownerless' for faction for HAT/SCA (spaceweed)
@@ -39,11 +54,6 @@
       ** We're not changing zones for this faction. Large easy starting zone
       ** Add bastion gate to entry system.
 
-* Configure GAME START options.
-  * Strong/easy start
-  * Hard start
-  * Each faction.
-  * Include DLC
 
 ## Optional/Maybe do/other ideas:
   * Add more derelict ships around
@@ -52,6 +62,13 @@
     * Deconstructing ships?
     * Loot drops?
     * Lower prices?
+
+  * Configure GAME START options.
+    * Strong/easy start
+    * Hard start
+    * Each faction.
+    * Include DLC
+
 
 # DONE
  * Handle STATION

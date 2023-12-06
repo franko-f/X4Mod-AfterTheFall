@@ -3,11 +3,20 @@ open System.Linq
 open System.Xml.Linq
 open System.Xml.XPath
 open FSharp.Data
+open X4MLParser.Data
+
 
 [<Literal>]
 let X4UnpackedDataFolder = __SOURCE_DIRECTORY__ + "/X4_unpacked_data"
 [<Literal>]
 let X4Core_WorldStartDataFile = X4UnpackedDataFolder + "/core/libraries/god.xml" // Core game data.
+[<Literal>]
+let MapsSubFolder = "maps/xu_ep2_universe"
+[<Literal>]
+let X4MapDataFolderCore = X4UnpackedDataFolder + "/core/" + MapsSubFolder
+[<Literal>]
+let X4SectorFileCore = X4UnpackedDataFolder  + "/core/maps/xu_ep2_universe/sectors.xml" // This core sectors file needs to be a literal, as it's also our type provider
+let X4SectorFileBoron = X4UnpackedDataFolder + "/boron/maps/xu_ep2_universe/dlc_boron_sectors.xml"   // This one is normal string, as we can load and parse using X4SectorCore literal
 
 // The default GOD.xml file, etc, don't have an 'add/replace' XML section, so they can't
 // be used as type providers for our output XML. So we've created a template that has
@@ -55,10 +64,16 @@ let X4ObjectTemplatesFile = __SOURCE_DIRECTORY__ + "/mod_templates/object_templa
 type X4WorldStart = XmlProvider<X4Core_WorldStartDataFile>
 type X4GodMod = XmlProvider<X4GodModFile >
 type X4ObjectTemplates = XmlProvider<X4ObjectTemplatesFile>
+type X4Sector = XmlProvider<X4SectorFileCore>
 
 let x4WorldStartData = X4WorldStart.Load(X4Core_WorldStartDataFile)
 let X4GodModData = X4GodMod.Load(X4GodModFile)   // It's a type provider AND has some template data we want
 let X4ObjectTemplatesData = X4ObjectTemplates.Load(X4ObjectTemplatesFile)
+
+// Load the sector data from each individual sector file. We'll combine them in to one list.
+let X4SectorCore = X4Sector.Load(X4SectorFileCore)
+let X4SectorBoron = X4Sector.Load(X4SectorFileBoron)
+let allSectors = X4SectorCore.Macros |> Array.append X4SectorBoron.Macros |> Array.toList
 
 // Extract the Xenon stations from the GodModTemplate. We'll use these as templates when we add new xenon stations
 let XenonShipyard = Array.find (fun (elem:X4ObjectTemplates.Station) -> elem.Id = "shipyard_xenon_cluster") X4ObjectTemplatesData.Stations
@@ -68,26 +83,40 @@ let XenonDefence  = Array.find (fun (elem:X4ObjectTemplates.Station) -> elem.Id 
 // the 'log' functions just extract a bit of data about a station, and log it
 // to the terminal for debugging and tracking purposes.
 let logStation (station:X4WorldStart.Station) =
-    let locationClass= station.Location.Class |> Option.defaultValue "none"
-    let locationMacro= station.Location.Macro |> Option.defaultValue "none"
-    let stationType  = station.Type           |> Option.defaultValue "none"
-    let stationMacro = station.Station.Macro  |> Option.defaultValue "none"
     let tags         = match station.Station.Select with | Some tag -> tag.Tags | _ -> "[none]"
-    printfn "PROCESSING STATION %s race: %s, owner: %s, type: %s, location: %s:%s, id: %s, station: %s   " tags station.Race station.Owner stationType locationClass locationMacro station.Id stationMacro
+    printfn "PROCESSING STATION %s race: %A, owner: %A, type: %A, location: %A:%A, id: %A, station: %A   " tags station.Race station.Owner station.Type station.Location.Class station.Location.Macro station.Id station.Station.Macro
 
 let logAddStation (station:X4GodMod.Station) =
-    let locationClass= station.Location.Class
-    let locationMacro= station.Location.Macro
-    let stationType  = station.Type 
     let tags         = match station.Station.Select with | Some tag -> tag.Tags | _ -> "[none]"
-    let stationMacro = "none"
-    printfn "   REPLACE STATION %s race: %s, owner: %s, type: %s, location: %s:%s, id: %s, station: %s   " tags station.Race station.Owner stationType locationClass locationMacro station.Id stationMacro
+    printfn "   REPLACE STATION %s race: %s, owner: %s, type: %s, location: %s:%s, id: %s, station: \"none\"   " tags station.Race station.Owner station.Type station.Location.Class station.Location.Macro station.Id
 
 let logProduct (product:X4WorldStart.Product) =
-    let prodModule = product.Module.Select
-    let faction    = prodModule.Faction |> Option.defaultValue "none"
-    let quotaSector      = product.Quota
     printfn "PROCESSING PRODUCT [%s:%s] %s/%s with quotas %i/%i" product.Owner product.Location.Faction product.Type product.Ware product.Quota.Galaxy (product.Quota.Sector |> Option.defaultValue -1)
+
+
+// UTILITY FUNCTIONS
+
+// Using the data in sector.xml, which is represented by the X4Sector type, find the name of
+// the sector given the name of the zone. the zone is stored as a connection in the sector definition.
+let find_sector_from_zone (zone:string) (sectors:X4Sector.Macro list) =
+    // Loops through the macros. Each macro will contain a sector. In that sector we'll find connections.
+    // Each connection will have zero or more zones for use to check.
+    let rec loop (sectors:X4Sector.Macro list) =
+        match sectors with
+        | [] -> None
+        | sector :: rest ->
+            //printfn "Checking sector: %s" sector.Name
+            let connections = sector.Connections
+            let foundConnection = Array.tryFind ( fun (connection:X4Sector.Connection) ->
+                                        //printfn "  Checking connection: %s:%s:%s" connection.Ref connection.Macro.Connection connection.Macro.Ref 
+                                        connection.Ref = "zones" 
+                                        && connection.Macro.Connection = "sector" 
+                                        && connection.Macro.Ref =? zone)    // Case insensitive comparison of zone, as the files mix the case of the zone names.
+                                    connections
+            match foundConnection with
+            | Some connection -> Some (sector.Name.ToLower()) // return the sector name, but in lower case, as the case varies in the files. I prefer to make it consistent
+            | None -> loop rest
+    loop sectors
 
 
 // Find and return the first occurrence of a station with the given faction and type.
@@ -95,6 +124,22 @@ let logProduct (product:X4WorldStart.Product) =
 // the first instance to the factions 'safe' location, while removing the rest.
 let find_station (faction:string) (stationType:string) (stations:X4WorldStart.Station[]) =
     Array.find (fun (station:X4WorldStart.Station) -> station.Owner = faction && station.Type = Some stationType) stations
+
+// Given a filename with full path, create all the parent directories recursively if they don't exist.
+let check_and_create_dir (filename:string) =
+    let dir = System.IO.Path.GetDirectoryName(filename)
+    if not (System.IO.Directory.Exists(dir)) then
+        System.IO.Directory.CreateDirectory(dir) |> ignore   // Should really catch the failure here. TODO
+
+// Write our XML output to a directory called 'mod'. If the directrory doesn't exist, create it.
+let write_xml_file (filename:string) (xml:XElement) =
+    let modDir = __SOURCE_DIRECTORY__ + "/mod/after_the_fall"
+    let fullname = modDir + "/" + filename
+    check_and_create_dir fullname   // filename may contain parent folder, so we use fullname when checking/creating dirs.
+    xml.Save(fullname)
+
+
+// MODE PROCESS FUNCTIONS
 
 // Given a station, process it according to our rules. We may replace it
 // with a Xenon one, remove it, etc. This function is call once per station
@@ -107,8 +152,23 @@ let processStation (station:X4WorldStart.Station) =
     // off a copy of an old one, it will use a reference to the underlying XElement.
     // that means our edits will overwrite, sooo we need to clone the XElement each time.
 
-    match station.Owner with
-    | "khaak" | "xenon" | "yaki" | "scaleplate" | "buccaneers" | "player" ->
+    // First check if the station is within the permitted sector for the faction.
+    // We've limited this to just a couple sectors per faction. If it's in one of these
+    // we leave it alone. Otherwise, it's going to get... "assimilated"
+
+    let sectorName = 
+        match station.Location.Class with
+        | Some "zone" -> find_sector_from_zone (station.Location.Macro |> Option.defaultValue "") allSectors |> Option.defaultValue "none"
+        | Some "sector" -> station.Location.Macro |> Option.defaultValue "none"
+        | _ -> "none"
+    let inTerritory = X4MLParser.Data.isFactionInSector station.Owner sectorName
+
+    match inTerritory, station.Owner with
+    | true, _ -> 
+        // This station is in a sector we're leaving alone..
+        printfn "  LEAVING [%s]:%s :: %A" station.Owner sectorName station.Id
+        (None, None)
+    | _, "khaak" | _, "xenon" | _, "yaki" | _, "scaleplate" | _,"buccaneers" | _, "player" ->
         // We're ignoring certain pirate bases for now like scaleplate and bucconeers. HAT bases we'll still replace below
         printfn "  IGNORING [%s]" station.Owner // These will still exist, and probably get wiped pretty quick, unless they're well hidden.
         (None, None)
@@ -164,18 +224,6 @@ let processProduct (product:X4WorldStart.Product) =
     logProduct product
     (Some product, None)
 
-// Given a filename with full path, create all the parent directories recursively if they don't exist.
-let check_and_create_dir (filename:string) =
-    let dir = System.IO.Path.GetDirectoryName(filename)
-    if not (System.IO.Directory.Exists(dir)) then
-        System.IO.Directory.CreateDirectory(dir) |> ignore   // Should really catch the failure here. TODO
-
-// Write our XML output to a directory called 'mod'. If the directrory doesn't exist, create it.
-let write_xml_file (filename:string) (xml:XElement) =
-    let modDir = __SOURCE_DIRECTORY__ + "/mod/after_the_fall"
-    let fullname = modDir + "/" + filename
-    check_and_create_dir fullname   // filename may contain parent folder, so we use fullname when checking/creating dirs.
-    xml.Save(fullname)
 
 // Given a list of 2 element tuples, split them in to two lists.
 // The first list contains all the first elements, the second list contains all the second elements.
@@ -247,4 +295,6 @@ write_xml_file "libraries/god.xml" outGodFile.XElement
 System.IO.File.Copy(__SOURCE_DIRECTORY__ + "/mod_templates/content.xml", __SOURCE_DIRECTORY__ + "/mod/after_the_fall/content.xml", true) |> ignore
 
 // let dump = outGodFile.XElement.ToString()
+// let sectorName = find_sector_from_zone "zone003_cluster_606_sector002_macro" allSectors
+// printfn "Found sector: %A" sectorName
 
