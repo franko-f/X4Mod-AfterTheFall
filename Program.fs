@@ -236,13 +236,22 @@ let processStation (station:X4WorldStart.Station) =
             | (None, Some "tradingstation") ->
                 // These seem to be teladi tranding stations. Replace with something more... interesting
                 Some (new XElement(XenonWharf.XElement))
+            | (None, Some "factory") ->
+                // MOST examples in the logs without a tag all seem to be scenarios we weren't going to replace. Khaak, xenon, etc.
+                // But TERRAN/SEG has a few defence stations without tags. We'll check their construction plan instead.
+                match station.Station.Constructionplan with
+                | Some "'ter_defence'" -> Some (new XElement(XenonDefence.XElement))
+                | Some "'ter_defenceplatform'" -> Some (new XElement(XenonDefence.XElement))
+                | Some "'pio_defence'" -> Some (new XElement(XenonDefence.XElement))
+                | _              -> None
+
             | (None, _) ->
-                // Any other example in the logs without a tag all seem to be scenarios we weren't going to replace anyway. Khaak, xenon, etc.
+                // the other examples in the logs without a tag all seem to be scenarios we weren't going to replace. Khaak, xenon, etc.
                 None
-            | (Some tag, _) ->
+            | (Some select, _) ->
                 // create the new xelement clone so we can edit it later as part of the replacement station.
                 // We're going to replace different types of NPC buildings with different Xenon stations.
-                match tag.Tags with
+                match select.Tags with
                 | "[shipyard]" ->
                     Some (new XElement(XenonShipyard.XElement))
                 | "[wharf]" | "[equipmentdock]" -> 
@@ -254,7 +263,10 @@ let processStation (station:X4WorldStart.Station) =
                     Some (new XElement(XenonDefence.XElement))
 
         match stationClone with
-        | None -> (None, None)
+        | None ->
+            printfn "  IGNORING DEFAULT [%s]" station.Owner // These will still exist, and probably get wiped pretty quick, unless they're well hidden.
+            (None, None)
+
         | Some stationClone ->
             let id = station.Id
             // create XML tag that will remove the old station

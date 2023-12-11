@@ -58,8 +58,7 @@ let territories = [
     // cradle of humanity
     { Territory.Default with faction = "terran"; sector = "Cluster_101_Sector001_macro" }     // Mars
     { Territory.Default with faction = "terran"; sector = "Cluster_100_Sector001_macro" }     // Asteroid belt
-    { Territory.Default with faction = "pioneers"; sector = "Cluster_114_Sector001_macro" }   // Gaian Prohecy
-    { Territory.Default with faction = "pioneers"; sector = "Cluster_113_Sector001_macro" }   // Segaris
+    { Territory.Default with faction = "pioneers"; sector = "" }   // Segaris sectors are Cluster_113_Sector001_macro -> 115  - but we'll leave them unchanged.
 
     // tides of avarice
     { Territory.Default with faction = "loanshark"; sector = "" }   // VIG : leave these UNCHANGED
