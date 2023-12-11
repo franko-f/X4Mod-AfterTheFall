@@ -9,14 +9,18 @@ open X4MLParser.Data
 [<Literal>]
 let X4UnpackedDataFolder = __SOURCE_DIRECTORY__ + "/X4_unpacked_data"
 [<Literal>]
-let X4Core_WorldStartDataFile = X4UnpackedDataFolder + "/core/libraries/god.xml" // Core game data.
-[<Literal>]
-let MapsSubFolder = "maps/xu_ep2_universe"
-[<Literal>]
-let X4MapDataFolderCore = X4UnpackedDataFolder + "/core/" + MapsSubFolder
+let X4GodFileCore = X4UnpackedDataFolder + "/core/libraries/god.xml" // Core game data.
+let X4GodFileSplit = X4UnpackedDataFolder + "/split/libraries/god.xml" // Core game data.
+let X4GodFileTerran = X4UnpackedDataFolder + "/terran/libraries/god.xml" // Core game data.
+let X4GodFilePirate = X4UnpackedDataFolder + "/pirate/libraries/god.xml" // Core game data.
+let X4GodFileBoron = X4UnpackedDataFolder + "/boron/libraries/god.xml" // Core game data.
+
 [<Literal>]
 let X4SectorFileCore = X4UnpackedDataFolder  + "/core/maps/xu_ep2_universe/sectors.xml" // This core sectors file needs to be a literal, as it's also our type provider
-let X4SectorFileBoron = X4UnpackedDataFolder + "/boron/maps/xu_ep2_universe/dlc_boron_sectors.xml"   // This one is normal string, as we can load and parse using X4SectorCore literal
+let X4SectorFileSplit = X4UnpackedDataFolder + "/split/maps/xu_ep2_universe/dlc4_sectors.xml"   // This one is normal string, as we can load and parse using X4SectorCore literal
+let X4SectorFileTerran = X4UnpackedDataFolder + "/terran/maps/xu_ep2_universe/dlc_terran_sectors.xml" 
+let X4SectorFilePirate = X4UnpackedDataFolder + "/pirate/maps/xu_ep2_universe/dlc_pirate_sectors.xml" 
+let X4SectorFileBoron = X4UnpackedDataFolder + "/boron/maps/xu_ep2_universe/dlc_boron_sectors.xml"   
 
 // The default GOD.xml file, etc, don't have an 'add/replace' XML section, so they can't
 // be used as type providers for our output XML. So we've created a template that has
@@ -61,24 +65,16 @@ let X4ObjectTemplatesFile = __SOURCE_DIRECTORY__ + "/mod_templates/object_templa
 // type, as some will appear in some cases of location, but not in others. So requires some tweaks
 // to the parsing code.
 // https://fsprojects.github.io/FSharp.Data/library/XmlProvider.html#Global-inference-mode
-type X4WorldStart = XmlProvider<X4Core_WorldStartDataFile>
+type X4WorldStart = XmlProvider<X4GodFileCore>
 type X4GodMod = XmlProvider<X4GodModFile >
 type X4ObjectTemplates = XmlProvider<X4ObjectTemplatesFile>
 type X4Sector = XmlProvider<X4SectorFileCore>
 
-let x4WorldStartData = X4WorldStart.Load(X4Core_WorldStartDataFile)
-let X4GodModData = X4GodMod.Load(X4GodModFile)   // It's a type provider AND has some template data we want
-let X4ObjectTemplatesData = X4ObjectTemplates.Load(X4ObjectTemplatesFile)
+type StationMod =
+    | Add of XElement
+    | Remove of XElement
+    | Replace of XElement
 
-// Load the sector data from each individual sector file. We'll combine them in to one list.
-let X4SectorCore = X4Sector.Load(X4SectorFileCore)
-let X4SectorBoron = X4Sector.Load(X4SectorFileBoron)
-let allSectors = X4SectorCore.Macros |> Array.append X4SectorBoron.Macros |> Array.toList
-
-// Extract the Xenon stations from the GodModTemplate. We'll use these as templates when we add new xenon stations
-let XenonShipyard = Array.find (fun (elem:X4ObjectTemplates.Station) -> elem.Id = "shipyard_xenon_cluster") X4ObjectTemplatesData.Stations
-let XenonWharf    = Array.find (fun (elem:X4ObjectTemplates.Station) -> elem.Id = "wharf_xenon_cluster") X4ObjectTemplatesData.Stations
-let XenonDefence  = Array.find (fun (elem:X4ObjectTemplates.Station) -> elem.Id = "xen_defence_cluster") X4ObjectTemplatesData.Stations
 
 // the 'log' functions just extract a bit of data about a station, and log it
 // to the terminal for debugging and tracking purposes.
@@ -93,8 +89,6 @@ let logAddStation (station:X4GodMod.Station) =
 let logProduct (product:X4WorldStart.Product) =
     printfn "PROCESSING PRODUCT [%s:%s] %s/%s with quotas %i/%i" product.Owner product.Location.Faction product.Type product.Ware product.Quota.Galaxy (product.Quota.Sector |> Option.defaultValue -1)
 
-
-// UTILITY FUNCTIONS
 
 // Using the data in sector.xml, which is represented by the X4Sector type, find the name of
 // the sector given the name of the zone. the zone is stored as a connection in the sector definition.
@@ -138,8 +132,71 @@ let write_xml_file (filename:string) (xml:XElement) =
     check_and_create_dir fullname   // filename may contain parent folder, so we use fullname when checking/creating dirs.
     xml.Save(fullname)
 
+// Extract the stations from the 'add' section of a DLCs god diff/mod file.
+// While there are many 'add' sections, we're only interested in the one that
+// that has the selectior '//god/stations'
+let getStationsFromDiff (diff:X4GodMod.Add[]) = 
+    let stationsAdd = Array.filter (fun (add:X4GodMod.Add) -> add.Sel = "/god/stations") diff
+    [| for stations in stationsAdd do
+            for station in stations.Stations do
+                yield new X4WorldStart.Station(station.XElement)
+    |]
 
-// MODE PROCESS FUNCTIONS
+
+
+let X4ObjectTemplatesData = X4ObjectTemplates.Load(X4ObjectTemplatesFile)
+let X4GodCore = X4WorldStart.Load(X4GodFileCore)
+let X4GodSplit = X4GodMod.Load(X4GodFileSplit)
+let X4GodTerran = X4GodMod.Load(X4GodFileTerran)
+let X4GodPirate = X4GodMod.Load(X4GodFilePirate)
+let X4GodBoron = X4GodMod.Load(X4GodFileBoron)
+
+// The DLC stations are of a different type: they're an XML DIFF file, not the GOD
+// file type. So we need to pull out the stations from the diff and convert them
+// to the same type as the core stations using the underlying XElement.
+let splitStations = getStationsFromDiff X4GodSplit.Adds
+let terranStations = getStationsFromDiff X4GodTerran.Adds
+let pirateStations = getStationsFromDiff X4GodPirate.Adds
+let boronStations = getStationsFromDiff X4GodBoron.Adds
+
+// Finally build up an uberlist of all our stations across all DLC and core game.
+let allStations = X4GodCore.Stations.Stations 
+                |> Array.append splitStations
+                |> Array.append terranStations
+                |> Array.append pirateStations
+                |> Array.append boronStations
+                |> Array.toList
+
+
+//let allProducts = X4GodCore.Products 
+//                |> Array.append X4GodSplit.Products 
+//                |> Array.append X4GodTerran.Products 
+//                |> Array.append X4GodPirate.Products 
+//                |> Array.append X4GodBoron.Products 
+//                |> Array.toList
+
+// Load the sector data from each individual sector file. We'll combine them in to one list.
+let X4SectorCore = X4Sector.Load(X4SectorFileCore)
+let X4SectorSplit = X4Sector.Load(X4SectorFileSplit)
+let X4SectorTerran = X4Sector.Load(X4SectorFileTerran)
+let X4SectorPirate = X4Sector.Load(X4SectorFilePirate)
+let X4SectorBoron = X4Sector.Load(X4SectorFileBoron)
+let allSectors = X4SectorCore.Macros 
+                |> Array.append X4SectorSplit.Macros 
+                |> Array.append X4SectorTerran.Macros 
+                |> Array.append X4SectorPirate.Macros 
+                |> Array.append X4SectorBoron.Macros 
+                |> Array.toList
+
+// Extract the Xenon stations from the GodModTemplate. We'll use these as templates when we add new xenon stations
+let XenonShipyard = Array.find (fun (elem:X4ObjectTemplates.Station) -> elem.Id = "shipyard_xenon_cluster") X4ObjectTemplatesData.Stations
+let XenonWharf    = Array.find (fun (elem:X4ObjectTemplates.Station) -> elem.Id = "wharf_xenon_cluster") X4ObjectTemplatesData.Stations
+let XenonDefence  = Array.find (fun (elem:X4ObjectTemplates.Station) -> elem.Id = "xen_defence_cluster") X4ObjectTemplatesData.Stations
+
+
+
+
+// MAIN PROCESSING FUNCTIONS
 
 // Given a station, process it according to our rules. We may replace it
 // with a Xenon one, remove it, etc. This function is call once per station
@@ -161,7 +218,7 @@ let processStation (station:X4WorldStart.Station) =
         | Some "zone" -> find_sector_from_zone (station.Location.Macro |> Option.defaultValue "") allSectors |> Option.defaultValue "none"
         | Some "sector" -> station.Location.Macro |> Option.defaultValue "none"
         | _ -> "none"
-    let inTerritory = X4MLParser.Data.isFactionInSector station.Owner sectorName
+    let inTerritory = (X4MLParser.Data.isFactionInSector station.Owner sectorName) || (ignoreFaction station.Owner)
 
     match inTerritory, station.Owner with
     | true, _ -> 
@@ -234,11 +291,11 @@ let splitTuples (tuples:('a option * 'b option)[]) =
     (firsts, seconds)
 
 let godModStations = 
-    [| for station in x4WorldStartData.Stations.Stations do yield processStation station |] |> splitTuples
+    [| for station in allStations do yield processStation station |] |> splitTuples
 
 
 let godModProducts = 
-    [| for product in x4WorldStartData.Products do
+    [| for product in X4GodCore.Products do
             let (add, remove) = processProduct product
             match add    with Some product -> yield product | _ -> ()
             match remove with Some product -> yield product | _ -> ()

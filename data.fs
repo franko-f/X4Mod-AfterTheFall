@@ -62,7 +62,7 @@ let territories = [
     { Territory.Default with faction = "pioneers"; sector = "Cluster_113_Sector001_macro" }   // Segaris
 
     // tides of avarice
-    { Territory.Default with faction = "loanshard"; sector = "" }   // VIG : leave these UNCHANGED
+    { Territory.Default with faction = "loanshark"; sector = "" }   // VIG : leave these UNCHANGED
     { Territory.Default with faction = "scavenger"; sector = "" }   // RIP : UNCHANGED
 
     // boron
@@ -75,3 +75,11 @@ let findRecordsByFaction (faction: string) records =
 
 let isFactionInSector (faction: string) (sector: string) =
     territories |> List.exists (fun record -> record.faction = faction && record.sector =? sector)
+
+// For some factions, like BORON, or TIDES, we want to leave along.
+// For Boron, their economy is crippled to start with, so we'll leave them alone.
+// For VIG, they're non expansionist, and it makes for an 'easier' start for the player, with
+// more space for early missions, etc; but limited destroyers and capital ships. (apart from
+// one special ship, of course)
+let ignoreFaction (faction: string) =
+    territories |> List.exists (fun record -> record.faction = faction && record.sector = "")

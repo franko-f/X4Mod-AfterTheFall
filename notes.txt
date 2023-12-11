@@ -27,3 +27,12 @@ Use this:
 <location class="sector" macro="homebrew_cluster08_sector001_macro" matchextension="false"  />
 
 This rule is also true for the jobs.xml, should you wish to add new jobs!
+
+
+
+from DeadAir on egosoft discord: example around count
+
+    <add sel="/defaults/dataset[@macro='Cluster_17_Sector001_macro']/properties[count(./area)=0]" silent="true">
+        <area tags="daxenoncore"/>
+    </add>
+    <add sel="/defaults/dataset[@macro='Cluster_17_Sector001_macro']/properties[count(./area)=1]/area" type="@tags" silent="true">daxenoncore</add>

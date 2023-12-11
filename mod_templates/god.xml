@@ -273,6 +273,9 @@
    </quotas>
 </replace>
 
+<!-- or another example -->
+<replace sel="/god/products/product[@id='arg_graphene']/quotas/quota/@galaxy">18</replace>
+
 <!-- Example replace that changes (in theory) number of xenon solar factories
 from the default 12 to 42: 3.5 times the normal number.-->
 <replace sel="/god/products/product[@id='xen_energycells']/@quotas">

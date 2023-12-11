@@ -1,9 +1,8 @@
 up next:
- * fix ALI bug
+ * add DLC support => this gives MVP (WORKING ON RIGHT NOW)
  * move faction shipyards to their new sector; and replace old one with xenon
- * add DLC support => this give MVP
- * add a gamestart to show entire universe/basic settings so that testing is easier.
-
+ * add a gamestart to enable easy testing: show all sectors.
+ 
 ## TODO:
  * Handle STATION
    ** MOVE/REPLACE one shipyards/wharves/trade station per faction rather than just removing.
@@ -11,11 +10,12 @@ up next:
    *** Need to find a zone for these moved items. Or create. Some won't need it. 
       Looks like I might be able to just specify a sector as location, and have it auto placed in sector.
 
-   BUG: ALI wharf in Trinity has been replaced by Xenon wharf. Check faction sector mapping/ALI name
+BUG: Looks like some terran and segaris defence stations are not being replaced: Why? Wrong name? Wharfs and shipyards are.
    
  * Handle PRODUCT
    ** I don't think we need REMOVE for products, so clean this code up.
    ** Reduce QUOTAS. Factor: try 1/3 of current allocation rounded up to start.
+   ** DLC slightly increases galaxy product module count with new product entries for existing factions: Remove these.
    ** Alter sector max to be same as galaxy max - I'm not sure this is necessary now we're giving them two sectors per faction
    ** INCREASE Xenon product quota - so that new sectors are filled with stations and generation resources. 3x? 
    ** write output REPLACE xml
@@ -87,3 +87,5 @@ up next:
         => Currently, we've assigned existing systems with existing resources. Some are pretty sparse, and might not be enough.
      * Make sure solar energy is 1x for at least one of chosen system: increase if required.
         => TER is light on energy (heh). Maybe increase solar to compensate.
+
+   BUG: ALI wharf in Trinity has been replaced by Xenon wharf. Check faction sector mapping/ALI name
