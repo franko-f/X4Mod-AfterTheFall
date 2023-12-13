@@ -1,8 +1,9 @@
 up next:
- * add DLC support => this gives MVP (WORKING ON RIGHT NOW)
  * move faction shipyards to their new sector; and replace old one with xenon
- * add a gamestart to enable easy testing: show all sectors.
- 
+ * update products
+ * add bastion
+ * change fleets
+
 ## TODO:
  * Handle STATION
    ** MOVE/REPLACE one shipyards/wharves/trade station per faction rather than just removing.
@@ -71,12 +72,14 @@ BUG: Looks like some terran and segaris defence stations are not being replaced:
 
 
 # DONE
+ * add a gamestart to enable easy testing: show all sectors.
  * Handle STATION
    ** write output ADD XML for stations we're added
    ** write output REPLACE xml for stations we're removing.
    ** add 'matchextension="false"' to location tags.
    ** CHECK: Do I need to add 'matchextension' for 'REMOVE' tags?
       => Seems to have worked without it.
+   * add DLC support => this gives MVP (WORKING ON RIGHT NOW)
 
  * Systems:
     * Assign 2 systems per faction

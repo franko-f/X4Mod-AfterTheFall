@@ -66,7 +66,6 @@ let territories = [
 
     // boron
     { Territory.Default with faction = "boron"; sector = "" }       // Boron: Economy is kinda screwed without player help anyway. Leave them alone for now?
-
 ]
 
 let findRecordsByFaction (faction: string) records =

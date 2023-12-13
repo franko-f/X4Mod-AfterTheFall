@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mdscript name="GS_EndofDays_test" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <cues>
+    <cue name="Start" namespace="this" module="endofdays_gamestart_test">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.GameStart" />
+      </conditions>
+      <actions>
+        <debug_text text="'Starting endofdays test gamestart'"/>
+      </actions>
+      <cues>
+        
+        <cue name="SetupMap">
+          <actions>
+            <!-- set ALL sectors known. -->
+            <set_value name="$InitialMap" exact="[
+                macro.cluster_602_sector001_macro,
+                macro.cluster_603_sector001_macro,
+                macro.cluster_605_sector001_macro,
+                macro.cluster_606_sector001_macro,
+                macro.cluster_606_sector002_macro,
+                macro.cluster_606_sector003_macro,
+                macro.cluster_604_sector001_macro,
+                macro.cluster_607_sector001_macro,
+                macro.cluster_601_sector001_macro,
+                macro.cluster_608_sector001_macro,
+                macro.cluster_609_sector001_macro,
+                macro.cluster_500_sector001_macro,
+                macro.cluster_500_sector002_macro,
+                macro.cluster_500_sector003_macro,
+                macro.cluster_501_sector001_macro,
+                macro.cluster_502_sector001_macro,
+                macro.cluster_503_sector001_macro,
+                macro.cluster_504_sector001_macro,
+                macro.cluster_100_sector001_macro,
+                macro.cluster_101_sector001_macro,
+                macro.cluster_102_sector001_macro,
+                macro.cluster_104_sector001_macro,
+                macro.cluster_104_sector002_macro,
+                macro.cluster_106_sector001_macro,
+                macro.cluster_107_sector001_macro,
+                macro.cluster_108_sector001_macro,
+                macro.cluster_108_sector002_macro,
+                macro.cluster_108_sector003_macro,
+                macro.cluster_109_sector001_macro,
+                macro.cluster_110_sector001_macro,
+                macro.cluster_111_sector001_macro,
+                macro.cluster_112_sector001_macro,
+                macro.cluster_112_sector002_macro,
+                macro.cluster_113_sector001_macro,
+                macro.cluster_114_sector001_macro,
+                macro.cluster_115_sector001_macro,
+                macro.cluster_116_sector001_macro,
+                macro.cluster_401_sector001_macro,
+                macro.cluster_402_sector001_macro,
+                macro.cluster_403_sector001_macro,
+                macro.cluster_400_sector001_macro,
+                macro.cluster_408_sector001_macro,
+                macro.cluster_408_sector002_macro,
+                macro.cluster_407_sector001_macro,
+                macro.cluster_409_sector001_macro,
+                macro.cluster_410_sector001_macro,
+                macro.cluster_411_sector001_macro,
+                macro.cluster_405_sector001_macro,
+                macro.cluster_406_sector001_macro,
+                macro.cluster_404_sector001_macro,
+                macro.cluster_418_sector001_macro,
+                macro.cluster_419_sector001_macro,
+                macro.cluster_420_sector001_macro,
+                macro.cluster_416_sector001_macro,
+                macro.cluster_416_sector002_macro,
+                macro.cluster_417_sector001_macro,
+                macro.cluster_421_sector001_macro,
+                macro.cluster_422_sector001_macro,
+                macro.cluster_423_sector001_macro,
+                macro.cluster_423_sector002_macro,
+                macro.cluster_412_sector001_macro,
+                macro.cluster_413_sector001_macro,
+                macro.cluster_414_sector001_macro,
+                macro.cluster_415_sector001_macro,
+                macro.cluster_424_sector001_macro,
+                macro.cluster_424_sector002_macro,
+                macro.cluster_425_sector001_macro,
+                macro.cluster_01_sector001_macro,
+                macro.cluster_01_sector002_macro,
+                macro.cluster_01_sector003_macro,
+                macro.cluster_02_sector001_macro,
+                macro.cluster_03_sector001_macro,
+                macro.cluster_04_sector001_macro,
+                macro.cluster_04_sector002_macro,
+                macro.cluster_05_sector001_macro,
+                macro.cluster_06_sector001_macro,
+                macro.cluster_06_sector002_macro,
+                macro.cluster_07_sector001_macro,
+                macro.cluster_08_sector001_macro,
+                macro.cluster_09_sector001_macro,
+                macro.cluster_10_sector001_macro,
+                macro.cluster_11_sector001_macro,
+                macro.cluster_12_sector001_macro,
+                macro.cluster_13_sector001_macro,
+                macro.cluster_14_sector001_macro,
+                macro.cluster_15_sector001_macro,
+                macro.cluster_15_sector002_macro,
+                macro.cluster_16_sector001_macro,
+                macro.cluster_17_sector001_macro,
+                macro.cluster_18_sector001_macro,
+                macro.cluster_19_sector001_macro,
+                macro.cluster_19_sector002_macro,
+                macro.cluster_20_sector001_macro,
+                macro.cluster_21_sector001_macro,
+                macro.cluster_21_sector002_macro,
+                macro.cluster_22_sector001_macro,
+                macro.cluster_23_sector001_macro,
+                macro.cluster_24_sector001_macro,
+                macro.cluster_25_sector001_macro,
+                macro.cluster_25_sector002_macro,
+                macro.cluster_26_sector001_macro,
+                macro.cluster_26_sector002_macro,
+                macro.cluster_27_sector001_macro,
+                macro.cluster_28_sector001_macro,
+                macro.cluster_29_sector001_macro,
+                macro.cluster_29_sector002_macro,
+                macro.cluster_30_sector001_macro,
+                macro.cluster_31_sector001_macro,
+                macro.cluster_32_sector001_macro,
+                macro.cluster_32_sector002_macro,
+                macro.cluster_33_sector001_macro,
+                macro.cluster_34_sector001_macro,
+                macro.cluster_35_sector001_macro,
+                macro.cluster_36_sector001_macro,
+                macro.cluster_37_sector001_macro,
+                macro.cluster_38_sector001_macro,
+                macro.cluster_39_sector001_macro,
+                macro.cluster_40_sector001_macro,
+                macro.cluster_41_sector001_macro,
+                macro.cluster_42_sector001_macro,
+                macro.cluster_42_sector002_macro,
+                macro.cluster_43_sector001_macro,
+                macro.cluster_44_sector001_macro,
+                macro.cluster_45_sector001_macro,
+                macro.cluster_46_sector001_macro,
+                macro.cluster_47_sector001_macro,
+                macro.cluster_49_sector001_macro,
+                macro.cluster_48_sector001_macro,
+                macro.cluster_50_sector001_macro,
+                macro.cluster_50_sector002_macro
+              ]"/>
+
+            <run_actions ref="md.LIB_Generic.UncoverMap_SectorsAndGates" >
+              <param name="InitialMap" value="$InitialMap"/>
+              <param name="UncoverShipyardsAndWharfs" value="true"/>
+              <param name="UncoverTradeStations" value="true"/>
+            </run_actions>
+
+          </actions>
+          <cues>
+
+            <cue name="SetupMapSatellites">
+              <actions>
+
+                <find_sector name="$InitialMapSectors" macro="$InitialMap" multiple="true"/>
+                <do_all exact="$InitialMapSectors.count" counter="$i">
+                  <set_value name="$Sector" exact="$InitialMapSectors.{$i}"/>
+                  <!-- select spawn-location for satellites (near gate or near station) -->
+                  <find_station name="$AllStations" space="$Sector" multiple="true" comment="find important stations">
+                    <match_any>
+                      <match tradestation="true"/>
+                      <match shipyard="true"/>
+                      <match wharf="true"/>
+                      <match headquarters="true"/>
+                      <match equipmentdock="true"/>
+                    </match_any>
+                  </find_station>
+                  <shuffle_list list="$AllStations"/>
+                  <set_value name="$SelectedTarget" exact="@$AllStations.random"/>
+                  <!-- spawn satellite at selected location -->
+                  <do_if value="$SelectedTarget" chance="70">
+                    <create_object name="$TargetSatellite" macro="[macro.eq_arg_satellite_02_macro].random" owner="faction.player" sector="$SelectedTarget.sector">
+                      <safepos max="15km" object="$SelectedTarget"/>
+                    </create_object>
+                    <add_to_group groupname="$ScientistSatellites" object="$TargetSatellite" comment="remember starting satellites"/>
+                  </do_if>
+
+                  <!-- sector entrance -->
+                  <run_actions ref="md.LIB_Generic.FindSectorEntryPoints" result="$LocalEntryPoints">
+                    <param name="Sector" value="$Sector"/>
+                  </run_actions>
+                  <set_value name="$SelectedTarget" exact="@$LocalEntryPoints.random"/>
+                  <do_if value="$SelectedTarget" chance="if @$AllStations.count then 20 else 80" comment="no stations found? then high chance for entrance-satellite">
+                    <create_object name="$TargetSatellite" macro="[macro.eq_arg_satellite_01_macro].random" owner="faction.player" sector="$SelectedTarget.sector">
+                      <safepos max="10km" object="$SelectedTarget"/>
+                    </create_object>
+                    <add_to_group groupname="$ScientistSatellites" object="$TargetSatellite" comment="remember starting satellites"/>
+                  </do_if>
+                </do_all>
+                <remove_value name="$SelectedTarget"/>
+                <remove_value name="$InitialMapSectors"/>
+              </actions>
+            </cue>
+
+            <cue name="SetupMapBeacons">
+              <actions>
+                <find_sector name="$InitialMapSectors" macro="$InitialMap" multiple="true"/>
+                <shuffle_list list="$InitialMapSectors"/>
+                <do_all exact="$InitialMapSectors.count" counter="$i">
+                  <set_value name="$Sector" exact="$InitialMapSectors.{$i}"/>
+                  <find_object name="$Anomaly" class="class.anomaly" space="$Sector"/>
+                  <do_if value="$Anomaly != null">
+                    <create_object name="$TargetBeacon" macro="[macro.env_deco_nav_beacon_t1_macro].random" owner="faction.player" sector="$Sector">
+                      <safepos max="15km" object="$Anomaly"/>
+                    </create_object>
+                    <add_to_group groupname="$ScientistBeacons" object="$TargetBeacon" comment="remember initial beacons"/>
+                    <set_value name="$AnomaliesFound" operation="add"/>
+                    <do_if value="$AnomaliesFound ge 2" comment="not more than 2">
+                      <break/>
+                    </do_if>
+                  </do_if>
+                </do_all>
+                <remove_value name="$Anomaly"/>
+                <remove_value name="$InitialMapSectors"/>
+              </actions>
+            </cue>
+            
+          </cues>
+        </cue>
+      </cues>
+    </cue>    
+  </cues>
+</mdscript>

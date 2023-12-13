@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<diff xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" >
+
+    <add sel="/gamestarts">
+
+        <!-- Modified from the Scientist gamestart. Just sets up a universe where we have full visibility with everything for 
+        testing the mod and ensuring universe changes are correct.  -->
+        <gamestart 
+            id="endofdays_gamestart_test" 
+            name="End of Days test gamestart" 
+            description="Sets up a universe where we have full visibility with everything for testing the mod and ensuring universe changes are correct. " 
+            image="gamestart_scientist" group="4">
+            <info>
+                <!-- Name, Gender, Location, Starting Ship(,2)/Ships(,10), Cash, Property -->
+                <item name="Location"   value="{1021,802}" />
+                <item name="Name"  value="{1021,813}" />
+                <item name="Starting Ships"   value="Unknown" />
+                <item />
+                <item name="Cash"   value="2500000"/>
+                <item name="Property"   value="Satellites" />
+            </info>
+
+            <location galaxy="xu_ep2_universe_macro" sector="cluster_01_sector001_macro" >
+                    <position x="-0.05115" y="1.806" z="-2.541"/>
+                    <rotation yaw="179.69951" pitch="-1.83378"/>
+            </location>
+            <player macro="character_player_scientist_macro" female="true" money="2500000" name="{1021,802}">
+                <ship macro="ship_par_s_fighter_01_a_macro">
+                    <loadout>
+                        <macros>
+                            <engine macro="engine_par_s_combat_01_mk1_macro" path="../con_engine_01" />
+                            <engine macro="engine_par_s_combat_01_mk1_macro" path="../con_engine_02" />
+                            <engine macro="engine_par_s_combat_01_mk1_macro" path="../con_engine_03" />
+                            <weapon macro="weapon_gen_s_laser_01_mk1_macro" path="../con_weapon_01" optional="true" />
+                            <weapon macro="weapon_gen_s_guided_01_mk1_macro" path="../con_weapon_02" optional="true" />
+                            <shield macro="shield_par_s_standard_01_mk1_macro" path="../con_shield_01" optional="true" />
+                        </macros>
+                        <ammunition>
+                            <ammunition macro="missile_guided_light_mk1_macro" exact="10" optional="true" />
+                            <ammunition macro="eq_arg_satellite_01_macro" exact="5" optional="true"/>
+                            <ammunition macro="env_deco_nav_beacon_t1_macro" exact="5" optional="true"/>
+                            <ammunition macro="eq_arg_resourceprobe_01_macro" exact="5" optional="true"/>
+                        </ammunition>
+                        <software>
+                            <software ware="software_targetmk1" />
+                        </software>
+                        <virtualmacros>
+                            <thruster macro="thruster_gen_s_allround_01_mk1_macro" />
+                        </virtualmacros>
+                    </loadout>
+                </ship>
+                <inventory>
+                    <ware ware="weapon_gen_spacesuit_repairlaser_01_mk1" amount="1" />
+                    <ware ware="software_scannerobjectmk3" amount="1" />
+                </inventory>
+                <blueprints>
+                    <ware ware="clothingmod_0001" />
+                    <ware ware="clothingmod_0002" />
+                    <ware ware="module_arg_dock_m_01_lowtech" />
+                    <ware ware="module_arg_pier_l_03" />
+                    <ware ware="module_arg_stor_container_s_01" />
+                    <ware ware="module_arg_conn_base_01" />
+                    <ware ware="module_arg_conn_cross_01" />
+                    <ware ware="module_arg_conn_vertical_01" />
+                    <ware ware="module_gen_prod_energycells_01" />
+                    <ware ware="module_arg_prod_meat_01" />
+                    <ware ware="paintmod_0006"/>
+                    <ware ware="paintmod_0048"/>
+                    <ware ware="paintmod_0049"/>
+                    <ware ware="paintmod_0050"/>
+                    <ware ware="paintmod_0097"/>
+                    <ware ware="paintmod_0098"/>
+                    <ware ware="paintmod_0099"/>
+                    <ware ware="paintmod_0100"/>
+                </blueprints>
+                <research>
+                    <ware ware="research_radioreceiver" />
+                    <ware ware="research_sensorbooster" />
+                    <ware ware="research_tradeinterface" />
+                </research>
+                <encyclopedia>
+                    <entry type="warebasket" ref="research_gamestart_common"/>
+                </encyclopedia>
+                <theme paint="painttheme_player_01" />
+            </player>
+            <universe>
+               <!-- Advanced Alliance gamestart = very friendly with Alliance, slight boost with ARG and PAR because they're ALI-affiliated -->
+                <factions>
+                    <relations>
+                    <relation faction="alliance" otherfaction="player" relation="0.01"/>
+                    <relation faction="argon" otherfaction="player" relation="0.0032"/>
+                    <relation faction="antigone" otherfaction="player" relation="1.0"/>
+                    <relation faction="paranid" otherfaction="player" relation="0.0032"/>
+                    </relations>
+                </factions>
+            </universe>
+        </gamestart>
+
+    </add>
+</diff>

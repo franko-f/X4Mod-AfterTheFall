@@ -4,6 +4,7 @@ open System.Xml.Linq
 //open System.Xml.XPath
 open FSharp.Data
 open X4MLParser.Data
+open X4MLParser.Utilities
 
 
 [<Literal>]
@@ -112,6 +113,9 @@ let find_sector_from_zone (zone:string) (sectors:X4Sector.Macro list) =
             | None -> loop rest
     loop sectors
 
+let dump_sectors (sectors:X4Sector.Macro list) =
+    for sector in sectors do
+        printfn "Macro.%s," (sector.Name.ToLower())
 
 // Find and return the first occurrence of a station with the given faction and type.
 // Used to find things like faction defence stations, wharfs, etc, so that we can move
@@ -355,6 +359,11 @@ stationsAdd.XElement.Add(outputStations)
 let productsAdd = find_add_selector "//god/products" outGodFile.Adds
 productsAdd.XElement.Add(outputProducts)
 
+
+// Now actually generate the files in the mod directory by spitting out XML or copying
+// our templates.
+directoryCopy (__SOURCE_DIRECTORY__ + "/mod_xml") (__SOURCE_DIRECTORY__ + "/mod/after_the_fall") true
+
 // Add out 'remove' tags to the end of the diff block.
 let diff = outGodFile.XElement // the root element is actually the 'diff' tag.
 diff.Add(removeStations)    // Add will append to the end of the diff children,
@@ -366,4 +375,4 @@ System.IO.File.Copy(__SOURCE_DIRECTORY__ + "/mod_templates/content.xml", __SOURC
 // let dump = outGodFile.XElement.ToString()
 // let sectorName = find_sector_from_zone "zone003_cluster_606_sector002_macro" allSectors
 // printfn "Found sector: %A" sectorName
-
+// dump_sectors allSectors

@@ -4,6 +4,7 @@
     <TargetFramework>net7.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="utilities.fs" />
     <Content Include="mod_templates/content.xml" />
     <Content Include="mod_templates\factionlogic_stations.xml" />
     <Content Include="mod_templates\gamestarts.xml" />
