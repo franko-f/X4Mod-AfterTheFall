@@ -146,65 +146,24 @@ let getStationsFromDiff (diff:X4GodMod.Add[]) =
                 yield new X4WorldStart.Station(station.XElement)
     |]
 
+let getProductFromDiff (diff:X4GodMod.Add[]) = 
+    let productsAdd = Array.filter (fun (add:X4GodMod.Add) -> add.Sel = "/god/products") diff
+    [| for products in productsAdd do
+            for product in products.Products do
+                yield new X4WorldStart.Product(product.XElement)
+    |]
 
-
-let X4ObjectTemplatesData = X4ObjectTemplates.Load(X4ObjectTemplatesFile)
-let X4GodCore = X4WorldStart.Load(X4GodFileCore)
-let X4GodSplit = X4GodMod.Load(X4GodFileSplit)
-let X4GodTerran = X4GodMod.Load(X4GodFileTerran)
-let X4GodPirate = X4GodMod.Load(X4GodFilePirate)
-let X4GodBoron = X4GodMod.Load(X4GodFileBoron)
-
-// The DLC stations are of a different type: they're an XML DIFF file, not the GOD
-// file type. So we need to pull out the stations from the diff and convert them
-// to the same type as the core stations using the underlying XElement.
-let splitStations = getStationsFromDiff X4GodSplit.Adds
-let terranStations = getStationsFromDiff X4GodTerran.Adds
-let pirateStations = getStationsFromDiff X4GodPirate.Adds
-let boronStations = getStationsFromDiff X4GodBoron.Adds
-
-// Finally build up an uberlist of all our stations across all DLC and core game.
-let allStations = X4GodCore.Stations.Stations 
-                |> Array.append splitStations
-                |> Array.append terranStations
-                |> Array.append pirateStations
-                |> Array.append boronStations
-                |> Array.toList
-
-
-//let allProducts = X4GodCore.Products 
-//                |> Array.append X4GodSplit.Products 
-//                |> Array.append X4GodTerran.Products 
-//                |> Array.append X4GodPirate.Products 
-//                |> Array.append X4GodBoron.Products 
-//                |> Array.toList
-
-// Load the sector data from each individual sector file. We'll combine them in to one list.
-let X4SectorCore = X4Sector.Load(X4SectorFileCore)
-let X4SectorSplit = X4Sector.Load(X4SectorFileSplit)
-let X4SectorTerran = X4Sector.Load(X4SectorFileTerran)
-let X4SectorPirate = X4Sector.Load(X4SectorFilePirate)
-let X4SectorBoron = X4Sector.Load(X4SectorFileBoron)
-let allSectors = X4SectorCore.Macros 
-                |> Array.append X4SectorSplit.Macros 
-                |> Array.append X4SectorTerran.Macros 
-                |> Array.append X4SectorPirate.Macros 
-                |> Array.append X4SectorBoron.Macros 
-                |> Array.toList
-
-// Extract the Xenon stations from the GodModTemplate. We'll use these as templates when we add new xenon stations
-let XenonShipyard = Array.find (fun (elem:X4ObjectTemplates.Station) -> elem.Id = "shipyard_xenon_cluster") X4ObjectTemplatesData.Stations
-let XenonWharf    = Array.find (fun (elem:X4ObjectTemplates.Station) -> elem.Id = "wharf_xenon_cluster") X4ObjectTemplatesData.Stations
-let XenonDefence  = Array.find (fun (elem:X4ObjectTemplates.Station) -> elem.Id = "xen_defence_cluster") X4ObjectTemplatesData.Stations
-
-
+// Given a selector ID, search an instance of a GodMod xml file for the 'ADD' section
+// with that 'sel' value. This will be the XElement we will manipulate.
+let find_add_selector sel xml =
+   Array.find (fun (elem:X4GodMod.Add) -> elem.Sel = sel) xml
 
 
 // MAIN PROCESSING FUNCTIONS
 
 // Given a station, process it according to our rules. We may replace it
 // with a Xenon one, remove it, etc. This function is call once per station
-let processStation (station:X4WorldStart.Station) =
+let processStation (station:X4WorldStart.Station) allSectors (xenonShipyard:XElement) (xenonWharf:XElement) (xenonDefence:XElement)  =
     logStation station
 
     // So, turns out XmlProvider is more focused around reads. Writes are not... great.
@@ -239,14 +198,14 @@ let processStation (station:X4WorldStart.Station) =
             match station.Station.Select, station.Type with
             | (None, Some "tradingstation") ->
                 // These seem to be teladi tranding stations. Replace with something more... interesting
-                Some (new XElement(XenonWharf.XElement))
+                Some (new XElement(xenonWharf))
             | (None, Some "factory") ->
                 // MOST examples in the logs without a tag all seem to be scenarios we weren't going to replace. Khaak, xenon, etc.
                 // But TERRAN/SEG has a few defence stations without tags. We'll check their construction plan instead.
                 match station.Station.Constructionplan with
-                | Some "'ter_defence'" -> Some (new XElement(XenonDefence.XElement))
-                | Some "'ter_defenceplatform'" -> Some (new XElement(XenonDefence.XElement))
-                | Some "'pio_defence'" -> Some (new XElement(XenonDefence.XElement))
+                | Some "'ter_defence'" -> Some (new XElement(xenonDefence))
+                | Some "'ter_defenceplatform'" -> Some (new XElement(xenonDefence))
+                | Some "'pio_defence'" -> Some (new XElement(xenonDefence))
                 | _              -> None
 
             | (None, _) ->
@@ -257,14 +216,14 @@ let processStation (station:X4WorldStart.Station) =
                 // We're going to replace different types of NPC buildings with different Xenon stations.
                 match select.Tags with
                 | "[shipyard]" ->
-                    Some (new XElement(XenonShipyard.XElement))
+                    Some (new XElement(xenonShipyard))
                 | "[wharf]" | "[equipmentdock]" -> 
-                    Some (new XElement(XenonWharf.XElement))
+                    Some (new XElement(xenonWharf))
                 | "[defence]" | "[tradestation]" | "[piratebase]" ->
-                    Some (new XElement(XenonDefence.XElement)) // For now, replace HAT piratebase with xenon defense.
+                    Some (new XElement(xenonDefence)) // For now, replace HAT piratebase with xenon defense.
                 | x ->
                     printfn "UNHANDLED STATION TYPE: %s - DEFAULTING TO XENON DEFENCE" x
-                    Some (new XElement(XenonDefence.XElement))
+                    Some (new XElement(xenonDefence))
 
         match stationClone with
         | None ->
@@ -292,10 +251,30 @@ let processStation (station:X4WorldStart.Station) =
             (Some replacement, Some remove)  // return an add/remove options,
 
 
+
+let product_replace_xml (id:string) (quota_type:string) (quota:int) =
+    // example replace line:
+    // <replace sel="/god/products/product[@id='arg_graphene']/quotas/quota/@galaxy">18</replace>
+    let xml = new XElement("replace",
+        new XAttribute("sel", $"//god/products/product[@id='{id}']/quotas/quota/@{quota_type}"),
+        quota
+    )
+    printfn "  REPLACING PRODUCT %s with quota %s:%i using:\n %s" id quota_type quota (xml.ToString())
+    xml
+
+// "products" define the number of production modules that will be created for a faction, scattered
+// between their factories. We're going tp increase it for Xenon, and reduce it for other major factions.
 let processProduct (product:X4WorldStart.Product) =
-    // TODO: Update the product quantities/settings before returning.
     logProduct product
-    (Some product, None)
+    match product.Owner, product.Ware with
+    | "xenon", _ -> Some (product_replace_xml product.Id "galaxy" (product.Quota.Galaxy * 4) )// Xenon get a 4x quota
+    | "khaak", _ | "yaki", _ | "scaleplate", _ | "buccaneers", _| "player",_ -> None // These are all fine as is.
+    | "terran", "energycells" ->
+        // The sectors we've assigned Terra have low solar output, so they're already crippled.
+        // We won't reduce production, but we will increase the limit per sector so that they
+        // can spawn all their factories in the slightly less bad .4 sunlight sector.
+        Some (product_replace_xml product.Id "sector" ( Option.defaultValue 32 product.Quota.Sector * 2) )
+    | _ -> Some (product_replace_xml product.Id "galaxy" (product.Quota.Galaxy / 2) ) // Everyone else gets half the quota
 
 
 // Given a list of 2 element tuples, split them in to two lists.
@@ -306,15 +285,77 @@ let splitTuples (tuples:('a option * 'b option)[]) =
     let seconds = [| for (_,b) in tuples do match b with Some x -> yield x | _ -> () |]
     (firsts, seconds)
 
+
+let X4ObjectTemplatesData = X4ObjectTemplates.Load(X4ObjectTemplatesFile)
+let X4GodCore = X4WorldStart.Load(X4GodFileCore)
+let X4GodSplit = X4GodMod.Load(X4GodFileSplit)
+let X4GodTerran = X4GodMod.Load(X4GodFileTerran)
+let X4GodPirate = X4GodMod.Load(X4GodFilePirate)
+let X4GodBoron = X4GodMod.Load(X4GodFileBoron)
+
+let splitStations = getStationsFromDiff X4GodSplit.Adds
+let terranStations = getStationsFromDiff X4GodTerran.Adds
+let pirateStations = getStationsFromDiff X4GodPirate.Adds
+let boronStations = getStationsFromDiff X4GodBoron.Adds
+
+// Finally build up an uberlist of all our stations across all DLC and core game.
+// The DLC stations are of a different type: they're an XML DIFF file, not the GOD
+// file type. So we need to pull out the stations from the diff and convert them
+// to the same type as the core stations using the underlying XElement.
+let allStations = X4GodCore.Stations.Stations 
+                |> Array.append (getStationsFromDiff X4GodSplit.Adds)
+                |> Array.append (getStationsFromDiff X4GodTerran.Adds)
+                |> Array.append (getStationsFromDiff X4GodPirate.Adds)
+                |> Array.append (getStationsFromDiff X4GodBoron.Adds)
+                |> Array.toList
+
+let allProducts = Array.toList <| Array.concat [
+                    X4GodCore.Products;
+                    getProductFromDiff X4GodSplit.Adds;
+                    getProductFromDiff X4GodTerran.Adds;
+                    getProductFromDiff X4GodPirate.Adds;
+                    getProductFromDiff X4GodBoron.Adds]
+
+//let allProducts = X4GodCore.Products 
+//                |> Array.append (getProductFromDiff X4GodSplit.Adds)
+//                |> Array.append (getProductFromDiff X4GodTerran.Adds)
+//                |> Array.append (getProductFromDiff X4GodPirate.Adds)
+//                |> Array.append (getProductFromDiff X4GodBoron.Adds)
+//                |> Array.toList
+
+// Load the sector data from each individual sector file. We'll combine them in to one list.
+let X4SectorCore = X4Sector.Load(X4SectorFileCore)
+let X4SectorSplit = X4Sector.Load(X4SectorFileSplit)
+let X4SectorTerran = X4Sector.Load(X4SectorFileTerran)
+let X4SectorPirate = X4Sector.Load(X4SectorFilePirate)
+let X4SectorBoron = X4Sector.Load(X4SectorFileBoron)
+let allSectors = X4SectorCore.Macros 
+                |> Array.append X4SectorSplit.Macros 
+                |> Array.append X4SectorTerran.Macros 
+                |> Array.append X4SectorPirate.Macros 
+                |> Array.append X4SectorBoron.Macros 
+                |> Array.toList
+
+// Extract the Xenon stations from the GodModTemplate. We'll use these as templates when we add new xenon stations
+let xenonShipyard = (Array.find (fun (elem:X4ObjectTemplates.Station) -> elem.Id = "shipyard_xenon_cluster") X4ObjectTemplatesData.Stations).XElement
+let xenonWharf    = (Array.find (fun (elem:X4ObjectTemplates.Station) -> elem.Id = "wharf_xenon_cluster") X4ObjectTemplatesData.Stations).XElement
+let xenonDefence  = (Array.find (fun (elem:X4ObjectTemplates.Station) -> elem.Id = "xen_defence_cluster") X4ObjectTemplatesData.Stations).XElement
+
 let godModStations = 
-    [| for station in allStations do yield processStation station |] |> splitTuples
+    [| for station in allStations do yield processStation station allSectors xenonShipyard xenonWharf xenonDefence |] |> splitTuples
+
+// convert our list of stations in to a list of XElements, so we can add it to our
+// output document. The XMK type provider doesn't provide manipulation functions, so we
+// can only manipulate the raw xelements.
+let (addStations, removeStations) = godModStations 
+let outputStations = [|
+    for station in addStations do yield station.XElement
+|]
 
 
-let godModProducts = 
-    [| for product in X4GodCore.Products do
-            let (add, remove) = processProduct product
-            match add    with Some product -> yield product | _ -> ()
-            match remove with Some product -> yield product | _ -> ()
+let outputProducts = 
+    [| for product in allProducts do
+            match processProduct product with Some product -> yield product | _ -> ()
     |]
 
 
@@ -330,47 +371,30 @@ let outGodFile = X4GodMod.Parse("<?xml version=\"1.0\" encoding=\"utf-8\"?>
     <diff>
         <add sel=\"//god/stations\">
         </add>
-        <add sel=\"//god/products\">
-        </add>
     </diff>
 "
 )
 
-// Given a selector ID, search an instance of a GodMod xml file for the 'ADD' section
-// with that 'sel' value. This will be the XElement we will manipulate.
-let find_add_selector sel xml =
-   Array.find (fun (elem:X4GodMod.Add) -> elem.Sel = sel) xml
-
-
-// convert our list of stations in to a list of XElements, so we can add it to our
-// output document. The XMK type provider doesn't provide manipulation functions, so we
-// can only manipulate the raw xelements.
-let (addStations, removeStations) = godModStations 
-let outputStations = [|
-    for station in addStations do yield station.XElement
-|]
-
-let outputProducts = [|
-    for product in godModProducts do yield product.XElement
-|]
 
 let stationsAdd = find_add_selector "//god/stations" outGodFile.Adds
-stationsAdd.XElement.Add(outputStations)
-let productsAdd = find_add_selector "//god/products" outGodFile.Adds
-productsAdd.XElement.Add(outputProducts)
+[| for element in outputStations do 
+    stationsAdd.XElement.Add(element)
+    stationsAdd.XElement.Add( new XText("\n")) // Add a newline after each element so the output is readible
+|] |> ignore
+
+// Add out 'remove' tags to the end of the diff block.
+let diff = outGodFile.XElement // the root element is actually the 'diff' tag.
+let changes = Array.concat [removeStations; outputProducts] 
+[| for element in changes do 
+    diff.Add(element)
+    diff.Add( new XText("\n")) // Add a newline after each element so the output is readible
+|] |> ignore
 
 
 // Now actually generate the files in the mod directory by spitting out XML or copying
 // our templates.
 directoryCopy (__SOURCE_DIRECTORY__ + "/mod_xml") (__SOURCE_DIRECTORY__ + "/mod/after_the_fall") true
-
-// Add out 'remove' tags to the end of the diff block.
-let diff = outGodFile.XElement // the root element is actually the 'diff' tag.
-diff.Add(removeStations)    // Add will append to the end of the diff children,
 write_xml_file "libraries/god.xml" outGodFile.XElement
-
-// Copy the content.xml file that describes the mod to the output directory.
-System.IO.File.Copy(__SOURCE_DIRECTORY__ + "/mod_templates/content.xml", __SOURCE_DIRECTORY__ + "/mod/after_the_fall/content.xml", true) |> ignore
 
 // let dump = outGodFile.XElement.ToString()
 // let sectorName = find_sector_from_zone "zone003_cluster_606_sector002_macro" allSectors

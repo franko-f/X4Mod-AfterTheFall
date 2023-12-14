@@ -1,6 +1,5 @@
 up next:
  * move faction shipyards to their new sector; and replace old one with xenon
- * update products
  * add bastion
  * change fleets
 
@@ -14,14 +13,11 @@ up next:
 BUG: Looks like some terran and segaris defence stations are not being replaced: Why? Wrong name? Wharfs and shipyards are.
    
  * Handle PRODUCT
-   ** I don't think we need REMOVE for products, so clean this code up.
-   ** Reduce QUOTAS. Factor: try 1/3 of current allocation rounded up to start.
-   ** DLC slightly increases galaxy product module count with new product entries for existing factions: Remove these.
-   ** Alter sector max to be same as galaxy max - I'm not sure this is necessary now we're giving them two sectors per faction
-   ** INCREASE Xenon product quota - so that new sectors are filled with stations and generation resources. 3x? 
-   ** write output REPLACE xml
-   ** add 'matchextension="false"' to location tags.
-   ** Give TER a few more solar stations: they're energy starved with the asteroid belt and mars
+d  ** DLC slightly increases galaxy product module count with new product entries for existing factions: Remove these.
+   *** We also have products allocated in 'friendly' sectors, such as PIO in Oort cloud.
+       eg:     <location class="sector" macro="cluster_116_sector001_macro" relation="self" comparison="ge" />
+      Also we have things like Xenon factories assigned to specific sectors: do NOT increase these limits.
+   ** add 'matchextension="false"' to location tags. - Is this needed?
 
  * FLEETS: 
   * Reduce faction starting fleet sizes
@@ -90,5 +86,12 @@ BUG: Looks like some terran and segaris defence stations are not being replaced:
         => Currently, we've assigned existing systems with existing resources. Some are pretty sparse, and might not be enough.
      * Make sure solar energy is 1x for at least one of chosen system: increase if required.
         => TER is light on energy (heh). Maybe increase solar to compensate.
+
+ * Handle PRODUCT
+   ** Reduce QUOTAS. Factor: try 2/3 of current allocation rounded up to start. Don't overdo, especially with increase X economy.
+   ** INCREASE Xenon product quota - so that new sectors are filled with stations and generation resources. 3x? 
+   ** write output REPLACE xml
+   ** Give TER a few more solar stations: they're energy starved with the asteroid belt and mars
+
 
    BUG: ALI wharf in Trinity has been replaced by Xenon wharf. Check faction sector mapping/ALI name
