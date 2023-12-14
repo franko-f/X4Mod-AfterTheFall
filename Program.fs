@@ -293,35 +293,26 @@ let X4GodTerran = X4GodMod.Load(X4GodFileTerran)
 let X4GodPirate = X4GodMod.Load(X4GodFilePirate)
 let X4GodBoron = X4GodMod.Load(X4GodFileBoron)
 
-let splitStations = getStationsFromDiff X4GodSplit.Adds
-let terranStations = getStationsFromDiff X4GodTerran.Adds
-let pirateStations = getStationsFromDiff X4GodPirate.Adds
-let boronStations = getStationsFromDiff X4GodBoron.Adds
-
 // Finally build up an uberlist of all our stations across all DLC and core game.
 // The DLC stations are of a different type: they're an XML DIFF file, not the GOD
 // file type. So we need to pull out the stations from the diff and convert them
 // to the same type as the core stations using the underlying XElement.
-let allStations = X4GodCore.Stations.Stations 
-                |> Array.append (getStationsFromDiff X4GodSplit.Adds)
-                |> Array.append (getStationsFromDiff X4GodTerran.Adds)
-                |> Array.append (getStationsFromDiff X4GodPirate.Adds)
-                |> Array.append (getStationsFromDiff X4GodBoron.Adds)
-                |> Array.toList
+let allStations = Array.toList <| Array.concat [ 
+                    X4GodCore.Stations.Stations; 
+                    getStationsFromDiff X4GodSplit.Adds;
+                    getStationsFromDiff X4GodTerran.Adds;
+                    getStationsFromDiff X4GodPirate.Adds;
+                    getStationsFromDiff X4GodBoron.Adds;
+                ]
 
+// Do the same for products
 let allProducts = Array.toList <| Array.concat [
                     X4GodCore.Products;
                     getProductFromDiff X4GodSplit.Adds;
                     getProductFromDiff X4GodTerran.Adds;
                     getProductFromDiff X4GodPirate.Adds;
-                    getProductFromDiff X4GodBoron.Adds]
-
-//let allProducts = X4GodCore.Products 
-//                |> Array.append (getProductFromDiff X4GodSplit.Adds)
-//                |> Array.append (getProductFromDiff X4GodTerran.Adds)
-//                |> Array.append (getProductFromDiff X4GodPirate.Adds)
-//                |> Array.append (getProductFromDiff X4GodBoron.Adds)
-//                |> Array.toList
+                    getProductFromDiff X4GodBoron.Adds
+                ]
 
 // Load the sector data from each individual sector file. We'll combine them in to one list.
 let X4SectorCore = X4Sector.Load(X4SectorFileCore)
@@ -329,12 +320,13 @@ let X4SectorSplit = X4Sector.Load(X4SectorFileSplit)
 let X4SectorTerran = X4Sector.Load(X4SectorFileTerran)
 let X4SectorPirate = X4Sector.Load(X4SectorFilePirate)
 let X4SectorBoron = X4Sector.Load(X4SectorFileBoron)
-let allSectors = X4SectorCore.Macros 
-                |> Array.append X4SectorSplit.Macros 
-                |> Array.append X4SectorTerran.Macros 
-                |> Array.append X4SectorPirate.Macros 
-                |> Array.append X4SectorBoron.Macros 
-                |> Array.toList
+let allSectors = Array.toList <| Array.concat [
+                    X4SectorCore.Macros; 
+                    X4SectorSplit.Macros; 
+                    X4SectorTerran.Macros; 
+                    X4SectorPirate.Macros;
+                    X4SectorBoron.Macros; 
+                ]
 
 // Extract the Xenon stations from the GodModTemplate. We'll use these as templates when we add new xenon stations
 let xenonShipyard = (Array.find (fun (elem:X4ObjectTemplates.Station) -> elem.Id = "shipyard_xenon_cluster") X4ObjectTemplatesData.Stations).XElement

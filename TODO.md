@@ -10,10 +10,8 @@ up next:
    *** Need to find a zone for these moved items. Or create. Some won't need it. 
       Looks like I might be able to just specify a sector as location, and have it auto placed in sector.
 
-BUG: Looks like some terran and segaris defence stations are not being replaced: Why? Wrong name? Wharfs and shipyards are.
-   
  * Handle PRODUCT
-d  ** DLC slightly increases galaxy product module count with new product entries for existing factions: Remove these.
+  ** DLC slightly increases galaxy product module count with new product entries for existing factions: Remove these.
    *** We also have products allocated in 'friendly' sectors, such as PIO in Oort cloud.
        eg:     <location class="sector" macro="cluster_116_sector001_macro" relation="self" comparison="ge" />
       Also we have things like Xenon factories assigned to specific sectors: do NOT increase these limits.
@@ -25,33 +23,12 @@ d  ** DLC slightly increases galaxy product module count with new product entrie
    * Civilian
   * Increase XENON starting fleet size
 
-
  * Systems:
   * Place GATE DEFENCE station
    * Each faction needs a strong station guarding it's gate.
    * check ZONES.xml file: seems to define zones for gates, and their connections
 
-  * Neutral/pirate factions:
-   * SCALE: Figure out where/how their stations are placed.
-     * Looks like SOME factories/product are set to 'ownerless' for faction for HAT/SCA (spaceweed)
-        So we might need to either override this to place in another faction, or create a 'safe'
-        ownerless sector somewhere for them.
-        This actually is probably good: 
-        WE SHOULD CREATE AT LEAST ONE 'SAFE' OWNERLESS FOR THE PLAYER!
-
- * DLC:
-  * Check if DLC exists
-  * Load/process each DLC
-    * SPLIT
-    * Terran
-    * BOR: Maybe start unified? How?
-      ** We're not changing their zones, as their economy is pretty wretched already.
-      ** Apart from add a Bastion gate to main system
-    * Pirate
-      ** We're not changing zones for this faction. Large easy starting zone
-      ** Add bastion gate to entry system.
-
-
+ 
 ## Optional/Maybe do/other ideas:
   * Add more derelict ships around
   * Handle better ways to get blueprints: (limit economy == slow gain)
@@ -65,6 +42,15 @@ d  ** DLC slightly increases galaxy product module count with new product entrie
     * Hard start
     * Each faction.
     * Include DLC
+
+  * Neutral/pirate factions: for now, lets just ignore.
+   * SCALE: Figure out where/how their stations are placed.
+     * Looks like SOME factories/product are set to 'ownerless' for faction for HAT/SCA (spaceweed)
+        So we might need to either override this to place in another faction, or create a 'safe'
+        ownerless sector somewhere for them.
+        This actually is probably good: 
+        WE SHOULD CREATE AT LEAST ONE 'SAFE' OWNERLESS FOR THE PLAYER!
+
 
 
 # DONE
@@ -93,5 +79,20 @@ d  ** DLC slightly increases galaxy product module count with new product entrie
    ** write output REPLACE xml
    ** Give TER a few more solar stations: they're energy starved with the asteroid belt and mars
 
+* DLC:
+  * Check if DLC exists
+  * Load/process each DLC
+    * SPLIT
+    * Terran
+    * BOR: Maybe start unified? How?
+      ** We're not changing their zones, as their economy is pretty wretched already.
+      ** Apart from add a Bastion gate to main system
+    * Pirate
+      ** We're not changing zones for this faction. Large easy starting zone
+      ** Add bastion gate to entry system.
+
+
 
    BUG: ALI wharf in Trinity has been replaced by Xenon wharf. Check faction sector mapping/ALI name
+   BUG: Looks like some terran and segaris defence stations are not being replaced: Why? Wrong name? Wharfs and shipyards are.
+   
