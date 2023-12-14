@@ -100,14 +100,11 @@ let find_sector_from_zone (zone:string) (sectors:X4Sector.Macro list) =
         match sectors with
         | [] -> None
         | sector :: rest ->
-            //printfn "Checking sector: %s" sector.Name
-            let connections = sector.Connections
-            let foundConnection = Array.tryFind ( fun (connection:X4Sector.Connection) ->
-                                        //printfn "  Checking connection: %s:%s:%s" connection.Ref connection.Macro.Connection connection.Macro.Ref 
-                                        connection.Ref = "zones" 
-                                        && connection.Macro.Connection = "sector" 
-                                        && connection.Macro.Ref =? zone)    // Case insensitive comparison of zone, as the files mix the case of the zone names.
-                                    connections
+            let findConnection (connection:X4Sector.Connection) =
+                // Case insensitive comparison of zone, as the files mix the case of the zone names.
+                connection.Ref = "zones" && connection.Macro.Connection = "sector" && connection.Macro.Ref =? zone
+            let foundConnection = Array.tryFind findConnection sector.Connections
+
             match foundConnection with
             | Some connection -> Some (sector.Name.ToLower()) // return the sector name, but in lower case, as the case varies in the files. I prefer to make it consistent
             | None -> loop rest
