@@ -248,7 +248,7 @@ let processStation (station:X4WorldStart.Station) allSectors (xenonShipyard:XEle
             replacement.Location.XElement.SetAttributeValue(XName.Get("macro"), locationMacro)
             logAddStation replacement
 
-            (Some replacement, Some remove)  // return an add/remove options,
+            (Some replacement.XElement, Some remove)  // return an add/remove options,
 
 
 
@@ -333,22 +333,13 @@ let xenonShipyard = (Array.find (fun (elem:X4ObjectTemplates.Station) -> elem.Id
 let xenonWharf    = (Array.find (fun (elem:X4ObjectTemplates.Station) -> elem.Id = "wharf_xenon_cluster") X4ObjectTemplatesData.Stations).XElement
 let xenonDefence  = (Array.find (fun (elem:X4ObjectTemplates.Station) -> elem.Id = "xen_defence_cluster") X4ObjectTemplatesData.Stations).XElement
 
-let godModStations = 
+let (addStations, removeStations)  = 
     [| for station in allStations do yield processStation station allSectors xenonShipyard xenonWharf xenonDefence |] |> splitTuples
 
-// convert our list of stations in to a list of XElements, so we can add it to our
-// output document. The XMK type provider doesn't provide manipulation functions, so we
-// can only manipulate the raw xelements.
-let (addStations, removeStations) = godModStations 
-let outputStations = [|
-    for station in addStations do yield station.XElement
+let outputProducts = [| 
+    for product in allProducts do
+        match processProduct product with Some product -> yield product | _ -> ()
 |]
-
-
-let outputProducts = 
-    [| for product in allProducts do
-            match processProduct product with Some product -> yield product | _ -> ()
-    |]
 
 
 // Now that everything has been processed, and we've got new stations and products, 
@@ -367,11 +358,10 @@ let outGodFile = X4GodMod.Parse("<?xml version=\"1.0\" encoding=\"utf-8\"?>
 "
 )
 
-
-let stationsAdd = find_add_selector "//god/stations" outGodFile.Adds
-[| for element in outputStations do 
-    stationsAdd.XElement.Add(element)
-    stationsAdd.XElement.Add( new XText("\n")) // Add a newline after each element so the output is readible
+let stationsAddElem = find_add_selector "//god/stations" outGodFile.Adds
+[| for element in addStations do 
+    stationsAddElem.XElement.Add(element)
+    stationsAddElem.XElement.Add( new XText("\n")) // Add a newline after each element so the output is readible
 |] |> ignore
 
 // Add out 'remove' tags to the end of the diff block.
@@ -387,8 +377,3 @@ let changes = Array.concat [removeStations; outputProducts]
 // our templates.
 directoryCopy (__SOURCE_DIRECTORY__ + "/mod_xml") (__SOURCE_DIRECTORY__ + "/mod/after_the_fall") true
 write_xml_file "libraries/god.xml" outGodFile.XElement
-
-// let dump = outGodFile.XElement.ToString()
-// let sectorName = find_sector_from_zone "zone003_cluster_606_sector002_macro" allSectors
-// printfn "Found sector: %A" sectorName
-// dump_sectors allSectors
