@@ -248,10 +248,33 @@ let processStation (station:X4WorldStart.Station) allSectors (xenonShipyard:XEle
             (Some replacement.XElement, Some remove)  // return an add/remove options,
 
 
+// Construct an XML element representing a 'replace' tag that will replace the quotas for a given job.
+// example replace line:
+// <replace sel="/jobs/job[@id='xen_energycells']/@quotas">
+//   <quotas>
+//      <quota galaxy="42" cluster="3"/>
+//   </quotas>
+// </replace>
+let job_replace_xml (id:string) (galaxy:int) (maxGalaxy: Option<int>) (cluster:Option<int>) (sector:Option<int>) =
+    let quotas = [
+        yield new XAttribute("galaxy", galaxy)
+        match maxGalaxy with Some x -> yield new XAttribute("maxgalaxy", x) | _ -> ()
+        match cluster with Some x -> yield new XAttribute("cluster", x) | _ -> ()
+        match sector with Some x -> yield new XAttribute("sector", x) | _ -> ()
+    ]
 
+    let xml = new XElement("replace",
+        new XAttribute("sel", $"//jobs/job[@id='{id}']/quotas"),
+        new XElement("quota", quotas)
+    )
+    printfn "  REPLACING JOB QUOTA %s with \n %s" id (xml.ToString())
+    xml 
+
+
+// Construct an XML element representing a 'replace' tag that will replace a specific quota for a given product.
+// example replace line:
+// <replace sel="/god/products/product[@id='arg_graphene']/quotas/quota/@galaxy">18</replace>
 let product_replace_xml (id:string) (quota_type:string) (quota:int) =
-    // example replace line:
-    // <replace sel="/god/products/product[@id='arg_graphene']/quotas/quota/@galaxy">18</replace>
     let xml = new XElement("replace",
         new XAttribute("sel", $"//god/products/product[@id='{id}']/quotas/quota/@{quota_type}"),
         quota
@@ -374,3 +397,7 @@ let changes = Array.concat [removeStations; outputProducts]
 // our templates.
 directoryCopy (__SOURCE_DIRECTORY__ + "/mod_xml") (__SOURCE_DIRECTORY__ + "/mod/after_the_fall") true
 write_xml_file "libraries/god.xml" outGodFile.XElement
+
+
+job_replace_xml "idfield" 42 (Some 42) (Some 3) (Some 1) |> ignore
+job_replace_xml "idfield2" 42 (Some 42) None (Some 1) |> ignore

@@ -18,10 +18,18 @@ up next:
    ** add 'matchextension="false"' to location tags. - Is this needed?
 
  * FLEETS: 
+ Fleets are handled in the JOBS file. It sets both initial game start fleets, and the
+ max number of fleets the game will gradually order if required by faction logic.
+ These quotas are 'galaxy' and 'maxgalaxy' respectively.
+ So we want to INCREASE both for xenon, and DECREASE only 'galaxy' for other factions.
+ We want them to start weaker than normal, but still have same max.
+ see  https://forum.egosoft.com/viewtopic.php?t=444909
+
   * Reduce faction starting fleet sizes
    * Military
    * Civilian
   * Increase XENON starting fleet size
+
 
  * Systems:
   * Place GATE DEFENCE station
