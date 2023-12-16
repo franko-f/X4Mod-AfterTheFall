@@ -23,6 +23,14 @@ let X4SectorFileTerran = X4UnpackedDataFolder + "/terran/maps/xu_ep2_universe/dl
 let X4SectorFilePirate = X4UnpackedDataFolder + "/pirate/maps/xu_ep2_universe/dlc_pirate_sectors.xml" 
 let X4SectorFileBoron = X4UnpackedDataFolder + "/boron/maps/xu_ep2_universe/dlc_boron_sectors.xml"   
 
+[<Literal>]
+let X4JobFileCore = X4UnpackedDataFolder + "/core/libraries/jobs.xml"
+let X4JobFileSplit = X4UnpackedDataFolder + "/split/libraries/jobs.xml"
+let X4JobFileTerran = X4UnpackedDataFolder + "/terran/libraries/jobs.xml"
+let X4JobFilePirate = X4UnpackedDataFolder + "/pirate/libraries/jobs.xml"
+[<Literal>] // We're going to use the boron as a template for diff/Add Job format file. Not all DLC do this.
+let X4JobFileBoron = X4UnpackedDataFolder + "/boron/libraries/jobs.xml"
+
 // The default GOD.xml file, etc, don't have an 'add/replace' XML section, so they can't
 // be used as type providers for our output XML. So we've created a template that has
 // versions of our types that we need (like station, product) as well as the XML selectors
@@ -31,7 +39,6 @@ let X4SectorFileBoron = X4UnpackedDataFolder + "/boron/maps/xu_ep2_universe/dlc_
 let X4GodModFile = __SOURCE_DIRECTORY__ + "/mod_templates/god.xml"
 [<Literal>]
 let X4ObjectTemplatesFile = __SOURCE_DIRECTORY__ + "/mod_templates/object_templates.xml"
-
 
 // The 'god.xml' file defines the starting state of the universe, in particular the starting
 // unique stations and random factories for each faction that are scattered around the
@@ -70,6 +77,8 @@ type X4WorldStart = XmlProvider<X4GodFileCore>
 type X4GodMod = XmlProvider<X4GodModFile >
 type X4ObjectTemplates = XmlProvider<X4ObjectTemplatesFile>
 type X4Sector = XmlProvider<X4SectorFileCore>
+type X4Job = XmlProvider<X4JobFileCore>
+type X4JobMod = XmlProvider<X4JobFileBoron>  // Use this as a sample file so we can parse the DLC jobs files that use the DIFF format.
 
 type StationMod =
     | Add of XElement
@@ -148,6 +157,13 @@ let getProductFromDiff (diff:X4GodMod.Add[]) =
     [| for products in productsAdd do
             for product in products.Products do
                 yield new X4WorldStart.Product(product.XElement)
+    |]
+
+let getJobsFromDiff (diff:X4JobMod.Add[]) = 
+    let jobsAdd = Array.filter (fun (add:X4JobMod.Add) -> add.Sel = "/jobs") diff
+    [|  for jobs in jobsAdd do
+            for job in jobs.Jobs do
+                yield new X4Job.Job(job.XElement)
     |]
 
 // Given a selector ID, search an instance of a GodMod xml file for the 'ADD' section
@@ -297,6 +313,28 @@ let processProduct (product:X4WorldStart.Product) =
     | _ -> Some (product_replace_xml product.Id "galaxy" (product.Quota.Galaxy / 2) ) // Everyone else gets half the quota
 
 
+let processJob (job:X4Job.Job) =
+    printfn "PROCESSING JOB %s" job.Id
+    let trafficJob = match job.Task with | None -> false | Some task -> task.Task = "masstraffic.generic" || task.Task = "masstraffic.police"
+
+    match trafficJob with 
+    | true -> None // Traffic jobs are special: station mass traffic.
+    | false ->
+        let faction = match job.Location.Faction with
+                        | None -> 
+                            match job.Category with
+                            | None ->
+                                printfn "  NO FACTION FOR JOB %s" job.Id; None
+                            | Some category ->
+                                Some category.Faction
+                        | Some faction ->
+                            Some faction
+        // TODO = now what do we do with faction?
+        None //Some (job_replace_xml job.Id 42 (Some 42) (Some 3) (Some 1)) // test
+        
+
+
+
 // Given a list of 2 element tuples, split them in to two lists.
 // The first list contains all the first elements, the second list contains all the second elements.
 // It will strip out any 'None' values.
@@ -306,7 +344,7 @@ let splitTuples (tuples:('a option * 'b option)[]) =
     (firsts, seconds)
 
 
-let X4ObjectTemplatesData = X4ObjectTemplates.Load(X4ObjectTemplatesFile)
+
 let X4GodCore = X4WorldStart.Load(X4GodFileCore)
 let X4GodSplit = X4GodMod.Load(X4GodFileSplit)
 let X4GodTerran = X4GodMod.Load(X4GodFileTerran)
@@ -348,7 +386,22 @@ let allSectors = Array.toList <| Array.concat [
                     X4SectorBoron.Macros; 
                 ]
 
+let X4JobsCore = X4Job.Load(X4JobFileCore)
+let X4JobsSplit = X4Job.Load(X4JobFileSplit)     // Split don't use a diff file.
+let X4JobsPirate = X4Job.Load(X4JobFilePirate)  // same for pirate.
+let X4JobsBoron = X4JobMod.Load(X4JobFileBoron) 
+let X4JobsTerran = X4JobMod.Load(X4JobFileTerran)
+let allJobs = Array.toList <| Array.concat [
+                    X4JobsCore.Jobs;
+                    X4JobsSplit.Jobs;
+                    X4JobsPirate.Jobs;
+                    getJobsFromDiff X4JobsTerran.Adds;
+                    getJobsFromDiff X4JobsBoron.Adds;
+                ]
+
+
 // Extract the Xenon stations from the GodModTemplate. We'll use these as templates when we add new xenon stations
+let X4ObjectTemplatesData = X4ObjectTemplates.Load(X4ObjectTemplatesFile)
 let xenonShipyard = (Array.find (fun (elem:X4ObjectTemplates.Station) -> elem.Id = "shipyard_xenon_cluster") X4ObjectTemplatesData.Stations).XElement
 let xenonWharf    = (Array.find (fun (elem:X4ObjectTemplates.Station) -> elem.Id = "wharf_xenon_cluster") X4ObjectTemplatesData.Stations).XElement
 let xenonDefence  = (Array.find (fun (elem:X4ObjectTemplates.Station) -> elem.Id = "xen_defence_cluster") X4ObjectTemplatesData.Stations).XElement
@@ -356,9 +409,15 @@ let xenonDefence  = (Array.find (fun (elem:X4ObjectTemplates.Station) -> elem.Id
 let (addStations, removeStations)  = 
     [| for station in allStations do yield processStation station allSectors xenonShipyard xenonWharf xenonDefence |] |> splitTuples
 
-let outputProducts = [| 
+let replaceProducts = [| 
     for product in allProducts do
         match processProduct product with Some product -> yield product | _ -> ()
+|]
+
+
+let replaceJobs = [|
+    for job in allJobs do
+        match processJob job with Some job -> yield job | _ -> ()
 |]
 
 
@@ -386,7 +445,7 @@ let stationsAddElem = find_add_selector "//god/stations" outGodFile.Adds
 
 // Add out 'remove' tags to the end of the diff block.
 let diff = outGodFile.XElement // the root element is actually the 'diff' tag.
-let changes = Array.concat [removeStations; outputProducts] 
+let changes = Array.concat [removeStations; replaceProducts; replaceJobs] 
 [| for element in changes do 
     diff.Add(element)
     diff.Add( new XText("\n")) // Add a newline after each element so the output is readible

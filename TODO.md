@@ -25,10 +25,16 @@ up next:
  We want them to start weaker than normal, but still have same max.
  see  https://forum.egosoft.com/viewtopic.php?t=444909
 
+Many jobs have only galaxy quota set, not maxGalaxy. Does this mean max=quota? Or no limit?
+We may need to add a maxgalaxy in these cases to set to the original quota.
+
+'wings' jobs only have a single 'quota' line. We should ignore these.
+
   * Reduce faction starting fleet sizes
    * Military
    * Civilian
   * Increase XENON starting fleet size
+
 
 
  * Systems:
