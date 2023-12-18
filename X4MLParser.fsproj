@@ -4,14 +4,16 @@
     <TargetFramework>net7.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="utilities.fs" />
     <Content Include="mod_templates/content.xml" />
     <Content Include="mod_templates\factionlogic_stations.xml" />
     <Content Include="mod_templates\gamestarts.xml" />
     <Content Include="mod_templates\god.xml" />
+    <Compile Include="utilities.fs" />
+    <Compile Include="data.fs" />
+    <Compile Include="jobs.fs" />
+    <Compile Include="god.fs" />
     <Content Include="mod_templates\macros.xml" />
     <None Include="mod_templates\ReadMe.md" />
-    <Compile Include="data.fs" />
     <Compile Include="Program.fs" />
   </ItemGroup>
   <ItemGroup />

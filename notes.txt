@@ -36,3 +36,16 @@ from DeadAir on egosoft discord: example around count
         <area tags="daxenoncore"/>
     </add>
     <add sel="/defaults/dataset[@macro='Cluster_17_Sector001_macro']/properties[count(./area)=1]/area" type="@tags" silent="true">daxenoncore</add>
+
+
+==== Jobs:
+From the x4-modding dischord:
+    Manoeuvring with Difficulty — Today at 1:30 PM
+    maxgalaxy by default is 2x galaxy, the rest looks right
+    Also galaxy is more of a target, so it can be higher or lower but factions will try and aim to keep the amount of ships to be around the galaxy value
+
+ Though DeadAir adds:
+ "Changing galaxy affects their default target"
+ and maxgalaxy is a hard limit. So dropping galaxy would not do what we want. Deadair suggests sector limits or splitting the job in to two.
+ One with a smaller target that is the initial spawn, and another with hte rest of the target, but the job set to 'prefer build', so that
+ they only build at shipyards and don't spawn in on game start.   

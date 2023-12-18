@@ -3,11 +3,42 @@
 /// generate our new universe.
 /// </summary>
 
-module X4MLParser.Data
+module X4.Data
+
+open FSharp.Data
+
+[<Literal>]
+let X4UnpackedDataFolder = __SOURCE_DIRECTORY__ + "/X4_unpacked_data"
+
 
 // Neat case insensitive string comparison function from https://stackoverflow.com/questions/1936767/f-case-insensitive-string-compare
 // It's important as the X4 data files often mix the case of identifiers like zone and sector names.
 let (=?) s1 s2 = System.String.Equals(s1, s2, System.StringComparison.CurrentCultureIgnoreCase)
+
+[<Literal>]
+let X4SectorFileCore = X4UnpackedDataFolder  + "/core/maps/xu_ep2_universe/sectors.xml" // This core sectors file needs to be a literal, as it's also our type provider
+let X4SectorFileSplit = X4UnpackedDataFolder + "/split/maps/xu_ep2_universe/dlc4_sectors.xml"   // This one is normal string, as we can load and parse using X4SectorCore literal
+let X4SectorFileTerran = X4UnpackedDataFolder + "/terran/maps/xu_ep2_universe/dlc_terran_sectors.xml" 
+let X4SectorFilePirate = X4UnpackedDataFolder + "/pirate/maps/xu_ep2_universe/dlc_pirate_sectors.xml" 
+let X4SectorFileBoron = X4UnpackedDataFolder + "/boron/maps/xu_ep2_universe/dlc_boron_sectors.xml"   
+
+type X4Sector = XmlProvider<X4SectorFileCore>
+
+
+// Load the sector data from each individual sector file. We'll combine them in to one list.
+let allSectors = 
+    let X4SectorCore = X4Sector.Load(X4SectorFileCore)
+    let X4SectorSplit = X4Sector.Load(X4SectorFileSplit)
+    let X4SectorTerran = X4Sector.Load(X4SectorFileTerran)
+    let X4SectorPirate = X4Sector.Load(X4SectorFilePirate)
+    let X4SectorBoron = X4Sector.Load(X4SectorFileBoron)
+    Array.toList <| Array.concat [
+                    X4SectorCore.Macros; 
+                    X4SectorSplit.Macros; 
+                    X4SectorTerran.Macros; 
+                    X4SectorPirate.Macros;
+                    X4SectorBoron.Macros; 
+                ]
 
 
 // Factions will be limited to only a sector or two of valid territory.
@@ -71,6 +102,8 @@ let territories = [
 let findRecordsByFaction (faction: string) records =
     records |> List.filter (fun record -> record.faction = faction)
 
+// This function returns whether a faction is ALLOWED to be in the sector as per our mod rules
+// For most factions this is a lot less than what is in the base game.
 let isFactionInSector (faction: string) (sector: string) =
     territories |> List.exists (fun record -> record.faction = faction && record.sector =? sector)
 
@@ -81,3 +114,26 @@ let isFactionInSector (faction: string) (sector: string) =
 // one special ship, of course)
 let ignoreFaction (faction: string) =
     territories |> List.exists (fun record -> record.faction = faction && record.sector = "")
+
+// Using the data in sector.xml, which is represented by the X4Sector type, find the name of
+// the sector given the name of the zone. the zone is stored as a connection in the sector definition.
+let find_sector_from_zone (zone:string) (sectors:X4Sector.Macro list) =
+    // Loops through the macros. Each macro will contain a sector. In that sector we'll find connections.
+    // Each connection will have zero or more zones for use to check.
+    let rec loop (sectors:X4Sector.Macro list) =
+        match sectors with
+        | [] -> None
+        | sector :: rest ->
+            let findConnection (connection:X4Sector.Connection) =
+                // Case insensitive comparison of zone, as the files mix the case of the zone names.
+                connection.Ref = "zones" && connection.Macro.Connection = "sector" && connection.Macro.Ref =? zone
+            let foundConnection = Array.tryFind findConnection sector.Connections
+
+            match foundConnection with
+            | Some connection -> Some (sector.Name.ToLower()) // return the sector name, but in lower case, as the case varies in the files. I prefer to make it consistent
+            | None -> loop rest
+    loop sectors
+
+let dump_sectors (sectors:X4Sector.Macro list) =
+    for sector in sectors do
+        printfn "Macro.%s," (sector.Name.ToLower())
