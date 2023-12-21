@@ -4,6 +4,7 @@
 
 module X4.Utilities
 
+open System
 open System.Xml.Linq
 
 // Borrowed from. Promise to give it back
@@ -50,4 +51,9 @@ let splitTuples (tuples:('a option * 'b option)[]) =
     let seconds = [| for (_,b) in tuples do match b with Some x -> yield x | _ -> () |]
     (firsts, seconds)
 
+
+let parseStringList (input: string) : string list =
+    let trimmedInput = input.Trim('[', ']')
+    let elements = trimmedInput.Split([|','|], StringSplitOptions.RemoveEmptyEntries) |> Array.toList
+    List.map (fun (element:string) -> element.Trim('"', ' ')) elements
 

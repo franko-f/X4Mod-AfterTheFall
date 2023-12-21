@@ -49,3 +49,8 @@ From the x4-modding dischord:
  and maxgalaxy is a hard limit. So dropping galaxy would not do what we want. Deadair suggests sector limits or splitting the job in to two.
  One with a smaller target that is the initial spawn, and another with hte rest of the target, but the job set to 'prefer build', so that
  they only build at shipyards and don't spawn in on game start.   
+
+ Other discord notes:
+
+"preferbuilding forces it to be built instead of spawned
+rebuild will be rebuilt if ship is lost/order times out"

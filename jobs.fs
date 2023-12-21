@@ -49,7 +49,7 @@ let getJobsFromDiff (diff:X4JobMod.Add[]) =
 //      <quota galaxy="42" cluster="3"/>
 //   </quotas>
 // </replace>
-let job_replace_xml (id:string) (galaxy:int) (maxGalaxy: Option<int>) (cluster:Option<int>) (sector:Option<int>) =
+let job_replace_quota_xml (id:string) (galaxy:int) (maxGalaxy: Option<int>) (cluster:Option<int>) (sector:Option<int>) =
     let quotas = [
         yield new XAttribute("galaxy", galaxy)
         match maxGalaxy with Some x -> yield new XAttribute("maxgalaxy", x) | _ -> ()
@@ -64,26 +64,122 @@ let job_replace_xml (id:string) (galaxy:int) (maxGalaxy: Option<int>) (cluster:O
     printfn "  REPLACING JOB QUOTA %s with \n %s" id (xml.ToString())
     xml 
 
+// Build XML that will replace or add a 'prefer build' tag.
+// We want to force many jobs for factions to be built at shipyards, rather
+// than get spawned in automatically. Means the factions will start weaker,
+// but, given time, will build up their fleets.
+// If I can easily select a handful of jobs programatically, it's easier than
+// taking every job and splitting it in two halves, one for prefer built,
+// the other with default spawn,
+let job_update_build_xml (id:string) (preferBuild:bool) (job:X4JobMod.Job)=
+    // If a job already has an environment, we want to pull it's existing settlings 
+    // and create full replace line. Otherwise create a new setting as an 'add' line
+    // instead of 'replace' line.
+    (*
+    match job.Environment with
+    | None ->
+        // Just build an entire 'add' like for the option.
+        None
+    | Some environment ->
+        // extract excisting settings so we can replace them.
+        // gernerate an array of our settings. If it already
+        // prefers build, do nothing.
+        let settings = [
+            yield new XAttribute("preferbuilding", preferBuild)
+        ]
+        match environment.Buildatshipyard, environment.Preferbuilding with
+        | None, None -> None
 
-let processJob (job:X4Job.Job) =
-    printfn "PROCESSING JOB %s" job.Id
+    let xml = new XElement("replace",
+        new XAttribute("sel", $"//jobs/job[@id='{id}']/preferbuild"),
+        new XElement("preferbuild", preferBuild)
+    )
+    printfn "  REPLACING JOB PREFERBUILD %s with \n %s" id (xml.ToString())
+    xml
+    *)
+    None 
+
+
+// Each job has a faction that it belongs to. The fields in the XML seem a bit unreliable
+// USUALLY it seems to be dictated by the category.faction, but this doesn't always exist.
+// If not, best guess seems to be look at the ship specified, and last of all, which factions
+// territory the job will be located in. (a job can specify several, for pirates, for example)
+let getJobFaction (job:X4Job.Job) =
+    // Category should give us the faction
+    match job.Category with
+    | Some category -> Some category.Faction
+    | None ->
+        match job.Ship with
+        | Some ship -> Some ship.Select.Faction 
+        | None ->
+            printfn "  NO CATEGORY/FACTION FOR JOB %s - defaulting to location.faction" job.Id; 
+            // Location is really more about which factional territory the job is in.
+            match job.Location.Faction with
+            | None -> printfn "  NO FACTION FOR JOB %s" job.Id; None
+            | Some faction -> Some faction
+
+// kind of the opposite of getJobFaction - We discover in which factions sectors
+// this job is allowed. I assume it's associated with Galaxy class
+let getJobLocationFaction (job:X4Job.Job) =
+    match job.Location.Faction with
+    | None ->
+        // if location faction is not specified, then we assume it's the same as 'category'
+        match job.Category with
+        | None ->  printfn "  NO FACTION FOR JOB %s" job.Id; None
+        | Some category -> Some category.Faction
+    | Some faction -> Some faction
+
+let getJobFactionName (job:X4Job.Job) =
+    getJobFaction job |> Option.defaultValue "NONE"
+
+// Checks if it's a police job, or lacks a faction, or something else
+// that makes it sa non standard faction job that were not interested in.
+// Returns None if we should ignore it, or Some FactionName
+let isStandardFactionJob (job:X4Job.Job) =
     let trafficJob = match job.Task with | None -> false | Some task -> task.Task = "masstraffic.generic" || task.Task = "masstraffic.police"
-
     match trafficJob with 
     | true -> None // Traffic jobs are special: station mass traffic.
-    | false ->
-        let faction = match job.Location.Faction with
-                        | None -> 
-                            match job.Category with
-                            | None ->
-                                printfn "  NO FACTION FOR JOB %s" job.Id; None
-                            | Some category ->
-                                Some category.Faction
-                        | Some faction ->
-                            Some faction
-        // TODO = now what do we do with faction?
-        // Some (job_replace_xml job.Id 42 (Some 42) (Some 3) (Some 1)) // test
-        None 
+    | false -> getJobFaction job
+
+let getJobTags (job:X4Job.Job) =
+    match job.Category with
+    | None -> []
+    | Some category ->Utilities.parseStringList category.Tags
+
+
+let processJob (job:X4Job.Job) =
+        
+    let tags = getJobTags job
+    match isStandardFactionJob job with
+    | None ->
+        printfn "IGNORING JOB %s, tags: %A" job.Id tags
+        None
+    | Some faction ->
+        // Extract data about the job, so we can summarise it.
+        // Find out which jobs are outside of the factions sectors:
+        let location = 
+            match job.Location.Macro with
+            | None -> "----"
+            | Some location -> location
+
+        let inTerritory =
+            match job.Location.Class with
+            | "sector" -> if (isFactionInSector faction location) then "Yes" else "No"
+            | "zone" -> 
+                match find_sector_from_zone location allSectors with
+                | None -> "???" // Can this happen?
+                | Some sector -> if (isFactionInSector faction sector) then "Yes" else "No"
+            | "galaxy" -> "Yes" // well, if the class is galaxy, then definitely.
+            | _ -> 
+                printfn "  UNHANDLED LOCATION CLASS %s" job.Location.Class
+                "???"   // Unhandled location class.
+ 
+        printfn "PROCESSING JOB %52s, %20s/%-20s: InTerritory:%3s, class:%8s, location:%30s. Tags:%A" job.Id (getJobFactionName job) (getJobLocationFaction job |> Option.defaultValue "NONE") inTerritory job.Location.Class location tags
+        None
+    // TODO = now what do we do with faction?
+    // Some (job_replace_xml job.Id 42 (Some 42) (Some 3) (Some 1)) // test
+//    None 
+
 
 
 // Kick off the work of generating the job file for the mod, and write out the
@@ -101,6 +197,22 @@ let generate_job_file (filename:string) =
                         getJobsFromDiff X4JobsTerran.Adds;
                         getJobsFromDiff X4JobsBoron.Adds;
                     ]
+
+    // lets find out some interesting things about jobs:
+    let categoryTags =
+        allJobs |> List.fold (
+                        fun (tags:Map<string list, int>) (job:X4Job.Job) -> 
+                            let jobtags = getJobTags job
+                            match Map.tryFind jobtags tags with
+                            | None -> Map.add jobtags 1 tags
+                            | Some count -> Map.add jobtags (count + 1) tags
+                    ) Map.empty
+    // write out the tags and counts
+    printfn "JOB CATEGORIES:"
+    categoryTags |> Map.iter (fun tag count -> printfn "  %A: %d" tag count)
+
+
+    let jobCount = allJobs.Length
 
     let replaceJobs = [|
         for job in allJobs do
