@@ -53,8 +53,8 @@ let allSectors =
 // place three bastion stations around each one, encircling it.
 type Location = { x: float; y: float; z: float }
 type MiningResource = { name: string; amount: int; location: Location }
-type Territory = { faction: string; sector: string; zone: string; resources: MiningResource list; gates: Location list }
-                   static member Default = { faction = ""; sector = ""; zone = ""; resources = []; gates = [] }
+type Territory = { faction: string; cluster:string; sector: string; zone: string; resources: MiningResource list; gates: Location list }
+                   static member Default = { faction = ""; cluster = ""; sector = ""; zone = ""; resources = []; gates = [] }
 
 // create a list of all the factions and their territories as Territory records
 // We'll pull resources and gates from the xml files, based on the sector name.
@@ -89,23 +89,95 @@ let territories = [
     // cradle of humanity
     { Territory.Default with faction = "terran"; sector = "Cluster_101_Sector001_macro" }     // Mars
     { Territory.Default with faction = "terran"; sector = "Cluster_100_Sector001_macro" }     // Asteroid belt
-    { Territory.Default with faction = "pioneers"; sector = "" }   // Segaris sectors are Cluster_113_Sector001_macro -> 115  - but we'll leave them unchanged.
+    { Territory.Default with faction = "pioneers"; sector = "Cluster_113_Sector001_macro" }   // Segaris sectors are Cluster_113_Sector001_macro -> 115  - but we'll leave them unchanged.
+    { Territory.Default with faction = "pioneers"; sector = "Cluster_114_Sector001_macro" }   // Segaris sectors are Cluster_113_Sector001_macro -> 115  - but we'll leave them unchanged.
+    { Territory.Default with faction = "pioneers"; sector = "Cluster_115_Sector001_macro" }   // Segaris sectors are Cluster_113_Sector001_macro -> 115  - but we'll leave them unchanged.
 
     // tides of avarice
-    { Territory.Default with faction = "loanshark"; sector = "" }   // VIG : leave these UNCHANGED
-    { Territory.Default with faction = "scavenger"; sector = "" }   // RIP : UNCHANGED
+    { Territory.Default with faction = "loanshark"; sector = "" }               // VIG : setting sector to "" means leave VIG UNCHANGED
+    { Territory.Default with faction = "loanshark"; cluster = "cluster_500" }   // identify the cluster though, so when we look up JOP cluster location, we can tell if it's in their territory.
+    { Territory.Default with faction = "loanshark"; cluster = "cluster_501" }   // 
+    { Territory.Default with faction = "loanshark"; cluster = "cluster_502" }   // 
+    { Territory.Default with faction = "scavenger"; sector = "" }               // RIP : UNCHANGED
+    { Territory.Default with faction = "scavenger"; cluster = "cluster_503" }   // RIP : UNCHANGED
 
     // boron
-    { Territory.Default with faction = "boron"; sector = "" }       // Boron: Economy is kinda screwed without player help anyway. Leave them alone for now?
+    { Territory.Default with faction = "boron"; sector = "" }                   // Boron: Economy is kinda screwed without player help anyway. Leave them alone for now?
+    { Territory.Default with faction = "boron"; cluster = "cluster_601" }       //
+    { Territory.Default with faction = "boron"; cluster = "cluster_602" }       
+    { Territory.Default with faction = "boron"; cluster = "cluster_603" }       
+    { Territory.Default with faction = "boron"; cluster = "cluster_604" }       
+    { Territory.Default with faction = "boron"; cluster = "cluster_605" }      
+    { Territory.Default with faction = "boron"; cluster = "cluster_606" }      
+    { Territory.Default with faction = "boron"; cluster = "cluster_607" }       
+    { Territory.Default with faction = "boron"; cluster = "cluster_608" }       
+    { Territory.Default with faction = "boron"; cluster = "cluster_609" }       
 ]
+
+
+// Seems that most locations withing a cluster have the string 'cluster_xxx' in their name somewhere
+// Lets look for that.
+let getClusterFromLocation (location:string) =
+    // split the location string in to words separated by '_', and convert to lowercase 
+    let words = location.ToLower().Split('_') |> Array.toList
+
+    let rec loop (words: string list) =
+        match words with
+        | [] -> None            // Empty list
+        | _last :: [] -> None    // If theres only one word left, it can't be a cluster followed by ID
+        | "cluster" :: id :: _tail -> Some $"cluster_{id}" 
+        | _head :: tail -> loop tail
+    loop words
+
+
+let isLocationInCluster (location:string) (cluster:string) =
+    let locationCluster = getClusterFromLocation location|> Option.defaultValue "none"
+    let clusterName = getClusterFromLocation cluster |> Option.defaultValue "none"
+    locationCluster =? clusterName
+
+// Explicit check for whether we've defined a cluster in the mapping. For many factions, this will
+// return 'false' even if they do have presence in sectors in the cluster. For the more general case
+// you'll probably want to use 'doesFactionHavePresenceInLocationCluster' instead.
+let isFactionInCluster (faction: string) (cluster: string) =
+    let clusterName = getClusterFromLocation cluster |> Option.defaultValue "none"  // First step is that 'cluster' is often recorded as 'cluster_[id]_macro' - so extract the actual name
+    // First check is simply whether we have a cluster defined and it matches
+    territories |> List.exists (fun record -> record.faction = faction && record.cluster =? clusterName) 
+
 
 let findRecordsByFaction (faction: string) records =
     records |> List.filter (fun record -> record.faction = faction)
 
+// Some factions don't have sectors speecified, but instead have clusters.
+// This indicates that the faction will use their default game defined sectors.
+// Check for any sector for a faction that isn't ''.
+let isFactionSetToDefaultSectors (faction: string) =
+    not (territories |> List.exists (fun record -> record.sector <> "" && record.faction = faction))
+
 // This function returns whether a faction is ALLOWED to be in the sector as per our mod rules
 // For most factions this is a lot less than what is in the base game.
+// Normally the territories explitly list the sectors, but for some factions, like VIG, we
+// set sector to '', and List clusters instead. We'll have to check both.
 let isFactionInSector (faction: string) (sector: string) =
     territories |> List.exists (fun record -> record.faction = faction && record.sector =? sector)
+    ||  if isFactionSetToDefaultSectors faction then
+            // This faction has no sectors specified, so it means we're using faction defaults.
+            // In these cases, we've specified clusters instead, so we'll need to check those.
+            isFactionInCluster faction sector
+        else false
+
+
+// 'true' if the faction has any sort of presence in the cluster, even if it's just one sector.
+// Used for certain jobs, but not appropriate for stations, as those are assigned to a specific sector.
+let doesFactionHavePresenceInLocationCluster (faction: string) (location: string) =
+    isFactionInCluster faction location
+    || isFactionInSector faction location
+    || territories |> List.exists (
+        // Otherwise, lets try extract teh cluster from the sector for an approximate match.
+        fun record ->
+            let recordCluster = getClusterFromLocation record.sector |> Option.defaultValue "none"
+            record.faction = faction && isLocationInCluster record.sector location 
+    ) 
+
 
 // For some factions, like BORON, or TIDES, we want to leave along.
 // For Boron, their economy is crippled to start with, so we'll leave them alone.
@@ -113,11 +185,11 @@ let isFactionInSector (faction: string) (sector: string) =
 // more space for early missions, etc; but limited destroyers and capital ships. (apart from
 // one special ship, of course)
 let ignoreFaction (faction: string) =
-    territories |> List.exists (fun record -> record.faction = faction && record.sector = "")
+    territories |> List.exists (fun record -> record.faction = faction && record.sector = "none")
 
 // Using the data in sector.xml, which is represented by the X4Sector type, find the name of
 // the sector given the name of the zone. the zone is stored as a connection in the sector definition.
-let find_sector_from_zone (zone:string) (sectors:X4Sector.Macro list) =
+let findSectorFromZone (zone:string) (sectors:X4Sector.Macro list) =
     // Loops through the macros. Each macro will contain a sector. In that sector we'll find connections.
     // Each connection will have zero or more zones for use to check.
     let rec loop (sectors:X4Sector.Macro list) =
@@ -134,6 +206,9 @@ let find_sector_from_zone (zone:string) (sectors:X4Sector.Macro list) =
             | None -> loop rest
     loop sectors
 
+
+
 let dump_sectors (sectors:X4Sector.Macro list) =
     for sector in sectors do
         printfn "Macro.%s," (sector.Name.ToLower())
+

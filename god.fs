@@ -129,7 +129,7 @@ let processStation (station:X4WorldStart.Station) allSectors (xenonShipyard:XEle
 
     let sectorName = 
         match station.Location.Class with
-        | Some "zone" -> X4.Data.find_sector_from_zone (station.Location.Macro |> Option.defaultValue "") allSectors |> Option.defaultValue "none"
+        | Some "zone" -> X4.Data.findSectorFromZone (station.Location.Macro |> Option.defaultValue "") allSectors |> Option.defaultValue "none"
         | Some "sector" -> station.Location.Macro |> Option.defaultValue "none"
         | _ -> "none"
     let inTerritory = (X4.Data.isFactionInSector station.Owner sectorName) || (X4.Data.ignoreFaction station.Owner)

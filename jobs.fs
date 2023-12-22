@@ -149,6 +149,11 @@ let getJobTags (job:X4Job.Job) =
 
 let processJob (job:X4Job.Job) =
         
+    // THINGS TO CHECK:
+    // 1. is job.startactive false? Then ignore
+    // 2. is category.shipsize 'ship_xl' and tags 'military' or 'resupply' : set to 'preferbuild' 
+    // 3. is job.category.faction xenon? Then double quota
+
     let tags = getJobTags job
     match isStandardFactionJob job with
     | None ->
@@ -166,15 +171,35 @@ let processJob (job:X4Job.Job) =
             match job.Location.Class with
             | "sector" -> if (isFactionInSector faction location) then "Yes" else "No"
             | "zone" -> 
-                match find_sector_from_zone location allSectors with
+                match findSectorFromZone location allSectors with
                 | None -> "???" // Can this happen?
                 | Some sector -> if (isFactionInSector faction sector) then "Yes" else "No"
+            | "cluster" ->
+                if (doesFactionHavePresenceInLocationCluster faction location) then "Yes" else "No"
             | "galaxy" -> "Yes" // well, if the class is galaxy, then definitely.
             | _ -> 
                 printfn "  UNHANDLED LOCATION CLASS %s" job.Location.Class
                 "???"   // Unhandled location class.
  
-        printfn "PROCESSING JOB %52s, %20s/%-20s: InTerritory:%3s, class:%8s, location:%30s. Tags:%A" job.Id (getJobFactionName job) (getJobLocationFaction job |> Option.defaultValue "NONE") inTerritory job.Location.Class location tags
+        let shipSize = 
+            match job.Category with
+            | None -> "----"
+            | Some category -> Option.defaultValue "----" category.Size
+
+        let quota =
+            let quota = job.Quota
+            match quota.Galaxy, quota.Maxgalaxy, quota.Cluster, quota.Sector, quota.Wing with
+            | None, None, None, None, None -> "----"
+            | galaxy, maxGalaxy, cluster, sector, wing ->
+                let galaxy = Option.defaultValue 0 galaxy
+                let maxGalaxy = Option.defaultValue 0 maxGalaxy
+                let cluster = Option.defaultValue 0 cluster
+                let sector = Option.defaultValue 0 sector
+                let wing = Option.defaultValue 0 wing
+                sprintf "%3d/%-3d, %3d, %3d, %3d" galaxy maxGalaxy cluster sector wing
+
+        printfn "PROCESSING JOB %52s, %20s/%-20s: InTerritory:%3s, class:%8s, location:%30s. size:%8s : %s %A" 
+             job.Id (getJobFactionName job) (getJobLocationFaction job |> Option.defaultValue "NONE") inTerritory job.Location.Class location shipSize quota tags
         None
     // TODO = now what do we do with faction?
     // Some (job_replace_xml job.Id 42 (Some 42) (Some 3) (Some 1)) // test
