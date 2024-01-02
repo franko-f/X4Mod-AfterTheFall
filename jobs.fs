@@ -13,15 +13,17 @@ open FSharp.Data
 open X4.Data
 
 
-[<Literal>]
 let X4JobFileCore = X4UnpackedDataFolder + "/core/libraries/jobs.xml"
-let X4JobFileSplit = X4UnpackedDataFolder + "/split/libraries/jobs.xml"
 let X4JobFileTerran = X4UnpackedDataFolder + "/terran/libraries/jobs.xml"
 let X4JobFilePirate = X4UnpackedDataFolder + "/pirate/libraries/jobs.xml"
+[<Literal>] // split will be the template for normal job files, as the core game file doesn't use some tags (eg, 'preferbuilding')
+let X4JobFileSplit = X4UnpackedDataFolder + "/split/libraries/jobs.xml"
 [<Literal>] // We're going to use the boron as a template for diff/Add Job format file. Not all DLC do this.
 let X4JobFileBoron = X4UnpackedDataFolder + "/boron/libraries/jobs.xml"
 
-type X4Job = XmlProvider<X4JobFileCore>
+// two job file formats to parse:
+// One normal game XML file, and the other is a DIFF file with jobs inside an 'add' selector tag.
+type X4Job = XmlProvider<X4JobFileSplit>
 type X4JobMod = XmlProvider<X4JobFileBoron>  // Use this as a sample file so we can parse the DLC jobs files that use the DIFF format.
 
 // This string is the starting point for the output job we'll write.
@@ -49,7 +51,7 @@ let getJobsFromDiff (diff:X4JobMod.Add[]) =
 //      <quota galaxy="42" cluster="3"/>
 //   </quotas>
 // </replace>
-let job_replace_quota_xml (id:string) (galaxy:int) (maxGalaxy: Option<int>) (cluster:Option<int>) (sector:Option<int>) =
+let replaceQuotaXml (id:string) (galaxy:int) (maxGalaxy: Option<int>) (cluster:Option<int>) (sector:Option<int>) =
     let quotas = [
         yield new XAttribute("galaxy", galaxy)
         match maxGalaxy with Some x -> yield new XAttribute("maxgalaxy", x) | _ -> ()
@@ -71,7 +73,7 @@ let job_replace_quota_xml (id:string) (galaxy:int) (maxGalaxy: Option<int>) (clu
 // If I can easily select a handful of jobs programatically, it's easier than
 // taking every job and splitting it in two halves, one for prefer built,
 // the other with default spawn,
-let job_update_build_xml (id:string) (preferBuild:bool) (job:X4JobMod.Job)=
+let updateBuildXml (id:string) (preferBuild:bool) (job:X4JobMod.Job)=
     // If a job already has an environment, we want to pull it's existing settlings 
     // and create full replace line. Otherwise create a new setting as an 'add' line
     // instead of 'replace' line.
@@ -104,7 +106,7 @@ let job_update_build_xml (id:string) (preferBuild:bool) (job:X4JobMod.Job)=
 // USUALLY it seems to be dictated by the category.faction, but this doesn't always exist.
 // If not, best guess seems to be look at the ship specified, and last of all, which factions
 // territory the job will be located in. (a job can specify several, for pirates, for example)
-let getJobFaction (job:X4Job.Job) =
+let getFaction (job:X4Job.Job) =
     // Category should give us the faction
     match job.Category with
     | Some category -> Some category.Faction
@@ -120,7 +122,7 @@ let getJobFaction (job:X4Job.Job) =
 
 // kind of the opposite of getJobFaction - We discover in which factions sectors
 // this job is allowed. I assume it's associated with Galaxy class
-let getJobLocationFaction (job:X4Job.Job) =
+let getLocationFaction (job:X4Job.Job) =
     match job.Location.Faction with
     | None ->
         // if location faction is not specified, then we assume it's the same as 'category'
@@ -129,37 +131,97 @@ let getJobLocationFaction (job:X4Job.Job) =
         | Some category -> Some category.Faction
     | Some faction -> Some faction
 
-let getJobFactionName (job:X4Job.Job) =
-    getJobFaction job |> Option.defaultValue "NONE"
+let getFactionName (job:X4Job.Job) =
+    getFaction job |> Option.defaultValue "NONE"
+
+
+// IT looks like the 'faction' in a job location does not mean 'put it in this
+// factions territory', but instead also uses two other fields: 'relation' and
+// 'comparison' to determine exactly where the job can be spawned.
+// Basically, you compare the 'faction' name to 'relation' using 'comparison'
+// operator.
+// eg 'xenon' 'self' 'lt' seems to mean 'spawn in any territory less that is
+// less than 'xenon': ie, all factions except xenon.
+// faction="teladi" relation="ally" comparison="ge"  - any ally  (does 'ge'
+// mean ally or my own territory?)
+// faction="[teladi, ministry]" relation="self" comparison="exact" spawn
+// only in teladi or ministry sectors.
+// I see this sometimes:
+//    xenon (ge) ally
+// I'm guessing this means xenon or neutral sectors.
+// This function extracts that data for writing an informational line
+let getLocationFactionRelation (job:X4Job.Job) =
+    let faction = getLocationFaction job |> Option.defaultValue "NONE"
+    match job.Location.Comparison, job.Location.Relation with
+    | None, None -> sprintf "%s" faction
+    | Some comparison, Some relation -> sprintf "%s (%s) %s" faction comparison relation
+    | _ -> sprintf "%s" faction     // This case never happens in the current data as of DLC 4:Boron
 
 // Checks if it's a police job, or lacks a faction, or something else
 // that makes it sa non standard faction job that were not interested in.
 // Returns None if we should ignore it, or Some FactionName
-let isStandardFactionJob (job:X4Job.Job) =
-    let trafficJob = match job.Task with | None -> false | Some task -> task.Task = "masstraffic.generic" || task.Task = "masstraffic.police"
-    match trafficJob with 
-    | true -> None // Traffic jobs are special: station mass traffic.
-    | false -> getJobFaction job
+let isMinorTask (job:X4Job.Job) =
+    match job.Task with | None -> false | Some task -> task.Task = "masstraffic.generic" || task.Task = "masstraffic.police"
 
 let getJobTags (job:X4Job.Job) =
     match job.Category with
     | None -> []
-    | Some category ->Utilities.parseStringList category.Tags
+    | Some category -> Utilities.parseStringList category.Tags
 
 
-let processJob (job:X4Job.Job) =
-        
-    // THINGS TO CHECK:
-    // 1. is job.startactive false? Then ignore
-    // 2. is category.shipsize 'ship_xl' and tags 'military' or 'resupply' : set to 'preferbuild' 
-    // 3. is job.category.faction xenon? Then double quota
+// Subordinate jobs are things like escorts or 'subordinate' ships.
+// They're wings of fighters on carriers, etc. We want to ignore these,
+// as it would be easu to overtune the xenon by accidentally exponentially
+// increasing the number of ships in a fleet.
+let isSubordinate (job:X4Job.Job) =
+    match job.Modifiers with
+    | None -> false
+    | Some modifiers ->
+        match modifiers.Subordinate with
+        | None -> false
+        | Some subordinate -> true
 
+
+// Some jobs are flagged to start immediately when the game begins.
+// Other jobs only activate on a given trigger. We want to ignore those.
+// defaults to true when not set
+let isStartActive (job:X4Job.Job) = job.Startactive  |> Option.defaultValue true
+
+let sectorQuota (job:X4Job.Job) = job.Quota.Sector |> Option.defaultValue 0
+let galaxyQuota (job:X4Job.Job) = job.Quota.Galaxy |> Option.defaultValue 0
+let maxGalaxyQuota (job:X4Job.Job) = job.Quota.Maxgalaxy |> Option.defaultValue 0
+let clusterQuota (job:X4Job.Job) = job.Quota.Cluster |> Option.defaultValue 0
+let wingQuota (job:X4Job.Job) = job.Quota.Wing |> Option.defaultValue 0
+
+let getTagList (job:X4Job.Job) =
+    match job.Category with
+    | None -> []
+    | Some category -> Utilities.parseStringList category.Tags
+
+let isMilitaryJob (job:X4Job.Job) =
+    getTagList job |> List.exists (fun tag -> tag = "military")
+
+// 'preferbuilding' means that the ships won't be autospawned. In theory, they
+// will get queued to build at shipyards instead.
+let isPreferBuild (job:X4Job.Job) =
+    match job.Environment with
+    | None -> false
+    | Some environment -> environment.Preferbuilding |> Option.defaultValue false
+
+let buildAtShipyard (job:X4Job.Job) =
+    match job.Environment with
+    | None -> false
+    | Some environment -> environment.Buildatshipyard
+
+
+// Write some useful data about a job to the console.
+let printJobInfo (job:X4Job.Job) =
     let tags = getJobTags job
-    match isStandardFactionJob job with
-    | None ->
+    match isMinorTask job with
+    | true ->
         printfn "IGNORING JOB %s, tags: %A" job.Id tags
-        None
-    | Some faction ->
+    | false ->
+        let faction = getFaction job |> Option.defaultValue "NONE"  // Will never return "NONE" as we ignore minor tasks.
         // Extract data about the job, so we can summarise it.
         // Find out which jobs are outside of the factions sectors:
         let location = 
@@ -169,14 +231,14 @@ let processJob (job:X4Job.Job) =
 
         let inTerritory =
             match job.Location.Class with
-            | "sector" -> if (isFactionInSector faction location) then "Yes" else "No"
+            | "sector" -> if (isFactionInSector faction location) then "InTerritory" else ""
             | "zone" -> 
                 match findSectorFromZone location allSectors with
                 | None -> "???" // Can this happen?
-                | Some sector -> if (isFactionInSector faction sector) then "Yes" else "No"
+                | Some sector -> if (isFactionInSector faction sector) then "InTerritory" else "No"
             | "cluster" ->
-                if (doesFactionHavePresenceInLocationCluster faction location) then "Yes" else "No"
-            | "galaxy" -> "Yes" // well, if the class is galaxy, then definitely.
+                if (doesFactionHavePresenceInLocationCluster faction location) then "InTerritory" else "No"
+            | "galaxy" -> "InTerritory" // well, if the class is galaxy, then definitely.
             | _ -> 
                 printfn "  UNHANDLED LOCATION CLASS %s" job.Location.Class
                 "???"   // Unhandled location class.
@@ -187,23 +249,34 @@ let processJob (job:X4Job.Job) =
             | Some category -> Option.defaultValue "----" category.Size
 
         let quota =
-            let quota = job.Quota
-            match quota.Galaxy, quota.Maxgalaxy, quota.Cluster, quota.Sector, quota.Wing with
-            | None, None, None, None, None -> "----"
-            | galaxy, maxGalaxy, cluster, sector, wing ->
-                let galaxy = Option.defaultValue 0 galaxy
-                let maxGalaxy = Option.defaultValue 0 maxGalaxy
-                let cluster = Option.defaultValue 0 cluster
-                let sector = Option.defaultValue 0 sector
-                let wing = Option.defaultValue 0 wing
-                sprintf "%3d/%-3d, %3d, %3d, %3d" galaxy maxGalaxy cluster sector wing
+            let galaxy    = job |> galaxyQuota
+            let maxGalaxy = job |> maxGalaxyQuota
+            let sector    = job |> sectorQuota
+            let cluster   = job |> clusterQuota
+            let wing      = job |> wingQuota
+            sprintf "%3d/%-3d, %3d, %3d, %3d" galaxy maxGalaxy cluster sector wing
 
-        printfn "PROCESSING JOB %52s, %20s/%-20s: InTerritory:%3s, class:%8s, location:%30s. size:%8s : %s %A" 
-             job.Id (getJobFactionName job) (getJobLocationFaction job |> Option.defaultValue "NONE") inTerritory job.Location.Class location shipSize quota tags
-        None
+        let subordinate = match isSubordinate job with false -> "" | true -> "escort"
+        let preferBuild = match isPreferBuild job with false -> "" | true -> "preferbuild"
+        let startactive = match isStartActive job with false -> "inactive" | true -> ""
+
+        printfn "PROCESSING JOB %52s, %20s/%-32s: %12s, %8s / %-30s | %8s : %s %6s %8s %11s %A"
+             job.Id (getFactionName job) (getLocationFactionRelation job) inTerritory job.Location.Class location shipSize quota subordinate startactive preferBuild tags
+
+
+let processJob (job:X4Job.Job) =
+    // THINGS TO CHECK:
+    // 1. is job.startactive false? Then ignore
+    // 2. is category.shipsize 'ship_xl' and tags 'military' or 'resupply' : set to 'preferbuild'
+    // 3. is job.category.faction xenon? Then double quota for military jobs, and increase
+    //   economy jobs by 50%. (it will already be bad enough with increased military to start,
+    //   and the extra territory and stations, so don't accidentally turbocharge their economy
+    //   vs the crippled factions)
+    printJobInfo job
+
+    None
     // TODO = now what do we do with faction?
     // Some (job_replace_xml job.Id 42 (Some 42) (Some 3) (Some 1)) // test
-//    None 
 
 
 

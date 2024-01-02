@@ -10,6 +10,20 @@ up next:
    *** Need to find a zone for these moved items. Or create. Some won't need it. 
       Looks like I might be able to just specify a sector as location, and have it auto placed in sector.
 
+* Change the faction terratories again.
+To stop the new defense stations from blockading paths for the xenon, I think I should move the factions
+each to one or two sectors that are dead ends, and add resource to these zones.
+
+ZYA: Eleventh hour
+FREE FAMILIIES:  Heart of Acrimony II
+HAT: Hatikvahs choice III
+ARGON: Morning Star IV
+ANT: Antigone Memorial (add a tiny bit of methane)
+HOP: Cardinals Redress, Lasting Vengence
+PAR: Trinity Sactum VII
+TEL/MIN: Hewa's Twin V
+
+
  * Handle PRODUCT
   ** DLC slightly increases galaxy product module count with new product entries for existing factions: Remove these.
    *** We also have products allocated in 'friendly' sectors, such as PIO in Oort cloud.
