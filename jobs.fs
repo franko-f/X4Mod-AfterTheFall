@@ -11,6 +11,7 @@ open System.Xml.Linq
 open FSharp.Data
 //open X4MLParser.Utilities
 open X4.Data
+open X4.Utilities
 
 
 let X4JobFileCore = X4UnpackedDataFolder + "/core/libraries/jobs.xml"
@@ -104,8 +105,7 @@ let updateBuildXml (id:string) (preferBuild:bool) (job:X4JobMod.Job)=
 
 // Each job has a faction that it belongs to. The fields in the XML seem a bit unreliable
 // USUALLY it seems to be dictated by the category.faction, but this doesn't always exist.
-// If not, best guess seems to be look at the ship specified, and last of all, which factions
-// territory the job will be located in. (a job can specify several, for pirates, for example)
+// If not, best guess seems to be look at the ship specified in the job, and use it's faction.
 let getFaction (job:X4Job.Job) =
     // Category should give us the faction
     match job.Category with
@@ -114,11 +114,9 @@ let getFaction (job:X4Job.Job) =
         match job.Ship with
         | Some ship -> Some ship.Select.Faction 
         | None ->
-            printfn "  NO CATEGORY/FACTION FOR JOB %s - defaulting to location.faction" job.Id; 
-            // Location is really more about which factional territory the job is in.
-            match job.Location.Faction with
-            | None -> printfn "  NO FACTION FOR JOB %s" job.Id; None
-            | Some faction -> Some faction
+            // According to the debug dump, this never actually happens, but we'll Leave
+            // the code here in case it does in a future DLC
+            Some "NONE"
 
 // kind of the opposite of getJobFaction - We discover in which factions sectors
 // this job is allowed. I assume it's associated with Galaxy class
@@ -181,6 +179,17 @@ let isSubordinate (job:X4Job.Job) =
         | None -> false
         | Some subordinate -> true
 
+// Does this ship have subordinates? ie, is it a carrier? Destroyer group?
+let hasSubordinate (job:X4Job.Job) =
+    match job.Subordinates with
+    | None -> false
+    | Some subordinates -> true
+
+let subordinateIds (job:X4Job.Job) =
+    match job.Subordinates with
+    | None -> [|""|]
+    | Some subordinates ->
+        subordinates.Subordinates |> Array.map (fun subordinate -> subordinate.Job)
 
 // Some jobs are flagged to start immediately when the game begins.
 // Other jobs only activate on a given trigger. We want to ignore those.
@@ -214,9 +223,10 @@ let buildAtShipyard (job:X4Job.Job) =
     | Some environment -> environment.Buildatshipyard
 
 
+
 // Write some useful data about a job to the console.
 let printJobInfo (job:X4Job.Job) =
-    let tags = getJobTags job
+    let tags = getJobTags job |> String.concat ", "
     match isMinorTask job with
     | true ->
         printfn "IGNORING JOB %s, tags: %A" job.Id tags
@@ -256,22 +266,35 @@ let printJobInfo (job:X4Job.Job) =
             let wing      = job |> wingQuota
             sprintf "%3d/%-3d, %3d, %3d, %3d" galaxy maxGalaxy cluster sector wing
 
-        let subordinate = match isSubordinate job with false -> "" | true -> "escort"
+        let subordinate = isSubordinate job |> either "escort" ""
+        let subordinates = hasSubordinate job |> either "escorted" ""
+        let subordinatelist = subordinateIds job |> String.concat ", "
         let preferBuild = match isPreferBuild job with false -> "" | true -> "preferbuild"
         let startactive = match isStartActive job with false -> "inactive" | true -> ""
 
-        printfn "PROCESSING JOB %52s, %20s/%-32s: %12s, %8s / %-30s | %8s : %s %6s %8s %11s %A"
-             job.Id (getFactionName job) (getLocationFactionRelation job) inTerritory job.Location.Class location shipSize quota subordinate startactive preferBuild tags
+        printfn "PROCESSING JOB %52s, %20s/%-32s: %12s, %8s / %-30s | %8s : %s %8s %6s %8s %11s [%-44s] escorts: %s"
+             job.Id (getFactionName job) (getLocationFactionRelation job) inTerritory job.Location.Class location shipSize quota subordinates subordinate startactive preferBuild tags subordinatelist
 
 
 let processJob (job:X4Job.Job) =
     // THINGS TO CHECK:
     // 1. is job.startactive false? Then ignore
-    // 2. is category.shipsize 'ship_xl' and tags 'military' or 'resupply' : set to 'preferbuild'
-    // 3. is job.category.faction xenon? Then double quota for military jobs, and increase
-    //   economy jobs by 50%. (it will already be bad enough with increased military to start,
-    //   and the extra territory and stations, so don't accidentally turbocharge their economy
-    //   vs the crippled factions)
+    // 2. is faction non-xenon, category.shipsize 'ship_xl' and tags 'military'
+    //    or 'resupply'?
+    //    set to 'preferbuild' so that factions don't start with large military
+    //    ships at all
+    // 3. is job.category.faction xenon? Then increase quota for military jobs,
+    //   and increase economy jobs by a different factor. We have to be
+    //   carefuly. it will already be bad enough with increased military to
+    //   start, and the extra territory and stations, so don't accidentally
+    //   turbocharge their economy vs the crippled factions.
+    //   Need to consider only small tweaks. Lets try:
+    //   XL military jobs: 50% increase. round up
+    //   S & M military jobs: 70% increase. round up
+    //   Economy: 30% increase. round up
+    // 4. Is job subordinate? LEAVE ALONE.
+    // 4. Leave the following special plot ships alone:
+    //    boron_carrier_patrol_xl_flagship
     printJobInfo job
 
     None

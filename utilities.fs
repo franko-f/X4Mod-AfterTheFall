@@ -57,3 +57,5 @@ let parseStringList (input: string) : string list =
     let elements = trimmedInput.Split([|','|], StringSplitOptions.RemoveEmptyEntries) |> Array.toList
     List.map (fun (element:string) -> element.Trim('"', ' ')) elements
 
+// return either A or B, depending on the value of check
+let either a b check = match check with true -> a | false -> b
