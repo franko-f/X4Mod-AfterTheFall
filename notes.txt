@@ -54,3 +54,251 @@ From the x4-modding dischord:
 
 "preferbuilding forces it to be built instead of spawned
 rebuild will be rebuilt if ship is lost/order times out"
+
+
+
+CLUSTER/SECTOR LIST: ( from https://www.elite-games.ru/conference/viewtopic.php?t=65970&sid=96823fcacb876775848b81a913f4912c)
+
+1 cluster_01 - Big Exchange (Teladi Company) 
+1 cluster_01_sector_01 - Big Exchange I 
+1 cluster_01_sector_02 - Big Exchange III 
+1 cluster_01_sector_03 - Big Exchange IV 
+
+2 cluster_02 - 18 billion (Teladi Company) 
+
+3 cluster_03 - Memory of Profit IX (Teladi Company) 
+
+4 cluster_04 - Fortuna Napileo (Neutral) 
+4 cluster_04_sector_01 - Fortuna Napileo II 
+4 cluster_04_sector_02 - Fortuna Napileo VI 
+
+5 cluster_05 - Road to Profit (Teladi Company) 
+
+6 cluster_06 - Black Sun (Argon Federation) 
+6 cluster_06_sector_01 - Black Sun IV 
+6 cluster_06_sector_02 - Black sun V 
+
+7 cluster_07 - Limit of Influence (Argon Federation) 
+
+8 cluster_08 - Silent Witness I (Argon Federation) 
+
+9 cluster_09 - Rainbow Perspective (Teladi Company) 
+
+10 cluster_10 - Punishment of the Atheist (Holy Paranid Kingdom) 
+
+11 cluster_11 - Pontiff's Claim (Holy Order of the Pontiff) 
+
+12 cluster_12 - Descent (Holy Order of the Pontiff) 
+
+13 cluster_13 - Second Contact II (Republic of Antigone) 
+
+14 cluster_14 - Argon Prime (Argon Federation) 
+
+15 cluster_15 - Ianamus Zura (Teladi Company) 
+15 cluster_15_sector_01 - Ianamus Zura IV 
+15 cluster_15_sector_02 - Ianamus Zura VII 
+
+16 cluster_16 - Checkmate Ritsa # 451 (XENON) 
+
+17 cluster_17 - Matrix #9 (XENON) 
+
+18 cluster_18 - Trinity Sanctuary III (Holy Paranid Realm) 
+
+19 cluster_19 - Heva Twin (Teladi Company) 
+19 cluster_19_sector_01 - Heva Twin I 
+19 cluster_19_sector_02 - Heva Twin II 
+
+20 cluster_20 - Care companies (Teladi Company) 
+
+21 cluster_21 - Green scale (XENON) 
+21 cluster_21_sector_01 - Green scale I 
+21 cluster_21_sector_02 - Green scale VII 
+
+22 cluster_22 - Pious dreams II (Holy Paranid Kingdom) 
+
+23 cluster_23 - Sacred relic (Holy Paranid Kingdom) 
+
+24 cluster_24 - Holy Vision (Holy Order of the Pontiff)
+
+25 cluster_25 - Vicious Logic (XENON) 
+25 cluster_25_sector_01 - Vicious Logic I 
+25 cluster_25_sector_02 - Vicious Logic VII 
+
+26 cluster_26 - Misadventure of Atiya (XENON) 
+26 cluster_26_sector_01 - Misadventure of Atiya I 
+26 cluster_26_sector_02 - Misadventure of Atiya III 
+
+27 cluster_ 27 - Abyss (Republic of Antigone) 
+
+28 cluster_28 - Antigone Memorial (Republic of Antigone) 
+
+29 cluster_29 - Hatikva's Choice (Mixed) 
+29 cluster_29_sector_01 - Hatikva's Choice I (Hatikva Free League) 
+29 cluster_29_sector_02 - Hatikva's Choice III (Argon Federation) 
+
+30 cluster_30 - Morning Star III (Argon Federation) 
+
+31 cluster_31 - Edge Heretics (Neutral) 
+
+32 cluster_32 - Thark's Series (XENON) 
+32 cluster_32_sector_01 - Thark's Series XV 
+32 cluster_32_sector_02 - Thark's Series XVII 
+
+33 cluster_33 - Matrix #79B (XENON) 
+
+34 cluster_34 - Alpha Income Center (Teladi Company) 
+
+35 cluster_35 - Lingering Revenge (Sacred th Order of the Pontiff) 
+
+36 cluster_36 - Cardinal's Pardon (Holy Order of the Pontiff) 
+
+37 cluster_37 - Pious Dreams IV (Holy Paranid Kingdom) 
+
+38 cluster_38 - Pious Dreams XI (Holy Paranid Kingdom) 
+
+39 cluster_39 - Memory of Profit X (Teladi Company) 
+
+40 cluster_40 - Second contact VII (Republic of Antigone) 
+
+41 cluster_41 - Second contact XI (Republic of Antigone) 
+
+42 cluster_42 - Twin of Heva (Mixed) 
+42 cluster_42_sector_01 - Twin of Heva III (Teladi Company) 
+42 cluster_42_sector_02 - Twin of Heva IV (Neutral) 
+
+43 cluster_43 - Twin of Heva V ( Teladi Company) 
+
+44 cluster_44 - Silent Witness XI (Neutral) 
+
+45 cluster_45 - Silent Witness XII (Mixed) 
+
+46 cluster_46 - Morning Star IV (Argon Federation) 
+
+47 cluster_47 - Trinity Sanctuary VII (Holy Paranid Kingdom) 
+
+48 cluster_48 - Getsu Fune (Neutral) 
+
+49 cluster_49 - Borderland (Neutral) 
+
+50 cluster_50 - Turquoise Sea (Neutral)
+50 cluster_50_sector_01 - Turquoise Sea IX (Neutral) 
+50 cluster_50_sector_02 - Turquoise Sea X (Neutral) 
+
+51 cluster_400 - Decrepit Skies IV Valka Family (Zyart Patriarchy) 
+
+52 cluster_401 - Zhin Family (Zyart Patriarchy) 
+
+53 cluster_402 - Kritt Family (Zyart Patriarchy) rt) 
+
+54 cluster_403 - Decrepit skies V Fi Family (Zyart Patriarchy) 
+
+55 cluster_404 - Zyart Domain I (Zyart Patriarchy) 
+
+56 cluster_405 - Zyart Domain IV (Zyart Patriarchy) 
+
+57 cluster_406 - Zyart Domain X (Zyart Patriarchy) 
+
+58 cluster_407 - Tkr Family (Free Families) 
+
+59 cluster_408 - Death of Turuk (Free Families) 
+59 cluster_408_sector_02 - Death of Turuk II First Strike (Free Families) 
+59 cluster_408_sector_01 - Death of Turuk III (Free Families) 
+
+60 cluster_409 - Tarka Gorge XXIV (Free Families) 
+
+61 cluster_410 - Tarka Gorge XVI (Free Families) 
+
+62 cluster_411 - Focus of Bile II (Free Families) 
+
+63 cluster_412 - Tarka Gorge VIII (Free Families) 
+
+64 cluster_413 - Tarka Gorge IV The Fall of Tarka (XENON) 
+
+65 cluster_414 - Defiance Paradise (XENON) 
+
+66 cluster_415 - Matrix 598 (XENON) 
+
+67 cluster_416 - Guiding Star (Argon Federation) 
+67 cluster_416_sector_01 - Guiding Star V (Argon Federation) 
+67 cluster_416_sector_02 - Guiding Star VII (Argon Federation) 
+
+68 cluster_417 - Last Moment (Argon Federation) 
+
+69 cluster_418 - Nuut Family (Zyart Patriarchy) 
+
+70 cluster_419 - Free Market ( Teladi Company) 
+
+71 cluster_420 - Two Great Ones (Teladi Company) 
+
+72 cluster_421 - Fires of Destruction (Free Families) 
+
+73 cluster_422 - Decrepit Heavens X (Holy Paranid Kingdom) 
+
+74 cluster_423 - Robe of Fury (Holy Paranid Kingdom) 
+74 cluster_423_sector_01 - Robe of Fury IX (St. yatoe Paranid Kingdom) 
+74 cluster_423_sector_02 - Robe of Fury XII (Holy Paranid Kingdom) 
+
+75 cluster_424 - Pride of the Emperor (XENON) 
+75 cluster_424_sector_01 - Pride of the Emperor IV (XENON)
+75 cluster_424_sector_02 - Pride of the Emperor VI (XENON) 
+
+76 cluster_425 - Focus of gall I Cemetery (Neutral) 
+
+77 cluster_100 - Asteroid Belt (Earth Protectorate) - Asteroid Belt 
+
+78 cluster_101 - Mars (Earth Protectorate) - Mars 
+
+79 cluster_102 - Venus (Earth Protectorate) ) - Venus 
+
+80 cluster_104_sector_01 - Earth (Earth Protectorate) - Earth 
+cluster_104_sector_02 - Moon (Earth Protectorate) - The Moon 
+
+81 cluster_106 - Mercury (Earth Protectorate) - Mercury 
+
+82 cluster_107 - Jupiter (Earth Protectorate) - Jupiter 
+
+83 cluster_108_sector_01 - Saturn (Earth noah protectorate) - Saturn 
+Cluster_108_Sector_02 - Titan (earthly protectorate) - Titan 
+
+84 Cluster_109 - Uranus (Earth protector) - Uranus 
+
+85 Cluster_110 - Neptune (Earth Victor) - Neptune 
+
+86 ClUster_111 - Pluto (Earth Victor) - Pluto - Pluto - Pluto - Pluto 
+
+87 Cluster_112 - Spiro of the savage (xenon) - Savage Spur 
+cluster_112_sector_01 - Savage Spur I - Savage Spur I 
+cluster_112_sector_02 - Savage Spur II - Savage Spur II 
+
+88 cluster_113 - Segaris (Segaris Pioneers) - Segaris 
+
+89 cluster_114 - Gaian Prophecy (Segaris Pioneers) - Gaian Prophecy 
+
+90 cluster_115 - Brennan's Triumph (Peony) ers of Segaris) - Brennan's Triumph 
+
+91 cluster_116 - Oort Cloud (Earth Protectorate) - Oort Cloud 
+
+- At the start of the "Hand of the Patriarch" - sector "Fires of Victory" 
+
+FACTIONS: 
+
+Argon Federation 6, 7, 8, 14, 30, 46, 67, 68, 
+Holy Kingdom Paranid 10, 18, 22, 23, 37, 38, 47, 73, 74, 
+Holy Order of the Pontiff 11, 12, 24, 35, 36, 
+Free League Hatikva 
+Teladi Company 1, 2, 3, 5, 9, 15, 19 , 20, 34, 39, 43, 70, 71, 
+Republic of Antigone 13, 27, 28, 40, 41, 
+Xenon 16, 17, 21, 25, 26, 32, 33, 64, 65, 66, 75 
+HAAKI 
+Ministry of Finance 
+Pact of Scales 
+Free families 58, 59, 60, 61, 62, 63, 72, 
+Fallen families 
+Patriarchy Zyart 51, 52, 53, 54, 55, 56, 57, 69, 
+Yaqi
+Earth Protectorate 77, 78, 79, 80, 81, 82, 83, 84. 85, 86, 91 
+Segaris Pioneers 88, 89, 90 
+Xenon 87 
+
+Neutral Sectors 4, 31, 44, 48, 49, 50, 76 
+Mixed Sectors 29 , 42, 45,

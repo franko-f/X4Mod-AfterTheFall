@@ -4,12 +4,12 @@
 /// We try to only impact the *initial* job quotas, so that the AI factions can
 /// still build up their fleets using their shipyards and wharfs. The intent is
 /// to reduce strength at game start vs the xenon, not permanently cripple them.
+/// Much of the functionality is about extracting and printing useful data about the jobs.
 
 module X4.Jobs
 
 open System.Xml.Linq
 open FSharp.Data
-//open X4MLParser.Utilities
 open X4.Data
 open X4.Utilities
 
@@ -19,7 +19,7 @@ let X4JobFileTerran = X4UnpackedDataFolder + "/terran/libraries/jobs.xml"
 let X4JobFilePirate = X4UnpackedDataFolder + "/pirate/libraries/jobs.xml"
 [<Literal>] // split will be the template for normal job files, as the core game file doesn't use some tags (eg, 'preferbuilding')
 let X4JobFileSplit = X4UnpackedDataFolder + "/split/libraries/jobs.xml"
-[<Literal>] // We're going to use the boron as a template for diff/Add Job format file. Not all DLC do this.
+[<Literal>] // We're going to use the boron as a template for diff/Add Job format file. Not all DLC use this format (eg, split, above).
 let X4JobFileBoron = X4UnpackedDataFolder + "/boron/libraries/jobs.xml"
 
 // two job file formats to parse:
@@ -34,7 +34,6 @@ let X4JobModTemplate = "<?xml version=\"1.0\" encoding=\"utf-8\"?>
             </add>
         </diff>
     "
-
 
 
 let getJobsFromDiff (diff:X4JobMod.Add[]) = 
@@ -67,40 +66,63 @@ let replaceQuotaXml (id:string) (galaxy:int) (maxGalaxy: Option<int>) (cluster:O
     printfn "  REPLACING JOB QUOTA %s with \n %s" id (xml.ToString())
     xml 
 
+
+// Some jobs are given a specific sector or zone or cluster to spawn in. We want to move
+// these to their new sectors if the old sector is no longer set as their primary territory.
+// This function takes a job, and updates the 'location' property to the new sector.
+let moveJobToSectorXml (id:string) (sector:string) (job:X4Job.Job) =
+    // Load the existing location element
+    let location = job.Location.XElement
+    // Store the old macro value
+    let oldMacro = location.Attribute("macro").Value
+
+    // Update the class and macro attributes
+    location.SetAttributeValue("class", "sector")
+    location.SetAttributeValue("macro", sector)
+
+    // Replace the old location element with the updated one
+    let xml = new XElement("replace",
+        new XAttribute("sel", $"//jobs/job[@id='{id}']/location"),
+        location
+    )
+    printfn "  MOVING JOB %s from %s to sector %s " id oldMacro sector
+    xml
+
+
 // Build XML that will replace or add a 'prefer build' tag.
-// We want to force many jobs for factions to be built at shipyards, rather
-// than get spawned in automatically. Means the factions will start weaker,
-// but, given time, will build up their fleets.
-// If I can easily select a handful of jobs programatically, it's easier than
-// taking every job and splitting it in two halves, one for prefer built,
-// the other with default spawn,
-let updateBuildXml (id:string) (preferBuild:bool) (job:X4JobMod.Job)=
+// We want to force many jobs for factions to be built at shipyards, rather than get spawned in automatically.
+// Means the factions will start weaker, but, given time, will build up their fleets.
+// I had considered the approach of splutting every job in two, one with preferbuild, the other without.
+// this would spawn half of the ships, weakening the faction nicely, but it's more complicated and adds
+// a lot of jobs. Instead, we're jjst going to target L and XL ships, and resupply ships.
+let setPreferBuildXml (id:string) (job:X4JobMod.Job)=
     // If a job already has an environment, we want to pull it's existing settlings 
     // and create full replace line. Otherwise create a new setting as an 'add' line
     // instead of 'replace' line.
-    (*
+
+    let envSettings = [
+            new XAttribute("preferbuilding", true),
+            new XAttribute("buildatshipyard", true)
+        ]
+    let addXml = new XElement("add",
+        new XAttribute("sel", $"//jobs/job[@id='{id}']/environment"),
+        new XElement("environment", envSettings)
+    )
+    
     match job.Environment with
     | None ->
         // Just build an entire 'add' like for the option.
-        None
+        printfn "  ADDING JOB ENVIRONMENT AND BUILD SETTINGS %s preferbuild" id 
+        addXml
     | Some environment ->
         // extract excisting settings so we can replace them.
         // gernerate an array of our settings. If it already
         // prefers build, do nothing.
-        let settings = [
-            yield new XAttribute("preferbuilding", preferBuild)
-        ]
-        match environment.Buildatshipyard, environment.Preferbuilding with
-        | None, None -> None
-
-    let xml = new XElement("replace",
-        new XAttribute("sel", $"//jobs/job[@id='{id}']/preferbuild"),
-        new XElement("preferbuild", preferBuild)
-    )
-    printfn "  REPLACING JOB PREFERBUILD %s with \n %s" id (xml.ToString())
-    xml
-    *)
-    None 
+            printfn "  REPLACING JOB ENVIRONMENT BUILD SETTINGS %s " id 
+            new XElement("replace",
+                new XAttribute("sel", $"//jobs/job[@id='{id}']/environment"),
+                new XElement("environment", envSettings)
+            )
 
 
 // Each job has a faction that it belongs to. The fields in the XML seem a bit unreliable
@@ -118,6 +140,9 @@ let getFaction (job:X4Job.Job) =
             // the code here in case it does in a future DLC
             Some "NONE"
 
+let getFactionName (job:X4Job.Job) =
+    getFaction job |> Option.defaultValue "NONE"
+
 // kind of the opposite of getJobFaction - We discover in which factions sectors
 // this job is allowed. I assume it's associated with Galaxy class
 let getLocationFaction (job:X4Job.Job) =
@@ -129,21 +154,15 @@ let getLocationFaction (job:X4Job.Job) =
         | Some category -> Some category.Faction
     | Some faction -> Some faction
 
-let getFactionName (job:X4Job.Job) =
-    getFaction job |> Option.defaultValue "NONE"
 
-
-// IT looks like the 'faction' in a job location does not mean 'put it in this
-// factions territory', but instead also uses two other fields: 'relation' and
-// 'comparison' to determine exactly where the job can be spawned.
-// Basically, you compare the 'faction' name to 'relation' using 'comparison'
-// operator.
-// eg 'xenon' 'self' 'lt' seems to mean 'spawn in any territory less that is
-// less than 'xenon': ie, all factions except xenon.
-// faction="teladi" relation="ally" comparison="ge"  - any ally  (does 'ge'
-// mean ally or my own territory?)
-// faction="[teladi, ministry]" relation="self" comparison="exact" spawn
-// only in teladi or ministry sectors.
+// IT looks like the 'faction' in a job location does not mean 'put it in this factions territory',
+// but instead also uses two other fields: 'relation' and 'comparison' to determine exactly where
+// the job can be spawned.
+// Basically, you compare the 'faction' name to 'relation' using 'comparison' operator.
+// eg 'xenon' 'self' 'lt' seems to mean 'spawn in any territory less that is less than 'xenon':
+// ie, all factions except xenon.
+// faction="teladi" relation="ally" comparison="ge"  - any ally  (does 'ge' mean ally or my own territory?)
+// faction="[teladi, ministry]" relation="self" comparison="exact" spawn only in teladi or ministry sectors.
 // I see this sometimes:
 //    xenon (ge) ally
 // I'm guessing this means xenon or neutral sectors.
@@ -166,10 +185,9 @@ let getJobTags (job:X4Job.Job) =
     | None -> []
     | Some category -> Utilities.parseStringList category.Tags
 
-
 // Subordinate jobs are things like escorts or 'subordinate' ships.
 // They're wings of fighters on carriers, etc. We want to ignore these,
-// as it would be easu to overtune the xenon by accidentally exponentially
+// as it would be easy to overtune the xenon by accidentally exponentially
 // increasing the number of ships in a fleet.
 let isSubordinate (job:X4Job.Job) =
     match job.Modifiers with
@@ -222,11 +240,26 @@ let buildAtShipyard (job:X4Job.Job) =
     | None -> false
     | Some environment -> environment.Buildatshipyard
 
-
+let isJobInFactionTerritory (job:X4Job.Job) =
+    let faction = getFaction job |> Option.defaultValue "NONE"  // Will never return "NONE" as we ignore minor tasks.
+    let location = 
+        match job.Location.Macro with
+        | None -> "----"
+        | Some location -> location
+    
+    match job.Location.Class with
+    | "galaxy" -> true // well, if the class is galaxy, then definitely.
+    | "cluster" -> doesFactionHavePresenceInLocationCluster faction location
+    | "sector" -> if (isFactionInSector faction location) then true else false
+    | "zone" -> 
+        match findSectorFromZone location allSectors with
+        | None -> failwith ("unable to find sector zone belongs to : " + location)
+        | Some sector -> isFactionInSector faction sector
+    | _ -> failwith ("Unhandled location class in job: " + job.Location.Class)
 
 // Write some useful data about a job to the console.
 let printJobInfo (job:X4Job.Job) =
-    let tags = getJobTags job |> String.concat ", "
+    let tags = "[" + (getJobTags job |> String.concat ", ") + "]"
     match isMinorTask job with
     | true ->
         printfn "IGNORING JOB %s, tags: %A" job.Id tags
@@ -239,19 +272,7 @@ let printJobInfo (job:X4Job.Job) =
             | None -> "----"
             | Some location -> location
 
-        let inTerritory =
-            match job.Location.Class with
-            | "sector" -> if (isFactionInSector faction location) then "InTerritory" else ""
-            | "zone" -> 
-                match findSectorFromZone location allSectors with
-                | None -> "???" // Can this happen?
-                | Some sector -> if (isFactionInSector faction sector) then "InTerritory" else "No"
-            | "cluster" ->
-                if (doesFactionHavePresenceInLocationCluster faction location) then "InTerritory" else "No"
-            | "galaxy" -> "InTerritory" // well, if the class is galaxy, then definitely.
-            | _ -> 
-                printfn "  UNHANDLED LOCATION CLASS %s" job.Location.Class
-                "???"   // Unhandled location class.
+        let inTerritory = isJobInFactionTerritory job |> either "InTerritory" "No"
  
         let shipSize = 
             match job.Category with
@@ -270,12 +291,28 @@ let printJobInfo (job:X4Job.Job) =
         let subordinates = hasSubordinate job |> either "escorted" ""
         let subordinatelist = subordinateIds job |> String.concat ", "
         let preferBuild = match isPreferBuild job with false -> "" | true -> "preferbuild"
+        let shipyard = match buildAtShipyard job with false -> "" | true -> "shipyard"
         let startactive = match isStartActive job with false -> "inactive" | true -> ""
 
-        printfn "PROCESSING JOB %52s, %20s/%-32s: %12s, %8s / %-30s | %8s : %s %8s %6s %8s %11s [%-44s] escorts: %s"
-             job.Id (getFactionName job) (getLocationFactionRelation job) inTerritory job.Location.Class location shipSize quota subordinates subordinate startactive preferBuild tags subordinatelist
+        printfn "PROCESSING JOB %52s, %20s/%-32s: %12s, %8s / %-30s | %8s : %s %8s %6s %8s %8s %11s %-46s escorts: %s"
+             job.Id (getFactionName job) (getLocationFactionRelation job) inTerritory job.Location.Class location shipSize quota subordinates subordinate startactive preferBuild shipyard tags subordinatelist
 
 
+// Process a job, and return a new job if we want to change it.
+// We're going to do one of two things:
+// 1. For XENON, increase the job quotas so that they spawn more ships initially, and are overall
+//   more dangerous.
+// 2. For other factions, we can't just reduce job quotas, as this impact the max number of ships
+//  that they will *ever* build. Instead, we'll set the 'preferbuild' tag so that they have to
+//  build their ships at shipyards, rather than getting them spawned in automatically at game start
+//  So, this mean the factions will start weaker, but, given time, will build up their fleets if
+//  their economy is strong enough.
+//  We will also move some specific home sector patrol jobs to their new sectors, if the old
+//  sector is no longer set as their primary territory. This is especially important for things
+//  like carrier groups.
+//  We will only change military jobs for X and XL ships and resupply ships. They're going to be
+//  weak enough with reduced territories, mining, and stations impacting economy. We don't want to
+//  overdo it.
 let processJob (job:X4Job.Job) =
     // THINGS TO CHECK:
     // 1. is job.startactive false? Then ignore
@@ -293,8 +330,20 @@ let processJob (job:X4Job.Job) =
     //   S & M military jobs: 70% increase. round up
     //   Economy: 30% increase. round up
     // 4. Is job subordinate? LEAVE ALONE.
-    // 4. Leave the following special plot ships alone:
+    // 5. Leave the following special plot ships alone:
     //    boron_carrier_patrol_xl_flagship
+    // 6. Is the job active, and placed in a specific zone or sector? Then check, and move it to a new sector if necessary
+    //   (some we may leave so that the faction agressively tries push out it's borders.)
+    //     * argon_carrier_patrol_xl_center_galaxy in Zone002_Cluster_14_Sector001_macro        : Argon Prime       : Move to new core sector
+    //     * antigone_destroyer_patrol_l_border_sector in sector / Cluster_13_Sector001_macro   : Second Contact II
+    //     * ministry_destroyer_patrol_l_border2 in sector / Cluster_20_Sector001_macro         : Company Regard
+    //     * zyarth_carrier_patrol_xl_center in sector / Cluster_405_Sector001_macro            : Zyarth Domain IV  : Move to Family Nhutt?
+    //   leave: Will cause the AI to push towards those sectors with heavy fleets.
+    //     * zyarth_carrier_patrol_xl_familykritt
+    //     * terran_carrier_defence_xl_earth_heavy in sector / Cluster_104_Sector001_macro      : Earth
+    //     * terran_carrier_defence_xl_neptune_medium in sector / Cluster_110_Sector001_macro   : Neptune
+    //     * terran_battleship_patrol_xl_luna in  zone / zone005_cluster_104_sector002_macro    : Luna
+
     printJobInfo job
 
     None
