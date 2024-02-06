@@ -57,5 +57,7 @@ let parseStringList (input: string) : string list =
     let elements = trimmedInput.Split([|','|], StringSplitOptions.RemoveEmptyEntries) |> Array.toList
     List.map (fun (element:string) -> element.Trim('"', ' ')) elements
 
-// return either A or B, depending on the value of check
+// return either A or B, depending on the value of check. basically a simple ternary operator.
+// so I don't need to do full if then else. Unlike C-style '?', The check value is the last parameter,
+// so I can chain via |>
 let either a b check = match check with true -> a | false -> b

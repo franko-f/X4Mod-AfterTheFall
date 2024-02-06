@@ -1,10 +1,11 @@
 /// Parse the X4 jobs file from the core game and the DLCs.
-/// Process job quotas, reducing AI faction ships and fleets, but increase the
-/// Xenons ships and fleets.
-/// We try to only impact the *initial* job quotas, so that the AI factions can
-/// still build up their fleets using their shipyards and wharfs. The intent is
-/// to reduce strength at game start vs the xenon, not permanently cripple them.
-/// Much of the functionality is about extracting and printing useful data about the jobs.
+/// Process job quotas, reducing AI faction ships and fleets, but increase the  Xenons ships and fleets.
+/// We try to only impact the *initial* job quotas, so that the AI factions can still build up their
+/// fleets using their shipyards and wharfs. The intent is to reduce strength at game start vs the xenon,
+/// not permanently cripple them.
+///
+/// Much of the functionality is about extracting and printing useful data about the jobs, so that we
+/// can understand the massive amount of data relating to factions and their jobs across all the DLCs.
 
 module X4.Jobs
 
@@ -36,12 +37,25 @@ let X4JobModTemplate = "<?xml version=\"1.0\" encoding=\"utf-8\"?>
     "
 
 
+// Since we're dealing with different job file formats between the base game and different mods, we need
+// to convert them all to one canonical format for processing. We cheat a little, knowing that the type
+// provider just puts a loose wrapping on top of the underlying XElement. IT's not strictly typesafe
+// but it's safe within the scope of the data we're reading, and saves us writing something more complicated.
 let getJobsFromDiff (diff:X4JobMod.Add[]) = 
     let jobsAdd = Array.filter (fun (add:X4JobMod.Add) -> add.Sel = "/jobs") diff
     [|  for jobs in jobsAdd do
             for job in jobs.Jobs do
                 yield new X4Job.Job(job.XElement)
     |]
+
+
+
+// Quotas may or may not exist. This is an easy function to multiply a quota if it's Some quota,
+// or just return None if it's None. ie; a Option aware multiplier. Unlike normal integer math, This rounds UP.
+let maybeMultiply (quota:Option<int>) (multiplier:float) =
+    match quota with
+    | Some q -> Some (int(ceil (float q * multiplier)))
+    | None -> None
 
 
 // Construct an XML element representing a 'replace' tag that will replace the quotas for a given job.
@@ -95,34 +109,22 @@ let moveJobToSectorXml (id:string) (sector:string) (job:X4Job.Job) =
 // I had considered the approach of splutting every job in two, one with preferbuild, the other without.
 // this would spawn half of the ships, weakening the faction nicely, but it's more complicated and adds
 // a lot of jobs. Instead, we're jjst going to target L and XL ships, and resupply ships.
-let setPreferBuildXml (id:string) (job:X4JobMod.Job)=
-    // If a job already has an environment, we want to pull it's existing settlings 
-    // and create full replace line. Otherwise create a new setting as an 'add' line
-    // instead of 'replace' line.
-
-    let envSettings = [
+let setPreferBuildXml (job:X4Job.Job)=
+    let environment = new XElement("environment", [
             new XAttribute("preferbuilding", true),
             new XAttribute("buildatshipyard", true)
-        ]
-    let addXml = new XElement("add",
-        new XAttribute("sel", $"//jobs/job[@id='{id}']/environment"),
-        new XElement("environment", envSettings)
-    )
+        ])
+    let selector = new XAttribute("sel", $"//jobs/job[@id='{job.Id}']/environment")
     
     match job.Environment with
     | None ->
-        // Just build an entire 'add' like for the option.
-        printfn "  ADDING JOB ENVIRONMENT AND BUILD SETTINGS %s preferbuild" id 
-        addXml
+        // no existing line build an entire xml diff 'add' for the option.
+        printfn "  ADDING JOB ENVIRONMENT AND BUILD SETTINGS %s preferbuild" job.Id
+        new XElement("add", selector, environment)
     | Some environment ->
-        // extract excisting settings so we can replace them.
-        // gernerate an array of our settings. If it already
-        // prefers build, do nothing.
-            printfn "  REPLACING JOB ENVIRONMENT BUILD SETTINGS %s " id 
-            new XElement("replace",
-                new XAttribute("sel", $"//jobs/job[@id='{id}']/environment"),
-                new XElement("environment", envSettings)
-            )
+        // There's an existing environment, so we'll build and xml REPLACE based on the existing settings.
+        printfn "  REPLACING JOB ENVIRONMENT BUILD SETTINGS %s " job.Id 
+        new XElement("replace", selector, environment)
 
 
 // Each job has a faction that it belongs to. The fields in the XML seem a bit unreliable
@@ -131,17 +133,18 @@ let setPreferBuildXml (id:string) (job:X4JobMod.Job)=
 let getFaction (job:X4Job.Job) =
     // Category should give us the faction
     match job.Category with
-    | Some category -> Some category.Faction
+    | Some category -> category.Faction
     | None ->
         match job.Ship with
-        | Some ship -> Some ship.Select.Faction 
+        | Some ship -> ship.Select.Faction 
         | None ->
             // According to the debug dump, this never actually happens, but we'll Leave
             // the code here in case it does in a future DLC
-            Some "NONE"
+            printfn "  WARNING!!!!! NO FACTION FOR JOB %s" job.Id
+            "NONE"
 
-let getFactionName (job:X4Job.Job) =
-    getFaction job |> Option.defaultValue "NONE"
+// Does this job belong to a specific faction?
+let isFaction(job, faction) = getFaction job = faction
 
 // kind of the opposite of getJobFaction - We discover in which factions sectors
 // this job is allowed. I assume it's associated with Galaxy class
@@ -241,7 +244,7 @@ let buildAtShipyard (job:X4Job.Job) =
     | Some environment -> environment.Buildatshipyard
 
 let isJobInFactionTerritory (job:X4Job.Job) =
-    let faction = getFaction job |> Option.defaultValue "NONE"  // Will never return "NONE" as we ignore minor tasks.
+    let faction = getFaction job  // Will never return "NONE" as we ignore minor tasks.
     let location = 
         match job.Location.Macro with
         | None -> "----"
@@ -257,14 +260,17 @@ let isJobInFactionTerritory (job:X4Job.Job) =
         | Some sector -> isFactionInSector faction sector
     | _ -> failwith ("Unhandled location class in job: " + job.Location.Class)
 
-// Write some useful data about a job to the console.
+
+// Write some useful data about a job to the console. We use this purely to understand what jobs are
+// doing, so we can make meaningful choices on how to change the economy and balance.
+// This is not part of the mod generation, instead it helps us write the mod.
 let printJobInfo (job:X4Job.Job) =
     let tags = "[" + (getJobTags job |> String.concat ", ") + "]"
     match isMinorTask job with
     | true ->
         printfn "IGNORING JOB %s, tags: %A" job.Id tags
     | false ->
-        let faction = getFaction job |> Option.defaultValue "NONE"  // Will never return "NONE" as we ignore minor tasks.
+        let faction = getFaction job
         // Extract data about the job, so we can summarise it.
         // Find out which jobs are outside of the factions sectors:
         let location = 
@@ -295,66 +301,87 @@ let printJobInfo (job:X4Job.Job) =
         let startactive = match isStartActive job with false -> "inactive" | true -> ""
 
         printfn "PROCESSING JOB %52s, %20s/%-32s: %12s, %8s / %-30s | %8s : %s %8s %6s %8s %8s %11s %-46s escorts: %s"
-             job.Id (getFactionName job) (getLocationFactionRelation job) inTerritory job.Location.Class location shipSize quota subordinates subordinate startactive preferBuild shipyard tags subordinatelist
+             job.Id (getFaction job) (getLocationFactionRelation job) inTerritory job.Location.Class location shipSize quota subordinates subordinate startactive preferBuild shipyard tags subordinatelist
 
 
-// Process a job, and return a new job if we want to change it.
-// We're going to do one of two things:
-// 1. For XENON, increase the job quotas so that they spawn more ships initially, and are overall
-//   more dangerous.
+// Print out the number of jobs in each set of category 'tags'. Again, not part of the mod generation,
+// but used as we write the mod to understand the massive amounts of data.
+let printJobCategoryCount allJobs =
+    let categoryTags =
+        allJobs |> List.fold (
+                        fun (tags:Map<string list, int>) (job:X4Job.Job) ->
+                            let jobtags = getJobTags job
+                            match Map.tryFind jobtags tags with
+                            | None -> Map.add jobtags 1 tags
+                            | Some count -> Map.add jobtags (count + 1) tags
+                    ) Map.empty
+    // write out the tags and counts
+    printfn "JOB CATEGORIES:"
+    categoryTags |> Map.iter (fun tag count -> printfn "  %A: %d" tag count)
+
+
+// 'Jobs' impacts the ships that are spawned. We're going to do one of two things:
+// 1. For XENON, increase the quotas for their ships, military and civilian.
+// We'll increase the military more than the economy, so that the Xenon start with strong
+// coverage across the galaxy, but not completely overwelming economy. We want to make the game
+// a bit harder, but not too much. And in a long term game, it's the economy that matters.
+// For military ships, we'll tune differently based on size. Increase X and L ships by a little,
+// but S & M by a lot: Lets have plenty small patrols causing chaos, but only a few big station busters.
+//
 // 2. For other factions, we can't just reduce job quotas, as this impact the max number of ships
-//  that they will *ever* build. Instead, we'll set the 'preferbuild' tag so that they have to
-//  build their ships at shipyards, rather than getting them spawned in automatically at game start
-//  So, this mean the factions will start weaker, but, given time, will build up their fleets if
-//  their economy is strong enough.
-//  We will also move some specific home sector patrol jobs to their new sectors, if the old
-//  sector is no longer set as their primary territory. This is especially important for things
-//  like carrier groups.
-//  We will only change military jobs for X and XL ships and resupply ships. They're going to be
-//  weak enough with reduced territories, mining, and stations impacting economy. We don't want to
-//  overdo it.
+// that they will *ever* build. Instead, we'll set the 'preferbuild' tag so that they have to
+// build their ships at shipyards, rather than getting them spawned in automatically at game start
+// So, this mean the factions will start weaker, but, given time, will build up their fleets if
+// their economy is strong enough.
+// We will only change military jobs, and just for X and XL ships and resupply ships. Factions will be
+// weak enough already with reduced territories, mining, and stations impacting economy. We don't
+// want to overdo it by reducing starting economy ships too.
+//
+// Originally, I was going to move certain L/XL fleets from their old sectors in to their
+// new sectors, but I've decided to leave them where they are. I want to encourage the AI
+// to be a bit agressive and try reclaim their territory once they build these fleets.
+// The station gate defense should be enough to keep the xenon at bay without these.
 let processJob (job:X4Job.Job) =
-    // THINGS TO CHECK:
-    // 1. is job.startactive false? Then ignore
-    // 2. is faction non-xenon, category.shipsize 'ship_xl' and tags 'military'
-    //    or 'resupply'?
-    //    set to 'preferbuild' so that factions don't start with large military
-    //    ships at all
-    // 3. is job.category.faction xenon? Then increase quota for military jobs,
-    //   and increase economy jobs by a different factor. We have to be
-    //   carefuly. it will already be bad enough with increased military to
-    //   start, and the extra territory and stations, so don't accidentally
-    //   turbocharge their economy vs the crippled factions.
-    //   Need to consider only small tweaks. Lets try:
-    //   XL military jobs: 50% increase. round up
-    //   S & M military jobs: 70% increase. round up
-    //   Economy: 30% increase. round up
-    // 4. Is job subordinate? LEAVE ALONE.
-    // 5. Leave the following special plot ships alone:
-    //    boron_carrier_patrol_xl_flagship
-    // 6. Is the job active, and placed in a specific zone or sector? Then check, and move it to a new sector if necessary
-    //   (some we may leave so that the faction agressively tries push out it's borders.)
-    //     * argon_carrier_patrol_xl_center_galaxy in Zone002_Cluster_14_Sector001_macro        : Argon Prime       : Move to new core sector
-    //     * antigone_destroyer_patrol_l_border_sector in sector / Cluster_13_Sector001_macro   : Second Contact II
-    //     * ministry_destroyer_patrol_l_border2 in sector / Cluster_20_Sector001_macro         : Company Regard
-    //     * zyarth_carrier_patrol_xl_center in sector / Cluster_405_Sector001_macro            : Zyarth Domain IV  : Move to Family Nhutt?
-    //   leave: Will cause the AI to push towards those sectors with heavy fleets.
-    //     * zyarth_carrier_patrol_xl_familykritt
-    //     * terran_carrier_defence_xl_earth_heavy in sector / Cluster_104_Sector001_macro      : Earth
-    //     * terran_carrier_defence_xl_neptune_medium in sector / Cluster_110_Sector001_macro   : Neptune
-    //     * terran_battleship_patrol_xl_luna in  zone / zone005_cluster_104_sector002_macro    : Luna
-
     printJobInfo job
+    let size = match job.Category with | None -> "NONE" | Some category -> Option.defaultValue "NONE" category.Size
 
-    None
-    // TODO = now what do we do with faction?
-    // Some (job_replace_xml job.Id 42 (Some 42) (Some 3) (Some 1)) // test
+    if not (isStartActive job) then None        // Any job that is not active at game start can be ignored. These are usually plot/story progress related.
+    else if isSubordinate job then None         // these are subordinate/escort ships. Leave them alone, as they won't spawn unless their parent does.
+    else if isMinorTask job then None           // These are minor tasks, like police or generic mass traffic. Leave them alone.
+    else if isFaction(job, "xenon") then
+        // XENON: Determine the quota mupliplier based on ship size and military/civilian
+        let multiplier =
+            match isMilitaryJob job, size with
+            | true, "ship_xl" -> 1.5    // battleships and carriers
+            | true, "ship_l"  -> 1.5    // destroyers: of which Xenon should have none in vanilla
+            | true, _         -> 1.7    // S and M military ships
+            | false, _        -> 1.3    // s & m civilian ships
 
+        // Calculate the new quotas.
+        let galaxyQuota = maybeMultiply job.Quota.Galaxy multiplier
+        let maxGalaxyQuota = maybeMultiply job.Quota.Maxgalaxy multiplier
+        let clusterQuota = maybeMultiply job.Quota.Cluster multiplier
+        let sectorQuota = maybeMultiply job.Quota.Sector multiplier
+
+        // We only need to create a replace tag if we're actually changing something. Check if any quotas are 'Some x'.
+        if List.exists Option.isSome [galaxyQuota; maxGalaxyQuota; clusterQuota; sectorQuota] then
+            Some  (replaceQuotaXml job.Id (galaxyQuota |> Option.defaultValue 0) maxGalaxyQuota clusterQuota sectorQuota)
+        else None
+
+    // Handle the NON-XENON factions
+    else if not (isMilitaryJob job) then None   // Leave the economy alone.
+    else if List.contains size ["ship_s"; "ship_m"] then None  // We don't care about small ships, just the big ones:
+    else
+        // So now, all we'll do is set the 'preferbuild' tag to make sure the factions start the game
+        // without their big cvarrier and destroyer fleets, and must build them slowly as the game progresses.
+        if not (isPreferBuild job) then Some (setPreferBuildXml job)
+        else None
 
 
 // Kick off the work of generating the job file for the mod, and write out the
 // XML diff to the given filename
 let generate_job_file (filename:string) =
+    // Load all the job data from the core game and expansions, and merge in to one list.
     let X4JobsCore = X4Job.Load(X4JobFileCore)
     let X4JobsSplit = X4Job.Load(X4JobFileSplit)     // Split don't use a diff file.
     let X4JobsPirate = X4Job.Load(X4JobFilePirate)  // same for pirate.
@@ -369,32 +396,20 @@ let generate_job_file (filename:string) =
                     ]
 
     // lets find out some interesting things about jobs:
-    let categoryTags =
-        allJobs |> List.fold (
-                        fun (tags:Map<string list, int>) (job:X4Job.Job) -> 
-                            let jobtags = getJobTags job
-                            match Map.tryFind jobtags tags with
-                            | None -> Map.add jobtags 1 tags
-                            | Some count -> Map.add jobtags (count + 1) tags
-                    ) Map.empty
-    // write out the tags and counts
-    printfn "JOB CATEGORIES:"
-    categoryTags |> Map.iter (fun tag count -> printfn "  %A: %d" tag count)
+    printJobCategoryCount allJobs
 
-
-    let jobCount = allJobs.Length
-
-    let replaceJobs = [|
+    // Now process all the jobs, getting a list containing only the changes that we're making.
+    let jobDiff = [|
         for job in allJobs do
-            match processJob job with Some job -> yield job | _ -> ()
+            match processJob job with Some xmldiff -> yield xmldiff | _ -> ()
     |]
 
-
+    // Prepare to write out the XML for the mod. Start by creating an XML DIFF object from the template
     let outJobFile = X4JobMod.Parse(X4JobModTemplate)
-        // Add out 'remove' tags to the end of the diff block.
     let diff = outJobFile.XElement // the root element is actually the 'diff' tag.
-    let changes = Array.concat [replaceJobs]
-    [| for element in changes do 
+
+    // Now add out job changes, one by one, to the mutable diff element
+    [| for element in jobDiff do
         diff.Add(element)
         diff.Add( new XText("\n")) // Add a newline after each element so the output is readible
     |] |> ignore
