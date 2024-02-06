@@ -1,7 +1,4 @@
 in progress:
-* change fleets
-    * increase #'s in some xenon fleets, both current and limits
-    * change faction fleets to reduce numbers in certain fleets so that they start by being built at stations, rather than spawned at game start
 up next:
 * move faction shipyards to their new sector; and replace old one with xenon
 * add bastion
@@ -33,24 +30,6 @@ TEL/MIN: Hewa's Twin V
         eg:     <location class="sector" macro="cluster_116_sector001_macro" relation="self" comparison="ge" />
         Also we have things like Xenon factories assigned to specific sectors: do NOT increase these limits.
     * add 'matchextension="false"' to location tags. - Is this needed?
-
-* FLEETS: 
- Fleets are handled in the JOBS file. It sets both initial game start fleets, and the
- max number of fleets the game will gradually order if required by faction logic.
- These quotas are 'galaxy' and 'maxgalaxy' respectively.
- So we want to INCREASE both for xenon, and DECREASE only 'galaxy' for other factions.
- We want them to start weaker than normal, but still have same max.
- see  https://forum.egosoft.com/viewtopic.php?t=444909
-
-Many jobs have only galaxy quota set, not maxGalaxy. Does this mean max=quota? Or no limit?
-We may need to add a maxgalaxy in these cases to set to the original quota.
-
-'wings' jobs only have a single 'quota' line. We should ignore these.
-
-* Reduce faction starting fleet sizes
-    * Military
-    * Civilian
-* Increase XENON starting fleet size
 
 
 
@@ -121,4 +100,22 @@ We may need to add a maxgalaxy in these cases to set to the original quota.
     * Pirate
         * We're not changing zones for this faction. Large easy starting zone
         * Add bastion gate to entry system.
+
+* FLEETS: 
+ Fleets are handled in the JOBS file. It sets both initial game start fleets, and the
+ max number of fleets the game will gradually order if required by faction logic.
+ These quotas are 'galaxy' and 'maxgalaxy' respectively.
+ So we want to INCREASE both for xenon, and DECREASE only 'galaxy' for other factions.
+ We want them to start weaker than normal, but still have same max.
+ see  https://forum.egosoft.com/viewtopic.php?t=444909
+
+Many jobs have only galaxy quota set, not maxGalaxy. Does this mean max=quota? Or no limit?
+We may need to add a maxgalaxy in these cases to set to the original quota.
+
+'wings' jobs only have a single 'quota' line. We should ignore these.
+
+* Reduce faction starting fleet sizes
+    * Military
+    * Civilian
+* Increase XENON starting fleet size
 
