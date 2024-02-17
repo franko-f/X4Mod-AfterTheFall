@@ -6,6 +6,7 @@
 module X4.Data
 
 open FSharp.Data
+open X4.Utilities
 
 [<Literal>]
 let X4UnpackedDataFolder = __SOURCE_DIRECTORY__ + "/X4_unpacked_data"
@@ -22,8 +23,16 @@ let X4SectorFileTerran = X4UnpackedDataFolder + "/terran/maps/xu_ep2_universe/dl
 let X4SectorFilePirate = X4UnpackedDataFolder + "/pirate/maps/xu_ep2_universe/dlc_pirate_sectors.xml" 
 let X4SectorFileBoron = X4UnpackedDataFolder + "/boron/maps/xu_ep2_universe/dlc_boron_sectors.xml"   
 
-type X4Sector = XmlProvider<X4SectorFileCore>
+[<Literal>]
+let X4ZoneFileCore = X4UnpackedDataFolder + "/core/maps/xu_ep2_universe/zones.xml"
+let X4ZoneFileSplit = X4UnpackedDataFolder + "/split/maps/xu_ep2_universe/dlc4_zones.xml"
+let X4ZoneFileTerran = X4UnpackedDataFolder + "/terran/maps/xu_ep2_universe/dlc_terran_zones.xml"
+let X4ZoneFilePirate = X4UnpackedDataFolder + "/pirate/maps/xu_ep2_universe/dlc_pirate_zones.xml"
+let X4ZoneFileBoron = X4UnpackedDataFolder + "/boron/maps/xu_ep2_universe/dlc_boron_zones.xml"
 
+
+type X4Sector = XmlProvider<X4SectorFileCore>
+type X4Zone = XmlProvider<X4ZoneFileCore>
 
 // Load the sector data from each individual sector file. We'll combine them in to one list.
 let allSectors = 
@@ -40,6 +49,25 @@ let allSectors =
                     X4SectorBoron.Macros; 
                 ]
 
+let allZones =
+    let X4ZoneCore = X4Zone.Load(X4ZoneFileCore)
+    let X4ZoneSplit = X4Zone.Load(X4ZoneFileSplit)
+    let X4ZoneTerran = X4Zone.Load(X4ZoneFileTerran)
+    let X4ZonePirate = X4Zone.Load(X4ZoneFilePirate)
+    let X4ZoneBoron = X4Zone.Load(X4ZoneFileBoron)
+    Array.toList <| Array.concat [
+                    X4ZoneCore.Macros;
+                    X4ZoneSplit.Macros;
+                    X4ZoneTerran.Macros;
+                    X4ZonePirate.Macros;
+                    X4ZoneBoron.Macros;
+                ]
+
+// Gates are linked to a zone by using one of the following as a reference. So by looking
+// for these references in the zone file, we can find the gates in a zone.
+// I don't think we actually need this. More investigation seems to suggest that a gate is
+// identified by a zone connection ref="gates" instead. If correct, we can remove this.
+let gateMacros = ["props_gates_orb_accelerator_01_macro", "props_gates_anc_gate_macro", "props_ter_gate_01_macro"]
 
 // Factions will be limited to only a sector or two of valid territory.
 // We'll put their defence stations and shipyards in these sectors. The game

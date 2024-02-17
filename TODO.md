@@ -1,4 +1,10 @@
 in progress:
+* Find unsafe gates to place defence stations next to.
+    * extract all gates and their data.
+    * find gates in territory
+    * determine which gates are safe and which are not
+    * place 3 race-specific defence stations around gate.
+
 up next:
 * move faction shipyards to their new sector; and replace old one with xenon
 * add bastion
@@ -32,12 +38,15 @@ TEL/MIN: Hewa's Twin V
     * add 'matchextension="false"' to location tags. - Is this needed?
 
 
-
 * Systems:
     * Place GATE DEFENCE station
         * Each faction needs a strong station guarding it's gate.
         * check ZONES.xml file: seems to define zones for gates, and their connections
-
+            * confirmed. More info at the bottom of page here:
+            https://github.com/enenra/x4modding/wiki/Universe-Creation#advanced---gates
+            * connection field 'ref="gates"' represents a connection to a gate.
+        * Write algorithm that uses valid sectors for race to determine where to place gates.
+            * advanced: Should I track paths of gates to determine whether the sector on the other side is a safe sector or not? Then places gates only on unsafe.
  
 ## Optional/Maybe do/other ideas:
 * Add more derelict ships around
@@ -59,7 +68,7 @@ TEL/MIN: Hewa's Twin V
         So we might need to either override this to place in another faction, or create a 'safe'
         ownerless sector somewhere for them.
         This actually is probably good: 
-        WE SHOULD CREATE AT LEAST ONE 'SAFE' OWNERLESS FOR THE PLAYER!
+        WE SHOULD LEAVE AT LEAST ONE 'SAFE' OWNERLESS FOR THE PLAYER!
 
 
 

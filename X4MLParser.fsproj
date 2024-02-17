@@ -10,6 +10,7 @@
     <Content Include="mod_templates\god.xml" />
     <Compile Include="utilities.fs" />
     <Compile Include="data.fs" />
+    <Compile Include="gates.fs" />
     <Compile Include="jobs.fs" />
     <Compile Include="god.fs" />
     <Content Include="mod_templates\macros.xml" />
