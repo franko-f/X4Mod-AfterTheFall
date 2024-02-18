@@ -19,16 +19,26 @@ up next:
 * Change the faction terratories again.
 To stop the new defense stations from blockading paths for the xenon, I think I should move the factions
 each to one or two sectors that are dead ends, and add resource to these zones.
+Note 2024/02/18: Turns out that the instructions I was following for gates applies only to, well, gates.
+The superhighways and accellerators that take you between sectors in a cluster do NOT work like this,
+and do not have configuration in the 'connections' file. They seem to be defined as a connection in the
+ *clusters* file, with connection ref "sechighways"
+ Which kind of leads to a lore issue: Clusters seem to be a system, so easy to traverse. Maybe I should be
+ limiting faction to whole clusters, rather than only some sectors in a cluster. Two reasons. Lore, otherwise
+ it's easy for Xenon to ignore gates. and b) I don't need to process even more data to figure out superhighways.
 
-ZYA: Eleventh hour
-FREE FAMILIIES:  Heart of Acrimony II
+Here are some ideas, but maybe it's preferrable to find places I can give them TWO clusters, for more starting variety.
+ZYA: Eleventh hour    OR Guiding Star V & VII
+FREE FAMILIIES:  Heart of Acrimony II, Tharka Ravine XVI
 HAT: Hatikvahs choice III
 ARGON: Morning Star IV
 ANT: Antigone Memorial (add a tiny bit of methane)
 HOP: Cardinals Redress, Lasting Vengence
 PAR: Trinity Sactum VII
-TEL/MIN: Hewa's Twin V
+TEL/MIN: Hewa's Twin V, III
 
+VIG: Lets actually take Windfall I away from them, and limit them to Wind 1&2. Gives Xenon even more open pathways.
+BORON: Retreat to core sectors? Need to set gamestarts to already open gate.
 
 * Handle PRODUCT
     * DLC slightly increases galaxy product module count with new product entries for existing factions: Remove these.

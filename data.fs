@@ -31,8 +31,20 @@ let X4ZoneFilePirate = X4UnpackedDataFolder + "/pirate/maps/xu_ep2_universe/dlc_
 let X4ZoneFileBoron = X4UnpackedDataFolder + "/boron/maps/xu_ep2_universe/dlc_boron_zones.xml"
 
 
+[<Literal>]
+let X4GalaxyFileCore = X4UnpackedDataFolder + "/core/maps/xu_ep2_universe/galaxy.xml"
+[<Literal>]  // the DLC galaxy files are in DIFF format, so we need a different type provider.
+let X4GalaxyFileSplit = X4UnpackedDataFolder + "/split/maps/xu_ep2_universe/galaxy.xml"
+let X4GalaxyFileTerran = X4UnpackedDataFolder + "/terran/maps/xu_ep2_universe/galaxy.xml"
+let X4GalaxyFilePirate = X4UnpackedDataFolder + "/pirate/maps/xu_ep2_universe/galaxy.xml"
+let X4GalaxyFileBoron = X4UnpackedDataFolder + "/boron/maps/xu_ep2_universe/galaxy.xml"
+
+
 type X4Sector = XmlProvider<X4SectorFileCore>
 type X4Zone = XmlProvider<X4ZoneFileCore>
+type X4Galaxy = XmlProvider<X4GalaxyFileCore>
+// the DLC galaxy files are in DIFF format, so we need a different type provider.
+type X4GalaxyDiff = XmlProvider<X4GalaxyFileSplit>
 
 // Load the sector data from each individual sector file. We'll combine them in to one list.
 let allSectors = 
@@ -61,6 +73,31 @@ let allZones =
                     X4ZoneTerran.Macros;
                     X4ZonePirate.Macros;
                     X4ZoneBoron.Macros;
+                ]
+
+
+let allGalaxy =
+    // we're assuming that the galaxy file just contains connections, and that the connection fields/structure
+    // is pretty much the same between core and DLCs. Otherwise this casting from one to the other using the
+    // XElement is dangerous. This only runs on mod creation though, and if it crashes it means something has
+    // changed that we need to account for anyway.
+    let loadFromDiff (diff:X4GalaxyDiff.Diff) =
+        // Galaxy file just contains a list of connections.
+        [|  for connection in diff.Add.Connections do
+                yield new X4Galaxy.Connection(connection.XElement)
+        |]
+
+    let X4GalaxyCore = X4Galaxy.Load(X4GalaxyFileCore)
+    let X4GalaxySplit = X4GalaxyDiff.Load(X4GalaxyFileSplit)
+    let X4GalaxyTerran = X4GalaxyDiff.Load(X4GalaxyFileTerran)
+    let X4GalaxyPirate = X4GalaxyDiff.Load(X4GalaxyFilePirate)
+    let X4GalaxyBoron = X4GalaxyDiff.Load(X4GalaxyFileBoron)
+    Array.toList <| Array.concat [
+                    X4GalaxyCore.Macro.Connections;
+                    loadFromDiff X4GalaxySplit;
+                    loadFromDiff X4GalaxyTerran;
+                    loadFromDiff X4GalaxyPirate;
+                    loadFromDiff X4GalaxyBoron;
                 ]
 
 // Gates are linked to a zone by using one of the following as a reference. So by looking
@@ -122,24 +159,24 @@ let territories = [
     { Territory.Default with faction = "pioneers"; sector = "Cluster_115_Sector001_macro" }   // Segaris sectors are Cluster_113_Sector001_macro -> 115  - but we'll leave them unchanged.
 
     // tides of avarice
-    { Territory.Default with faction = "loanshark"; sector = "" }               // VIG : setting sector to "" means leave VIG UNCHANGED
-    { Territory.Default with faction = "loanshark"; cluster = "cluster_500" }   // identify the cluster though, so when we look up JOP cluster location, we can tell if it's in their territory.
-    { Territory.Default with faction = "loanshark"; cluster = "cluster_501" }   // 
+    // :eave VIG/Scavengers mostly unchanged. Leave Windfall I for sure to avoid issues with Erlking.
+    { Territory.Default with faction = "scavenger"; cluster = "cluster_500" }   // RIP: Unchanged. All sectors in cluster_500
+    { Territory.Default with faction = "loanshark"; cluster = "cluster_501" }   // Leave VIG unchanged.
     { Territory.Default with faction = "loanshark"; cluster = "cluster_502" }   // 
-    { Territory.Default with faction = "scavenger"; sector = "" }               // RIP : UNCHANGED
-    { Territory.Default with faction = "scavenger"; cluster = "cluster_503" }   // RIP : UNCHANGED
+    { Territory.Default with faction = "loanshark"; cluster = "cluster_503" }   // I considered removing this cluster, but it has the scrap VIG need, so will leave it.
 
     // boron
-    { Territory.Default with faction = "boron"; sector = "" }                   // Boron: Economy is kinda screwed without player help anyway. Leave them alone for now?
-    { Territory.Default with faction = "boron"; cluster = "cluster_601" }       //
-    { Territory.Default with faction = "boron"; cluster = "cluster_602" }       
-    { Territory.Default with faction = "boron"; cluster = "cluster_603" }       
-    { Territory.Default with faction = "boron"; cluster = "cluster_604" }       
-    { Territory.Default with faction = "boron"; cluster = "cluster_605" }      
-    { Territory.Default with faction = "boron"; cluster = "cluster_606" }      
-    { Territory.Default with faction = "boron"; cluster = "cluster_607" }       
-    { Territory.Default with faction = "boron"; cluster = "cluster_608" }       
-    { Territory.Default with faction = "boron"; cluster = "cluster_609" }       
+    // Boron: Economy is kinda screwed without player help anyway. Leave them alone for now?
+    // Changing it could screw things with the default boron story if there are Xenon swarming around.
+    // { Territory.Default with faction = "boron"; cluster = "cluster_601" }       // Watchful Gaze Not in territory by default.
+    { Territory.Default with faction = "boron"; cluster = "cluster_602" }       // Barren Shores 
+    { Territory.Default with faction = "boron"; cluster = "cluster_603" }       // Great Reef 
+    { Territory.Default with faction = "boron"; cluster = "cluster_604" }       // Ocean of Fantasy
+    // { Territory.Default with faction = "boron"; cluster = "cluster_605" }       // Sanctuary of Darkness : The Khaak sector
+    { Territory.Default with faction = "boron"; cluster = "cluster_606" }       // Kingdom End (cluster with 3 sectors) : Kingdoms end I, Reflected Stars, Towering Waves 
+    { Territory.Default with faction = "boron"; cluster = "cluster_607" }       // Rolk's Demise 
+    { Territory.Default with faction = "boron"; cluster = "cluster_608" }       // Atreus' Clouds
+    { Territory.Default with faction = "boron"; cluster = "cluster_609" }       // Menelaus' Oasis 
 ]
 
 
@@ -194,6 +231,7 @@ let isFactionInSector (faction: string) (sector: string) =
         else false
 
 
+
 // 'true' if the faction has any sort of presence in the cluster, even if it's just one sector.
 // Used for certain jobs, but not appropriate for stations, as those are assigned to a specific sector.
 let doesFactionHavePresenceInLocationCluster (faction: string) (location: string) =
@@ -234,7 +272,26 @@ let findSectorFromZone (zone:string) (sectors:X4Sector.Macro list) =
             | None -> loop rest
     loop sectors
 
+// Given a sector name, which cluster does it belong to?
+let findClusterFromSector (sector:string) =
+    getClusterFromLocation sector // Maybe we can do better by checking the connections explicitly, but Egosoft have reliably named the sectors with the cluster name in them.
 
+let findFactionFromCluster (cluster: string) =
+    territories |> List.tryFind (fun record -> record.cluster =? cluster) |> Option.map (fun record -> record.faction)
+
+let findFactionFromSector (sector: string) =
+   match territories |> List.tryFind (fun record -> record.sector =? sector) |> Option.map (fun record -> record.faction) with
+   | Some faction -> Some faction
+   | None ->
+        match findClusterFromSector sector with
+        | None -> None
+        | Some cluster -> findFactionFromCluster cluster
+
+let findFactionFromZone (zone: string) =
+    let sector = findSectorFromZone zone allSectors
+    match sector with
+    | None -> None
+    | Some sector -> findFactionFromSector sector
 
 let dump_sectors (sectors:X4Sector.Macro list) =
     for sector in sectors do

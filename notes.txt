@@ -302,3 +302,28 @@ Xenon 87
 
 Neutral Sectors 4, 31, 44, 48, 49, 50, 76 
 Mixed Sectors 29 , 42, 45,
+
+
+
+This data did not include Boron and Pirates DLC, so:
+PIRATE
+500 : Avarice. Cluster contains 3 sectors
+501 : Windfall I
+502 : Windfall II
+503 : Windfall III
+
+
+601 Watchful Gaze
+602 Barren Shores
+603 Great Reef
+604 Ocean of Fantasy
+605 Sanctuary of Darkness
+
+606 Kingdom End (cluster with 3 sectors)
+    Kingdoms end I
+    Reflected Stars
+    Towering Waves
+
+607 Rolk's Demise
+608 Atreus' Clouds
+609 Menelaus' Oasis

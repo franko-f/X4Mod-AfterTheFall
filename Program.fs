@@ -13,4 +13,4 @@ X4.God.generate_god_file "libraries/god.xml"
 X4.Jobs.generate_job_file "libraries/job.xml"
 
 X4.Gates.printGatesInZones 
-
+//X4.Gates.printGateConnections
