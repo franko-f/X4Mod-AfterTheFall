@@ -1,9 +1,8 @@
 in progress:
-* Find unsafe gates to place defence stations next to.
-    * extract all gates and their data.
-    * find gates in territory
-    * determine which gates are safe and which are not
+    * Write code to find a type of station for a race
+    * write code to place a station in a specific place/zone
     * place 3 race-specific defence stations around gate.
+        * Figure out how to rotate the defense station around the gate so it's not blocking things
 
 up next:
 * move faction shipyards to their new sector; and replace old one with xenon
@@ -138,3 +137,7 @@ We may need to add a maxgalaxy in these cases to set to the original quota.
     * Civilian
 * Increase XENON starting fleet size
 
+* Find unsafe gates to place defence stations next to.
+    * extract all gates and their data.
+    * find gates in territory
+    * determine which gates are safe and which are not

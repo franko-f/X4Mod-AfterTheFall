@@ -4,6 +4,11 @@ open FSharp.Data
 open X4.Utilities
 open X4.Data
 
+// Data on gates is scattered in a two primary places.
+// 1. The ZONES file that creates a zone, then places a gate within it.
+// 2. The GALAXY file that holds the information on the connections between two gates.
+
+
 [<StructuredFormatDisplay("({X}, {Y}, {Z})")>]
 type Position = 
     {
@@ -37,17 +42,6 @@ let isZoneConnectionAGate (connection:X4Zone.Connection) =
 let findGateFromZoneConnections (connections:X4Zone.Connections) =
     connections.Connections |> Array.tryFind isZoneConnectionAGate
 
-// Is this zone a zone that contains a gate?
-let IsGateZone (zone:X4Zone.Macro) =
-    match zone.Connections with
-    | None -> false
-    | Some connections -> 
-        match findGateFromZoneConnections connections with
-        | None -> false
-        | Some gate -> true
-
-let findConnectionByName (name:string) (connections:X4Galaxy.Connection list) =
-    connections |> List.tryFind (fun connection -> connection.Name = name) 
 
 let findConnectionByDestination (destination:string) (connections:X4Galaxy.Connection list) =
     let containsDestination (connection:X4Galaxy.Connection) = 
@@ -116,6 +110,15 @@ type Gate =
 
 // Generate a list of all the gates in the game across base and DLC
 let allGates =
+    // Helper function: Is this zone a zone that contains a gate?
+    let IsGateZone (zone:X4Zone.Macro) =
+        match zone.Connections with
+        | None -> false
+        | Some connections -> 
+            match findGateFromZoneConnections connections with
+            | None -> false
+            | Some gate -> true
+
     // If a zone contains a gate, extract the data and return Some Gate, otherwise None
     let getGateFromZone (zone:X4Zone.Macro) =
         match IsGateZone zone with
@@ -123,9 +126,6 @@ let allGates =
         | true -> Some (Gate.FromZone zone)
     X4.Data.allZones |> List.choose getGateFromZone
 
-// Generate a list of all the gate connnections in the game.
-let allGateConnections =
-    allGalaxy |> List.filter (fun connection -> connection.Ref = "destination")
 
 // Given the name of a connection, find the gate that it refers to.
 let findGateByConnectionName (connectionName:string) =
@@ -158,8 +158,19 @@ let isGateConnectionSafe (gate:Gate) =
     | Some remoteGate -> remoteGate.Faction = gate.Faction  // Is the remote gate of the same faction? Then safe!
 
 
-let findGateConnection (gate:Gate) connections =
-    findConnectionByName gate.ConnectionName connections
+// This is the primary function of this module: IT uses all the other functions to process all gates defined
+// in the ZONES file, figure out how they are connected to each other via the GALAXY file, and then determines
+// which gates connected to potentially hostile territory for our main AI factions. We will use this list of
+// unsafe gates when we determine where to place our defense stations.
+let findUnsafeGates =
+    allGates
+        |> List.filter (fun gate -> gate.Faction <> "xenon" && gate.Faction <> "Unknown")
+        |> List.filter (fun gate -> not (isGateConnectionSafe gate))
+
+
+
+
+/// ======== Some debug dump functions to print out the gates we've found. =========
 
 let printGates (gates:Gate list) =
     [| for gate in gates do printfn "%A (%A)" (gate.asString()) (isGateConnectionSafe gate) |] |> ignore
@@ -167,10 +178,13 @@ let printGates (gates:Gate list) =
 
 
 // dump some debut: print out all the gates found in the game.
-let printGatesInZones =
+let printGatesInZones() =
     // Start with all the gates
     allGates |> printGates
 
     // Now lets just print out the gates in our new faction zones
-    let safeGates = allGates |> List.filter (fun gate -> gate.Faction <> "xenon" && gate.Faction <> "Unknown")
-    safeGates |> printGates
+    let factionGates = allGates |> List.filter (fun gate -> gate.Faction <> "xenon" && gate.Faction <> "Unknown")
+    factionGates |> printGates
+
+    // And now the specific faction unsafe gates we want to defend:
+    findUnsafeGates |> printGates
