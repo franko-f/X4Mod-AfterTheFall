@@ -20,6 +20,7 @@
   <ItemGroup />
   <ItemGroup>
     <PackageReference Include="FSharp.Data" Version="6.3.0" />
+    <PackageReference Include="MathNet.Numerics" Version="5.0.0" />
   </ItemGroup>
   <ItemGroup />
 </Project>

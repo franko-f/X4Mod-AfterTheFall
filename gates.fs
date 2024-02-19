@@ -1,5 +1,8 @@
 module X4.Gates
 
+open System
+open MathNet.Numerics.LinearAlgebra.Double
+
 open FSharp.Data
 open X4.Utilities
 open X4.Data
@@ -60,7 +63,7 @@ let findConnectionByDestination (destination:string) (connections:X4Galaxy.Conne
 // A record that represents a gate and the zone it's in, along with code to
 // extract the data from a the type provider zone type. We do this to simplify
 // handling, but also store the full zone, in case we need it to write some XML out.
-[<StructuredFormatDisplay("{Sector}/{Zone}:{Faction} ({ConnectionType})/{ConnectionName} {GateType} - {Position} rotation{Quarternion} {connection}")>]
+[<StructuredFormatDisplay("{Sector}/{Zone}:{Faction} ({ConnectionType})/{ConnectionName} {GateType} - {Position} rotation{Quarternion}")>]
 type Gate =
     {
         Sector: string
@@ -168,6 +171,57 @@ let findUnsafeGates =
         |> List.filter (fun gate -> not (isGateConnectionSafe gate))
 
 
+
+let calculateStationPosition (position:Position) (rotation:Quaternion) (distance:float) (angle:float) =
+    // Convert quaternion to rotation matrix
+    let q = rotation
+    let rotationMatrix = DenseMatrix.OfArray (array2D [|
+        [| 1.0 - 2.0*q.Y*q.Y - 2.0*q.Z*q.Z; 2.0*q.X*q.Y - 2.0*q.Z*q.W; 2.0*q.X*q.Z + 2.0*q.Y*q.W |]
+        [| 2.0*q.X*q.Y + 2.0*q.Z*q.W; 1.0 - 2.0*q.X*q.X - 2.0*q.Z*q.Z; 2.0*q.Y*q.Z - 2.0*q.X*q.W |]
+        [| 2.0*q.X*q.Z - 2.0*q.Y*q.W; 2.0*q.Y*q.Z + 2.0*q.X*q.W; 1.0 - 2.0*q.X*q.X - 2.0*q.Y*q.Y |]
+    |])
+
+    // Convert angle from degrees to radians
+    let angleRad = angle * Math.PI / 180.0
+
+    // Create rotation matrix for the angle around the y-axis
+    let angleRotationMatrix = DenseMatrix.OfArray (array2D [|
+        [| Math.Cos(angleRad); 0.0; Math.Sin(angleRad) |]
+        [| 0.0; 1.0; 0.0 |]
+        [| -Math.Sin(angleRad); 0.0; Math.Cos(angleRad) |]
+    |])
+
+    // Combine the initial rotation with the angle rotation
+    let combinedRotationMatrix = rotationMatrix * angleRotationMatrix
+
+    // Apply the rotation and distance to the position
+    let positionVector = DenseVector.OfArray [| position.X; position.Y; position.Z |]
+    let displacementVector = distance * combinedRotationMatrix.Column(0)
+    let newPositionVector = positionVector + displacementVector
+
+    // Convert the result back to a Position
+    let newPosition = { X = newPositionVector.[0]; Y = newPositionVector.[1]; Z = newPositionVector.[2] }
+
+    printfn "Position old/new: %A / %A    (angle: %A, distance: %A, rotation: %A)" position newPosition angle distance rotation
+    newPosition
+
+// This function, given a gate, will extract the position, and rotation defined in quaternion, and then
+// return three new locations that are positioned around the gate, each at an offset of 120 degrees, and each
+// 10000 meters away from the gate. This is used to determine where to place defense stations around the gate.
+let getDefenseStationLocations (gate:Gate) (numberOfStations:int) (distanceFromGate:int)=
+    let position = gate.Position
+    let rotation = gate.Quarternion
+    let angle = float(360/numberOfStations)
+    let angle_offset = float(360/numberOfStations)/2.0  // offset the angle by half the angle so that the first station is not right in front of the gate
+    [ for i in 0..numberOfStations-1 -> calculateStationPosition position rotation (float(distanceFromGate)) (float(i) * angle + angle_offset), i ]
+
+
+// using the gates from 'findUnsafeGates', this function will return the location of the defense stations
+// for each gate, in a tuble that is 'race, gate, location'. It takes a single paramter that is "numberOfStations"
+// which is the number of stations to place around each gate.
+let getRequiredDefenseStationLocations numberOfStations distanceFromGate =
+    findUnsafeGates
+        |> List.collect (fun gate -> (getDefenseStationLocations gate numberOfStations distanceFromGate) |> List.map (fun (location, n) -> (gate, n, location)) )
 
 
 /// ======== Some debug dump functions to print out the gates we've found. =========
