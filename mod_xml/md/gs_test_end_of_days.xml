@@ -174,7 +174,7 @@
                   <shuffle_list list="$AllStations"/>
                   <set_value name="$SelectedTarget" exact="@$AllStations.random"/>
                   <!-- spawn satellite at selected location -->
-                  <do_if value="$SelectedTarget" chance="70">
+                  <do_if value="$SelectedTarget" chance="100">
                     <create_object name="$TargetSatellite" macro="[macro.eq_arg_satellite_02_macro].random" owner="faction.player" sector="$SelectedTarget.sector">
                       <safepos max="15km" object="$SelectedTarget"/>
                     </create_object>

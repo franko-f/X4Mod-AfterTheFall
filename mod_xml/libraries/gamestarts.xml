@@ -21,8 +21,8 @@
                 <item name="Property"   value="Satellites" />
             </info>
 
-            <location galaxy="xu_ep2_universe_macro" sector="cluster_01_sector001_macro" >
-                    <position x="-0.05115" y="1.806" z="-2.541"/>
+            <location galaxy="xu_ep2_universe_macro" sector="cluster_14_sector001_macro" >
+                    <position x="1000.05115" y="1.806" z="-2000.541"/>
                     <rotation yaw="179.69951" pitch="-1.83378"/>
             </location>
             <player macro="character_player_scientist_macro" female="true" money="2500000" name="{1021,802}">
