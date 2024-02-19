@@ -311,9 +311,10 @@ let generateGateDefenseStations() =
         // and override the specific position. Start by pulling the location entry for the gate,
         // then updating the position to the new coordinates.
         let zone = gate.X4Zone
-        // override the location to the gates zone.
+        // override the location to the gates zone, and set 'matchextension' to false (without it, game ignores mods touching things outside their scope)
         defenseStation.Location.XElement.SetAttributeValue(XName.Get("class"), zone.Class)
         defenseStation.Location.XElement.SetAttributeValue(XName.Get("macro"), zone.Name)
+        defenseStation.Location.XElement.SetAttributeValue(XName.Get("matchextension"), "false")
 
         // Now update the precise position.
         let position =
