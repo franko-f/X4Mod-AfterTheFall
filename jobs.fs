@@ -110,21 +110,26 @@ let moveJobToSectorXml (id:string) (sector:string) (job:X4Job.Job) =
 // this would spawn half of the ships, weakening the faction nicely, but it's more complicated and adds
 // a lot of jobs. Instead, we're jjst going to target L and XL ships, and resupply ships.
 let setPreferBuildXml (job:X4Job.Job)=
-    let environment = new XElement("environment", [
-            new XAttribute("preferbuilding", true),
-            new XAttribute("buildatshipyard", true)
-        ])
     let selector = new XAttribute("sel", $"//jobs/job[@id='{job.Id}']/environment")
     
     match job.Environment with
     | None ->
         // no existing line build an entire xml diff 'add' for the option.
         printfn "  ADDING JOB ENVIRONMENT AND BUILD SETTINGS %s preferbuild" job.Id
+        let environment = new XElement("environment", [
+            new XAttribute("preferbuilding", true),
+            new XAttribute("buildatshipyard", true)
+        ])
         new XElement("add", selector, environment)
+
     | Some environment ->
         // There's an existing environment, so we'll build and xml REPLACE based on the existing settings.
         printfn "  REPLACING JOB ENVIRONMENT BUILD SETTINGS %s " job.Id 
-        new XElement("replace", selector, environment)
+        let newEnvironment = new XElement(environment.XElement)
+        newEnvironment.SetAttributeValue("preferbuilding", true)
+        newEnvironment.SetAttributeValue("buildatshipyard", true)
+        let replacement = new XElement("replace", selector, newEnvironment)
+        replacement
 
 
 // Each job has a faction that it belongs to. The fields in the XML seem a bit unreliable
