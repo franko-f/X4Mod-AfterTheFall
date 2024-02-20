@@ -59,14 +59,14 @@ let maybeMultiply (quota:Option<int>) (multiplier:float) =
 
 
 // Construct an XML element representing a 'replace' tag that will replace the quotas for a given job.
+// Important note: stations and products have a QUOTAS section containing a list of quotas, but JOBS
+// have only a single QUOTA element, and no quotas list.
 // example replace line:
-// <replace sel="/jobs/job[@id='xen_energycells']/@quotas">
-//   <quotas>
+// <replace sel="/jobs/job[@id='xen_energycells']/@quota">
 //      <quota galaxy="42" cluster="3"/>
-//   </quotas>
 // </replace>
 let replaceQuotaXml (id:string) (galaxy:int) (maxGalaxy: Option<int>) (cluster:Option<int>) (sector:Option<int>) =
-    let quotas = [
+    let quota = [
         yield new XAttribute("galaxy", galaxy)
         match maxGalaxy with Some x -> yield new XAttribute("maxgalaxy", x) | _ -> ()
         match cluster with Some x -> yield new XAttribute("cluster", x) | _ -> ()
@@ -74,8 +74,8 @@ let replaceQuotaXml (id:string) (galaxy:int) (maxGalaxy: Option<int>) (cluster:O
     ]
 
     let xml = new XElement("replace",
-        new XAttribute("sel", $"//jobs/job[@id='{id}']/quotas"),
-        new XElement("quota", quotas)
+        new XAttribute("sel", $"//jobs/job[@id='{id}']/quota"),
+        new XElement("quota", quota)
     )
     printfn "  REPLACING JOB QUOTA %s with \n %s" id (xml.ToString())
     xml 

@@ -1,20 +1,11 @@
 in progress:
-    * Write code to find a type of station for a race
-    * write code to place a station in a specific place/zone
-    * place 3 race-specific defence stations around gate.
-        * Figure out how to rotate the defense station around the gate so it's not blocking things
 
 up next:
 * move faction shipyards to their new sector; and replace old one with xenon
-* add bastion
 
 BUGS:
 * Bastions are:
     * sometimes not alwayd generated in right place. Does the game move them?
-    * Not strong enough: more? or custom station?
-    * Pirate stations not bein generated. Error in logs could not find suitable zone. The
-    stations have a 'solitary' tag. remove this?
-* Fleets (at least some) are still being created.
 
 ## TODO:
 * Handle STATION
@@ -84,7 +75,7 @@ BORON: Retreat to core sectors? Need to set gamestarts to already open gate.
         * Looks like SOME factories/product are set to 'ownerless' for faction for HAT/SCA (spaceweed)
         So we might need to either override this to place in another faction, or create a 'safe'
         ownerless sector somewhere for them.
-        This actually is probably good: 
+        This actually is probably good:
         WE SHOULD LEAVE AT LEAST ONE 'SAFE' OWNERLESS FOR THE PLAYER!
 
 
@@ -149,3 +140,9 @@ We may need to add a maxgalaxy in these cases to set to the original quota.
     * extract all gates and their data.
     * find gates in territory
     * determine which gates are safe and which are not
+
+* Stations:
+    * Write code to find a type of station for a race
+    * write code to place a station in a specific place/zone
+    * place 3 race-specific defence stations around gate.
+        * Figure out how to rotate the defense station around the gate so it's not blocking things
