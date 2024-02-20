@@ -17,7 +17,8 @@ BUGS:
 * Change the faction terratories again.
 To stop the new defense stations from blockading paths for the xenon, I think I should move the factions
 each to one or two sectors that are dead ends, and add resource to these zones.
-Note 2024/02/18: Turns out that the instructions I was following for gates applies only to, well, gates.
+
+Note: 2024/02/18: Turns out that the instructions I was following for gates applies only to, well, gates.
 The superhighways and accellerators that take you between sectors in a cluster do NOT work like this,
 and do not have configuration in the 'connections' file. They seem to be defined as a connection in the
  *clusters* file, with connection ref "sechighways"
@@ -26,6 +27,9 @@ and do not have configuration in the 'connections' file. They seem to be defined
  it's easy for Xenon to ignore gates. and b) I don't need to process even more data to figure out superhighways.
 
 Here are some ideas, but maybe it's preferrable to find places I can give them TWO clusters, for more starting variety.
+Really need two sectors per faction, as often station placement is limited per sector. Even with two sectors, 
+some products won't be placed, reducing economies. This is ok, I think.
+
 ZYA: Eleventh hour    OR Guiding Star V & VII
 FREE FAMILIIES:  Heart of Acrimony II, Tharka Ravine XVI
 HAT: Hatikvahs choice III
@@ -38,23 +42,7 @@ TEL/MIN: Hewa's Twin V, III
 VIG: Lets actually take Windfall I away from them, and limit them to Wind 1&2. Gives Xenon even more open pathways.
 BORON: Retreat to core sectors? Need to set gamestarts to already open gate.
 
-* Handle PRODUCT
-    * DLC slightly increases galaxy product module count with new product entries for existing factions: Remove these.
-        * We also have products allocated in 'friendly' sectors, such as PIO in Oort cloud.
-        eg:     <location class="sector" macro="cluster_116_sector001_macro" relation="self" comparison="ge" />
-        Also we have things like Xenon factories assigned to specific sectors: do NOT increase these limits.
-    * add 'matchextension="false"' to location tags. - Is this needed?
 
-
-* Systems:
-    * Place GATE DEFENCE station
-        * Each faction needs a strong station guarding it's gate.
-        * check ZONES.xml file: seems to define zones for gates, and their connections
-            * confirmed. More info at the bottom of page here:
-            https://github.com/enenra/x4modding/wiki/Universe-Creation#advanced---gates
-            * connection field 'ref="gates"' represents a connection to a gate.
-        * Write algorithm that uses valid sectors for race to determine where to place gates.
-            * advanced: Should I track paths of gates to determine whether the sector on the other side is a safe sector or not? Then places gates only on unsafe.
  
 ## Optional/Maybe do/other ideas:
 * Add more derelict ships around
@@ -77,6 +65,14 @@ BORON: Retreat to core sectors? Need to set gamestarts to already open gate.
         ownerless sector somewhere for them.
         This actually is probably good:
         WE SHOULD LEAVE AT LEAST ONE 'SAFE' OWNERLESS FOR THE PLAYER!
+
+* Handle PRODUCT
+    * I'm not sure the following really matter. Will move it to options.
+    * DLC slightly increases galaxy product module count with new product entries for existing factions: Remove these.
+        * We also have products allocated in 'friendly' sectors, such as PIO in Oort cloud.
+        eg:     <location class="sector" macro="cluster_116_sector001_macro" relation="self" comparison="ge" />
+        Also we have things like Xenon factories assigned to specific sectors: do NOT increase these limits.
+    * add 'matchextension="false"' to location tags. - Is this needed? (yes, turned out it was)
 
 
 
@@ -136,6 +132,16 @@ We may need to add a maxgalaxy in these cases to set to the original quota.
     * Civilian
 * Increase XENON starting fleet size
 
+* Systems:
+    * Place GATE DEFENCE station
+        * Each faction needs a strong station guarding it's gate.
+        * check ZONES.xml file: seems to define zones for gates, and their connections
+            * confirmed. More info at the bottom of page here:
+            https://github.com/enenra/x4modding/wiki/Universe-Creation#advanced---gates
+            * connection field 'ref="gates"' represents a connection to a gate.
+        * Write algorithm that uses valid sectors for race to determine where to place gates.
+            * advanced: Should I track paths of gates to determine whether the sector on the other side is a safe sector or not? Then places gates only on unsafe.
+
 * Find unsafe gates to place defence stations next to.
     * extract all gates and their data.
     * find gates in territory
@@ -146,3 +152,4 @@ We may need to add a maxgalaxy in these cases to set to the original quota.
     * write code to place a station in a specific place/zone
     * place 3 race-specific defence stations around gate.
         * Figure out how to rotate the defense station around the gate so it's not blocking things
+

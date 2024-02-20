@@ -307,17 +307,15 @@ let generateGateDefenseStations() =
         let stationClone = new XElement(station.XElement)
         let defenseStation = new X4GodMod.Station(stationClone)
         defenseStation.XElement.SetAttributeValue(XName.Get("id"), gate.ConnectionName + "_bastion_" + n.ToString())   // Give it a new unique ID
-        // update location. We want to change this to refer to a zone (the same zone as the gate),
-        // and override the specific position. Start by pulling the location entry for the gate,
-        // then updating the position to the new coordinates.
+        
+        // update location and set the location of the station copy to be the zone of the gate,
         let zone = gate.X4Zone
-        // override the location to the gates zone, and set 'matchextension' to false (without it, game ignores mods touching things outside their scope)
         defenseStation.Location.XElement.SetAttributeValue(XName.Get("class"), zone.Class)
         defenseStation.Location.XElement.SetAttributeValue(XName.Get("macro"), zone.Name)
-        defenseStation.Location.XElement.SetAttributeValue(XName.Get("matchextension"), "false")
+        defenseStation.Location.XElement.SetAttributeValue(XName.Get("matchextension"), "false")   // without this, game ignores mods touching things outside their scope
         defenseStation.Location.XElement.SetAttributeValue("solitary", null)    // VIG faction has this attribute set that may cause station placement to fail
 
-        // Now update the precise position.
+        // Now update the precise position within the zone to the caculated spot in a circle near the gate.
         let position =
             match defenseStation.Position with
             | Some position -> position.XElement
