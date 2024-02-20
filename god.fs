@@ -293,7 +293,7 @@ let processProduct (product:X4WorldStart.Product) =
 // and then updating the location to the new coordinates, and finally renaming the station to be
 // '(gate.name).defense_[id]' so that it's unique.
 let generateGateDefenseStations() =
-    let gateStations = X4.Gates.getRequiredDefenseStationLocations 3 8000 // 3 stations per gate, 8000m from the gate. Give them almost overlapping fields of fire for long range plasma
+    let gateStations = X4.Gates.getRequiredDefenseStationLocations 5 10000 // 5 stations per gate, 10000m from the gate. Give them almost overlapping fields of fire for long range plasma
 
     [ for gate, n, location  in gateStations do
         printfn "GENERATING DEFENSE STATION FOR %s GATE %s" gate.Faction gate.ConnectionName
@@ -303,8 +303,8 @@ let generateGateDefenseStations() =
             | Some station -> station
             | None -> failwithf "No defense station found for faction %s" gate.Faction
         printfn "  FOUND DEFENSE STATION %s owner:%s" station.Id station.Owner
+
         let stationClone = new XElement(station.XElement)
-        let id = station.Id
         let defenseStation = new X4GodMod.Station(stationClone)
         defenseStation.XElement.SetAttributeValue(XName.Get("id"), gate.ConnectionName + "_bastion_" + n.ToString())   // Give it a new unique ID
         // update location. We want to change this to refer to a zone (the same zone as the gate),
