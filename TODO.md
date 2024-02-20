@@ -8,6 +8,14 @@ up next:
 * move faction shipyards to their new sector; and replace old one with xenon
 * add bastion
 
+BUGS:
+* Bastions are:
+    * sometimes not alwayd generated in right place. Does the game move them?
+    * Not strong enough: more? or custom station?
+    * Pirate stations not bein generated. Error in logs could not find suitable zone. The
+    stations have a 'solitary' tag. remove this?
+* Fleets (at least some) are still being created.
+
 ## TODO:
 * Handle STATION
     * MOVE/REPLACE one shipyards/wharves/trade station per faction rather than just removing.

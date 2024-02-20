@@ -42,8 +42,8 @@ let isZoneConnectionAGate (connection:X4Zone.Connection) =
 
 // Given the array of connections in a zone, return Some connection if theres a gate, or None if it's not.
 // While we might have an array as input, it seems there's only ever a single gate in a zone.
-let findGateFromZoneConnections (connections:X4Zone.Connections) =
-    connections.Connections |> Array.tryFind isZoneConnectionAGate
+let findGatesInConnections (connections:X4Zone.Connection list) =
+    connections |> List.filter isZoneConnectionAGate
 
 
 let findConnectionByDestination (destination:string) (connections:X4Galaxy.Connection list) =
@@ -78,8 +78,9 @@ type Gate =
         connection: Option<X4Galaxy.Connection>
         X4Zone: X4Zone.Macro    // Store the full record for later use.
     }
-    static member FromZone(zone: X4Zone.Macro) =
-        let connection = (findGateFromZoneConnections zone.Connections.Value).Value
+    // Create a 'gate' record from a zone and a connection. While the zone already contains the connection, a zone may have 
+    // multiple gate connections, so we need to be specific about the connection we want.
+    static member FromZone(zone: X4Zone.Macro) (connection: X4Zone.Connection ) =
         let connectionMacro = connection.Macro.Value   // the caller of FromZone must make sure this is always present: ie, this is a valid gate zone
         let sector = findSectorFromZone zone.Name allSectors |> Option.defaultValue "Unknown"
         let faction = findFactionFromZone zone.Name |> Option.defaultValue "Unknown"
@@ -113,21 +114,15 @@ type Gate =
 
 // Generate a list of all the gates in the game across base and DLC
 let allGates =
-    // Helper function: Is this zone a zone that contains a gate?
-    let IsGateZone (zone:X4Zone.Macro) =
-        match zone.Connections with
-        | None -> false
-        | Some connections -> 
-            match findGateFromZoneConnections connections with
-            | None -> false
-            | Some gate -> true
-
-    // If a zone contains a gate, extract the data and return Some Gate, otherwise None
-    let getGateFromZone (zone:X4Zone.Macro) =
-        match IsGateZone zone with
-        | false -> None
-        | true -> Some (Gate.FromZone zone)
-    X4.Data.allZones |> List.choose getGateFromZone
+    X4.Data.allZones
+    |> List.collect (
+        fun zone ->
+            zone.Connections 
+            |> Option.map (fun x -> Array.toList x.Connections)            // IF there is a connections array in the zone Option<connections>, convert to a list
+            |> Option.defaultValue []                                      // convert the None result to an empty list
+            |> findGatesInConnections                                      // Find any connections that represent a gate in the connections list for the zone.
+            |> List.map (fun connection -> Gate.FromZone zone connection)  // And convert these connections to a Gate record.
+       )
 
 
 // Given the name of a connection, find the gate that it refers to.

@@ -296,7 +296,7 @@ let generateGateDefenseStations() =
     let gateStations = X4.Gates.getRequiredDefenseStationLocations 3 8000 // 3 stations per gate, 8000m from the gate. Give them almost overlapping fields of fire for long range plasma
 
     [ for gate, n, location  in gateStations do
-        printfn "  GENERATING DEFENSE STATION FOR %s GATE %s" gate.Faction gate.ConnectionName
+        printfn "GENERATING DEFENSE STATION FOR %s GATE %s" gate.Faction gate.ConnectionName
         // find the first defence station for the faction. We want to fail if we find nothing, as that would break the mod.
         let station =
             match find_station gate.Faction "defence" allStations with
@@ -321,7 +321,7 @@ let generateGateDefenseStations() =
             match defenseStation.Position with
             | Some position -> position.XElement
             | None ->
-                printfn "No position found for station %s" defenseStation.Id
+                printfn "   No position found for station %s" defenseStation.Id
                 let posXml = new XElement("position")
                 defenseStation.XElement.Add(posXml)
                 defenseStation.XElement.Add( new XText("\n")) // Add a newline after each element so the output is readible
