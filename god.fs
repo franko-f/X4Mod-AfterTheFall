@@ -315,6 +315,7 @@ let generateGateDefenseStations() =
         defenseStation.Location.XElement.SetAttributeValue(XName.Get("class"), zone.Class)
         defenseStation.Location.XElement.SetAttributeValue(XName.Get("macro"), zone.Name)
         defenseStation.Location.XElement.SetAttributeValue(XName.Get("matchextension"), "false")
+        defenseStation.Location.XElement.SetAttributeValue("solitary", null)    // VIG faction has this attribute set that may cause station placement to fail
 
         // Now update the precise position.
         let position =
