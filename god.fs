@@ -64,9 +64,9 @@ type X4ObjectTemplates = XmlProvider<X4ObjectTemplatesFile>
 
 // the 'log' functions just extract a bit of data about a station, and log it
 // to the terminal for debugging and tracking purposes.
-let logStation (station:X4WorldStart.Station) =
+let logStation (action:string) (station:X4WorldStart.Station) =
     let tags         = match station.Station.Select with | Some tag -> tag.Tags | _ -> "[none]"
-    printfn "PROCESSING STATION %s race: %A, owner: %A, type: %A, location: %A:%A, id: %A, station: %A   " tags station.Race station.Owner station.Type station.Location.Class station.Location.Macro station.Id station.Station.Macro
+    printfn "%s STATION %s race: %A, owner: %A, type: %A, location: %A:%A, id: %A, station: %A   " action tags station.Race station.Owner station.Type station.Location.Class station.Location.Macro station.Id station.Station.Macro
 
 let logAddStation (action:string) (station:X4GodMod.Station) =
     let tags         = match station.Station.Select with | Some tag -> tag.Tags | _ -> "[none]"
@@ -166,12 +166,24 @@ let find_add_selector sel xml =
    Array.find (fun (elem:X4GodMod.Add) -> elem.Sel = sel) xml
 
 
+let stationSectorName (station:X4WorldStart.Station) =
+    match station.Location.Class with
+    | Some "zone" -> X4.Data.findSectorFromZone (station.Location.Macro |> Option.defaultValue "") X4.Data.allSectors |> Option.defaultValue "none"
+    | Some "sector" -> station.Location.Macro |> Option.defaultValue "none"
+    | _ -> "none"
+
+// Is this station in a sector we're going to leave alone? ie, in the territory of the owning faction
+// or a faction we're ignoring and not changing?
+let ignoreStation (station:X4WorldStart.Station) =
+    let sectorName = stationSectorName station
+    (X4.Data.isFactionInSector station.Owner sectorName) || List.contains station.Owner ["khaak"; "xenon"; "yaki"; "scaleplate"; "buccaneers"; "player"]
+
 // MAIN PROCESSING FUNCTIONS
 
 // Given a station, process it according to our rules. We may replace it
 // with a Xenon one, remove it, etc. This function is call once per station
 let processStation (station:X4WorldStart.Station) allSectors (xenonShipyard:XElement) (xenonWharf:XElement) (xenonDefence:XElement)  =
-    logStation station
+    logStation "PROCESSING" station
 
     // So, turns out XmlProvider is more focused around reads. Writes are not... great.
     // To edit underlying fields, you really need to get to the underlying linq XElement
@@ -179,25 +191,10 @@ let processStation (station:X4WorldStart.Station) allSectors (xenonShipyard:XEle
     // off a copy of an old one, it will use a reference to the underlying XElement.
     // that means our edits will overwrite, sooo we need to clone the XElement each time.
 
-    // First check if the station is within the permitted sector for the faction.
-    // We've limited this to just a couple sectors per faction. If it's in one of these
-    // we leave it alone. Otherwise, it's going to get... "assimilated"
-
-    let sectorName = 
-        match station.Location.Class with
-        | Some "zone" -> X4.Data.findSectorFromZone (station.Location.Macro |> Option.defaultValue "") allSectors |> Option.defaultValue "none"
-        | Some "sector" -> station.Location.Macro |> Option.defaultValue "none"
-        | _ -> "none"
-    let inTerritory = (X4.Data.isFactionInSector station.Owner sectorName) || (X4.Data.ignoreFaction station.Owner)
-
-    match inTerritory, station.Owner with
-    | true, _ -> 
+    match ignoreStation station with
+    | true ->
         // This station is in a sector we're leaving alone..
-        printfn "  LEAVING [%s]:%s :: %A" station.Owner sectorName station.Id
-        (None, None)
-    | _, "khaak" | _, "xenon" | _, "yaki" | _, "scaleplate" | _,"buccaneers" | _, "player" ->
-        // We're ignoring certain pirate bases for now like scaleplate and bucconeers. HAT bases we'll still replace below
-        printfn "  IGNORING [%s]" station.Owner // These will still exist, and probably get wiped pretty quick, unless they're well hidden.
+        printfn "  LEAVING [%s]:%s :: %A" station.Owner (stationSectorName station) station.Id
         (None, None)
     | _ ->
         // 'Select' contains the tags that describe whether this is a defence station, wharf or shipyard.
@@ -256,6 +253,40 @@ let processStation (station:X4WorldStart.Station) allSectors (xenonShipyard:XEle
             logAddStation "REPLACE" replacement
 
             (Some replacement.XElement, Some remove)  // return an add/remove options,
+
+
+// Given a list of stations, move each one to a 'safe' sector. that is, a sector we've assigned to a faction.
+let moveStationToSafeSector (stations:X4WorldStart.Station list) =
+    // Now we need to, for each of these, move them to one of the sectors we've assigned to the faction.
+    stations |> printfn "STATIONS THAT NEED MOVING: %A"
+
+    [ for station in stations do
+        printfn "  MOVING [%s]:%s :: %A" station.Owner (stationSectorName station) station.Id
+
+
+
+        yield station
+    ]
+
+
+// with the shifting around of valid territory, the various races have lost some of their critical wharfs and shipyards.
+// We need to re-add some, but not all. Just make sure each faction has at least one of each type.
+let findStationsThatNeedMoving (stations:X4WorldStart.Station list) =
+    stations
+    // We're looking for the station we did NOT ignore earlier: ie, the ones that may have been replaced.
+    |> List.filter (fun (station:X4WorldStart.Station) -> ignoreStation station = false)
+    // But they may have been ignored because they belong to a faction we're not touching
+    |> List.filter (fun station -> not (List.contains station.Owner ["khaak"; "xenon"; "yaki"; "scaleplate"; "buccaneers"; "player"]))
+    // And we're only interested in the ones that are shipyards, wharfs, trading stations, etc.
+    |> List.filter (
+        fun station ->
+            // most special stations are identified by tags in the optional 'select' field.
+            station.Station.Select |> Option.exists (fun s -> List.contains (s.Tags) ["[shipyard]"; "[wharf]"; "[equipmentdock]"; "[tradestation]"] )
+            || station.Type = Some "tradingstation" // Teladi trading stations are identified differently, by using type.
+    )
+    // BUT, we only want to move the first instance of each type of station per fection, so lets drop duplicates.
+    |> List.distinctBy (fun station -> (station.Owner, station.Type, station.Station.Select))
+
 
 
 // Construct an XML element representing a 'replace' tag that will replace a specific quota for a given product.
@@ -344,7 +375,6 @@ let generate_god_file (filename:string) =
     let xenonWharf    = (Array.find (fun (elem:X4ObjectTemplates.Station) -> elem.Id = "wharf_xenon_cluster") X4ObjectTemplatesData.Stations).XElement
     let xenonDefence  = (Array.find (fun (elem:X4ObjectTemplates.Station) -> elem.Id = "xen_defence_cluster") X4ObjectTemplatesData.Stations).XElement
 
-
     let (addStations, removeStations)  = 
         [| for station in allStations do yield processStation station X4.Data.allSectors xenonShipyard xenonWharf xenonDefence |] |> splitTuples
 
@@ -352,6 +382,12 @@ let generate_god_file (filename:string) =
         for product in allProducts do
             match processProduct product with Some product -> yield product | _ -> ()
     |]
+
+    let movedStations =
+        findStationsThatNeedMoving allStations
+        |> moveStationToSafeSector
+    [ for station in movedStations do logStation "MOVING" station] |> ignore
+    // exit 0
 
     let newDefenseStations = generateGateDefenseStations()
 

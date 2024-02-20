@@ -245,14 +245,6 @@ let doesFactionHavePresenceInLocationCluster (faction: string) (location: string
     ) 
 
 
-// For some factions, like BORON, or TIDES, we want to leave along.
-// For Boron, their economy is crippled to start with, so we'll leave them alone.
-// For VIG, they're non expansionist, and it makes for an 'easier' start for the player, with
-// more space for early missions, etc; but limited destroyers and capital ships. (apart from
-// one special ship, of course)
-let ignoreFaction (faction: string) =
-    territories |> List.exists (fun record -> record.faction = faction && record.sector = "none")
-
 // Using the data in sector.xml, which is represented by the X4Sector type, find the name of
 // the sector given the name of the zone. the zone is stored as a connection in the sector definition.
 let findSectorFromZone (zone:string) (sectors:X4Sector.Macro list) =
