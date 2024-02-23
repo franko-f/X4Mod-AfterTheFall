@@ -1,7 +1,8 @@
 in progress:
-
+* find sectors in cluster
+* find sectors for faction.
 up next:
-* move faction shipyards to their new sector; and replace old one with xenon
+* move faction shipyards to their new sector;
 
 BUGS:
 * Bastions are:

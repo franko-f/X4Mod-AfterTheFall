@@ -16,6 +16,14 @@ let X4UnpackedDataFolder = __SOURCE_DIRECTORY__ + "/X4_unpacked_data"
 // It's important as the X4 data files often mix the case of identifiers like zone and sector names.
 let (=?) s1 s2 = System.String.Equals(s1, s2, System.StringComparison.CurrentCultureIgnoreCase)
 
+
+[<Literal>]
+let X4ClusterFileCore = X4UnpackedDataFolder + "/core/maps/xu_ep2_universe/clusters.xml"
+let X4ClusterFileSplit = X4UnpackedDataFolder + "/split/maps/xu_ep2_universe/dlc4_clusters.xml"
+let X4ClusterFileTerran = X4UnpackedDataFolder + "/terran/maps/xu_ep2_universe/dlc_terran_clusters.xml"
+let X4ClusterFilePirate = X4UnpackedDataFolder + "/pirate/maps/xu_ep2_universe/dlc_pirate_clusters.xml"
+let X4ClusterFileBoron = X4UnpackedDataFolder + "/boron/maps/xu_ep2_universe/dlc_boron_clusters.xml"
+
 [<Literal>]
 let X4SectorFileCore = X4UnpackedDataFolder  + "/core/maps/xu_ep2_universe/sectors.xml" // This core sectors file needs to be a literal, as it's also our type provider
 let X4SectorFileSplit = X4UnpackedDataFolder + "/split/maps/xu_ep2_universe/dlc4_sectors.xml"   // This one is normal string, as we can load and parse using X4SectorCore literal
@@ -40,11 +48,29 @@ let X4GalaxyFilePirate = X4UnpackedDataFolder + "/pirate/maps/xu_ep2_universe/ga
 let X4GalaxyFileBoron = X4UnpackedDataFolder + "/boron/maps/xu_ep2_universe/galaxy.xml"
 
 
-type X4Sector = XmlProvider<X4SectorFileCore>
-type X4Zone = XmlProvider<X4ZoneFileCore>
-type X4Galaxy = XmlProvider<X4GalaxyFileCore>
+type X4Cluster    = XmlProvider<X4ClusterFileCore>
+type X4Sector     = XmlProvider<X4SectorFileCore>
+type X4Zone       = XmlProvider<X4ZoneFileCore>
+type X4Galaxy     = XmlProvider<X4GalaxyFileCore>
 // the DLC galaxy files are in DIFF format, so we need a different type provider.
 type X4GalaxyDiff = XmlProvider<X4GalaxyFileSplit>
+
+
+// Load the cluster data from each individual core/expansion cluster XML file. We'll combine them in to one list.
+// Convinience functions to search/manipulate these lists are defined below.
+let AllClusters =
+    let X4ClusterCore   = X4Cluster.Load(X4ClusterFileCore)
+    let X4ClusterSplit  = X4Cluster.Load(X4ClusterFileSplit)
+    let X4ClusterTerran = X4Cluster.Load(X4ClusterFileTerran)
+    let X4ClusterPirate = X4Cluster.Load(X4ClusterFilePirate)
+    let X4ClusterBoron  = X4Cluster.Load(X4ClusterFileBoron)
+    Array.toList <| Array.concat [
+                    X4ClusterCore.Macros;
+                    X4ClusterSplit.Macros;
+                    X4ClusterTerran.Macros;
+                    X4ClusterPirate.Macros;
+                    X4ClusterBoron.Macros;
+                ]
 
 // Load the sector data from each individual sector file. We'll combine them in to one list.
 let allSectors = 
@@ -195,6 +221,11 @@ let getClusterFromLocation (location:string) =
     loop words
 
 
+
+// TODO: All these location sector/cluster functions need to be reconsidered as we
+// change how we're handling sectors and clusters for the mod
+
+
 let isLocationInCluster (location:string) (cluster:string) =
     let locationCluster = getClusterFromLocation location|> Option.defaultValue "none"
     let clusterName = getClusterFromLocation cluster |> Option.defaultValue "none"
@@ -212,23 +243,16 @@ let isFactionInCluster (faction: string) (cluster: string) =
 let findRecordsByFaction (faction: string) records =
     records |> List.filter (fun record -> record.faction = faction)
 
-// Some factions don't have sectors speecified, but instead have clusters.
-// This indicates that the faction will use their default game defined sectors.
-// Check for any sector for a faction that isn't ''.
-let isFactionSetToDefaultSectors (faction: string) =
-    not (territories |> List.exists (fun record -> record.sector <> "" && record.faction = faction))
 
 // This function returns whether a faction is ALLOWED to be in the sector as per our mod rules
 // For most factions this is a lot less than what is in the base game.
 // Normally the territories explitly list the sectors, but for some factions, like VIG, we
 // set sector to '', and List clusters instead. We'll have to check both.
 let isFactionInSector (faction: string) (sector: string) =
+    // The the given sector straigh up listed in the territories list? Otherwsie, check clusters
     territories |> List.exists (fun record -> record.faction = faction && record.sector =? sector)
-    ||  if isFactionSetToDefaultSectors faction then
-            // This faction has no sectors specified, so it means we're using faction defaults.
-            // In these cases, we've specified clusters instead, so we'll need to check those.
-            isFactionInCluster faction sector
-        else false
+    ||  isFactionInCluster faction sector
+
 
 
 
@@ -242,27 +266,50 @@ let doesFactionHavePresenceInLocationCluster (faction: string) (location: string
         fun record ->
             let recordCluster = getClusterFromLocation record.sector |> Option.defaultValue "none"
             record.faction = faction && isLocationInCluster record.sector location 
-    ) 
+    )
 
 
 // Using the data in sector.xml, which is represented by the X4Sector type, find the name of
 // the sector given the name of the zone. the zone is stored as a connection in the sector definition.
 let findSectorFromZone (zone:string) (sectors:X4Sector.Macro list) =
-    // Loops through the macros. Each macro will contain a sector. In that sector we'll find connections.
-    // Each connection will have zero or more zones for use to check.
-    let rec loop (sectors:X4Sector.Macro list) =
-        match sectors with
-        | [] -> None
-        | sector :: rest ->
-            let findConnection (connection:X4Sector.Connection) =
-                // Case insensitive comparison of zone, as the files mix the case of the zone names.
-                connection.Ref = "zones" && connection.Macro.Connection = "sector" && connection.Macro.Ref =? zone
-            let foundConnection = Array.tryFind findConnection sector.Connections
+    // allSectors is a list of secto Macros. Each macro represents a sector. In that sector we'll find connections.
+    // Each connection will have zero or more zones for use to check. So we try find a macro that contains a zone with the name we're looking for.
+    // Then return the name of that macro.
+    allSectors |> List.tryFind (
+        fun sector -> 
+            sector.Connections |> Array.tryFind (
+                fun connection -> connection.Ref = "zones" && connection.Macro.Connection = "sector" && connection.Macro.Ref =? zone
+            ) |> Option.isSome 
+    )
+    |> Option.map (fun sector -> sector.Name.ToLower()) // return the sector name, but in lower case, as the case varies in the files. I prefer to make it consistent
 
-            match foundConnection with
-            | Some connection -> Some (sector.Name.ToLower()) // return the sector name, but in lower case, as the case varies in the files. I prefer to make it consistent
-            | None -> loop rest
-    loop sectors
+
+// Given a cluster name, return the X4Cluster object representing it.
+let findCluster (clusterName:string) =
+    AllClusters |> List.tryFind (fun cluster -> cluster.Name =? clusterName)
+
+
+// Given a cluster name, find it, and then return all of it's connections of the specific type in a list.
+// Note that here, unlike in other places, the type is pluralised. eg, don't search for 'sector', use 'sectors'
+// Returns empty list if no sectors found.
+let getClusterConnectionsByType clusterName connectionType =
+    findCluster clusterName
+    |>  Option.map (
+            fun cluster -> 
+                cluster.Connections
+                |> Array.toList 
+                |> List.filter (fun connection -> connection.Ref = connectionType
+        )
+    )
+    |> Option.defaultValue []
+
+
+// Given a cluster name, return all the X4Sector objects in a list.
+let findSectorsInCluster (cluster:string) =
+    getClusterConnectionsByType cluster "sectors"
+    |> List.map (fun connection -> Option.defaultValue "no_sector_name" connection.Macro.Ref)
+    |> List.map (fun sector -> sector.ToLower()) // Lower case for consistency
+
 
 // Given a sector name, which cluster does it belong to?
 let findClusterFromSector (sector:string) =
