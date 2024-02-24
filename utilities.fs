@@ -52,11 +52,9 @@ let write_xml_file (filename:string) (xml:XElement) =
 // Given a list of 2 element tuples, split them in to two lists.
 // The first list contains all the first elements, the second list contains all the second elements.
 // It will strip out any 'None' values.
-let splitTuples (tuples:('a option * 'b option)[]) =
-    let firsts = [| for (a,_) in tuples do match a with Some x -> yield x | _ -> () |]
-    let seconds = [| for (_,b) in tuples do match b with Some x -> yield x | _ -> () |]
-    (firsts, seconds)
-
+let splitTuples (tuples:('a option * 'b option * 'c option) list) =
+    let x, y, z = List.unzip3 tuples
+    (List.choose id x, List.choose id y, List.choose id z)
 
 let parseStringList (input: string) : string list =
     let trimmedInput = input.Trim('[', ']')

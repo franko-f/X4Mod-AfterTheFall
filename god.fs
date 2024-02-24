@@ -74,7 +74,7 @@ let ignoreStation (station:X4WorldStart.Station) =
 // Sometimes the station type is determined by the value of 'station.type', but other times,
 // station.type is set to 'factory', and you must look to the 'tags' field to determine the
 // type of station.
-let find_station (faction:string) (stationType:string) (stations:X4WorldStart.Station list) =
+let findStation (faction:string) (stationType:string) (stations:X4WorldStart.Station list) =
     match List.tryFind (fun (station:X4WorldStart.Station) -> station.Owner = faction && station.Type = Some stationType) stations with
     | Some station -> Some station
     | None ->
@@ -102,7 +102,9 @@ let find_station (faction:string) (stationType:string) (stations:X4WorldStart.St
 
 // Given a station, process it according to our rules. We may replace it
 // with a Xenon one, remove it, etc. This function is call once per station
-let processStation (station:X4WorldStart.Station) allSectors (xenonShipyard:XElement) (xenonWharf:XElement) (xenonDefence:XElement)  =
+// stationsToMove are the IDs of stations that we're going to move to a safe sector, rather than
+// completely replace by a Xenon one. We'll still put a xenon station where they used to be
+let processStation (station:X4WorldStart.Station) (stationsToMove:string list) (xenonShipyard:XElement) (xenonWharf:XElement) (xenonDefence:XElement)  =
     logStation "PROCESSING" station
 
     // So, turns out XmlProvider is more focused around reads. Writes are not... great.
@@ -115,7 +117,7 @@ let processStation (station:X4WorldStart.Station) allSectors (xenonShipyard:XEle
     | true ->
         // This station is in a sector we're leaving alone..
         printfn "  LEAVING [%s]:%s :: %A" station.Owner (stationSectorName station) station.Id
-        (None, None)
+        (None, None, None)
     | _ ->
         // 'Select' contains the tags that describe whether this is a defence station, wharf or shipyard.
         let stationClone =
@@ -152,15 +154,16 @@ let processStation (station:X4WorldStart.Station) allSectors (xenonShipyard:XEle
         match stationClone with
         | None ->
             printfn "  IGNORING DEFAULT [%s]" station.Owner // These will still exist, and probably get wiped pretty quick, unless they're well hidden.
-            (None, None)
+            (None, None, None)
 
         | Some stationClone ->
+            // ok, so we're going to replace this station with a Xenon one. This means we need to do a couple of things:
+            // 1. Give the clone a new ID based off the old stations ID
+            // 2. Create some XML that will remove the old station from the game. Later, we're toing to check the list of
+            //   remove stations and actually move a few of them to a new location instead.
             let id = station.Id
-            // create XML tag that will remove the old station
-            let remove = new XElement( "remove",
-                new XAttribute("sel", $"//god/stations/station[@id='{id}']") // XML remove tag for the station we're replacing with Xenon.
-            )
-            
+
+            // Update location and ID of the clone. 
             // create a new Xenon station to replace it
             let replacement = new X4GodMod.Station(stationClone)
             replacement.XElement.SetAttributeValue(XName.Get("id"), replacement.Id + "_x_" + id)   // Give it a new unique ID
@@ -172,7 +175,33 @@ let processStation (station:X4WorldStart.Station) allSectors (xenonShipyard:XEle
             replacement.Location.XElement.SetAttributeValue(XName.Get("macro"), locationMacro)
             logAddStation "REPLACE" replacement
 
-            (Some replacement.XElement, Some remove)  // return an add/remove options,
+            // Now that's done, decide whether to REMOVE or MOVE the old station.
+            if List.contains id stationsToMove then
+                // We're going to move this station to a safe sector, rather than completely replace it with Xenon.
+                // We'll still put a xenon station where they used to be
+                // Select a random safe sector for the station to move to.
+                let sectors = X4.Data.getFactionSectors station.Owner
+                let random = System.Random()
+                let randomSector = sectors.[random.Next(sectors.Length)]
+                printfn "  MOVING [%s]:%s :: %A  from  %A:%A to sector:%A" station.Owner (stationSectorName station) station.Id locationClass locationMacro randomSector
+                // build the XML that will update the old stations location.
+                let replaceXml = [
+                    new XElement( "replace",
+                        new XAttribute("sel", $"//god/stations/station[@id='{id}']/location/@class"),
+                        "sector"
+                    )
+                    new XElement( "replace",
+                        new XAttribute("sel", $"//god/stations/station[@id='{id}']/location/@macro"),
+                        randomSector
+                    )
+                ]
+                (Some replacement.XElement, None, Some replaceXml)
+            else
+                // create XML tag that will remove the old station
+                let remove = new XElement( "remove",
+                    new XAttribute("sel", $"//god/stations/station[@id='{id}']") // XML remove tag for the station we're replacing with Xenon.
+                )
+                (Some replacement.XElement, Some remove, None)  // return an add/remove options,
 
 
 // Given a list of stations, move each one to a 'safe' sector. that is, a sector we've assigned to a faction.
@@ -250,7 +279,7 @@ let generateGateDefenseStations() =
         printfn "GENERATING DEFENSE STATION FOR %s GATE %s" gate.Faction gate.ConnectionName
         // find the first defence station for the faction. We want to fail if we find nothing, as that would break the mod.
         let station =
-            match find_station gate.Faction "defence" allStations with
+            match findStation gate.Faction "defence" allStations with
             | Some station -> station
             | None -> failwithf "No defense station found for faction %s" gate.Faction
         printfn "  FOUND DEFENSE STATION %s owner:%s" station.Id station.Owner
@@ -295,19 +324,15 @@ let generate_god_file (filename:string) =
     let xenonWharf    = (Array.find (fun (elem:X4ObjectTemplates.Station) -> elem.Id = "wharf_xenon_cluster") X4ObjectTemplatesData.Stations).XElement
     let xenonDefence  = (Array.find (fun (elem:X4ObjectTemplates.Station) -> elem.Id = "xen_defence_cluster") X4ObjectTemplatesData.Stations).XElement
 
-    let (addStations, removeStations)  = 
-        [| for station in allStations do yield processStation station X4.Data.allSectors xenonShipyard xenonWharf xenonDefence |] |> splitTuples
+    let stationsToMove = findStationsThatNeedMoving allStations |> List.map(fun s -> s.Id) // find the IDs of the stations we're going to move to a safe sector
+    let (addStations, removeStations, moveStations)  = 
+        [ for station in allStations do yield processStation station stationsToMove xenonShipyard xenonWharf xenonDefence ]
+        |> splitTuples
 
-    let replaceProducts = [| 
+    let replaceProducts = [
         for product in allProducts do
             match processProduct product with Some product -> yield product | _ -> ()
-    |]
-
-    let movedStations =
-        findStationsThatNeedMoving allStations
-        |> moveStationToSafeSector
-    [ for station in movedStations do logStation "MOVING" station] |> ignore
-    // exit 0
+    ]
 
     let newDefenseStations = generateGateDefenseStations()
 
@@ -342,7 +367,7 @@ let generate_god_file (filename:string) =
 
     // Add out 'remove' tags to the end of the diff block.
     let diff = outGodFile.XElement // the root element is actually the 'diff' tag.
-    let changes = Array.concat [removeStations; replaceProducts ] 
+    let changes = List.concat [removeStations; replaceProducts; (List.concat moveStations) ]
     [ for element in changes do
         diff.Add(element)
         diff.Add( new XText("\n")) // Add a newline after each element so the output is readible
