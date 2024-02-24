@@ -254,16 +254,8 @@ let isJobInFactionTerritory (job:X4Job.Job) =
         match job.Location.Macro with
         | None -> "----"
         | Some location -> location
-    
-    match job.Location.Class with
-    | "galaxy" -> true // well, if the class is galaxy, then definitely.
-    | "cluster" -> doesFactionHavePresenceInLocationCluster faction location
-    | "sector" -> if (isFactionInSector faction location) then true else false
-    | "zone" -> 
-        match findSectorFromZone location allSectors with
-        | None -> failwith ("unable to find sector zone belongs to : " + location)
-        | Some sector -> isFactionInSector faction sector
-    | _ -> failwith ("Unhandled location class in job: " + job.Location.Class)
+
+    isFactionInLocation faction location job.Location.Class
 
 
 // Write some useful data about a job to the console. We use this purely to understand what jobs are

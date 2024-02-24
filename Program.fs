@@ -15,3 +15,4 @@ X4.Jobs.generate_job_file "libraries/jobs.xml"
 //X4.Gates.printGatesInZones()
 //X4.Gates.printGateConnections()
 printfn "Sectors: %A" (X4.Data.findSectorsInCluster "Cluster_606_macro")
+printfn "Cluster name for sector cluster_606_sector001_macro: %A" (findClusterFromSector "cluster_606_sector001_macro")

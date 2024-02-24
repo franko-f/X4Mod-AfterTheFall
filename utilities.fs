@@ -7,6 +7,12 @@ module X4.Utilities
 open System
 open System.Xml.Linq
 
+
+// Neat case insensitive string comparison function from https://stackoverflow.com/questions/1936767/f-case-insensitive-string-compare
+// It's important as the X4 data files often mix the case of identifiers like zone and sector names.
+let (=?) s1 s2 = System.String.Equals(s1, s2, System.StringComparison.CurrentCultureIgnoreCase)
+
+
 // Borrowed from. Promise to give it back
 // https://www.fssnip.net/gO/title/Copy-a-directory-of-files
 let rec directoryCopy srcPath dstPath copySubDirs =

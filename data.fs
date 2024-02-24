@@ -12,10 +12,6 @@ open X4.Utilities
 let X4UnpackedDataFolder = __SOURCE_DIRECTORY__ + "/X4_unpacked_data"
 
 
-// Neat case insensitive string comparison function from https://stackoverflow.com/questions/1936767/f-case-insensitive-string-compare
-// It's important as the X4 data files often mix the case of identifiers like zone and sector names.
-let (=?) s1 s2 = System.String.Equals(s1, s2, System.StringComparison.CurrentCultureIgnoreCase)
-
 
 [<Literal>]
 let X4ClusterFileCore = X4UnpackedDataFolder + "/core/maps/xu_ep2_universe/clusters.xml"
@@ -144,130 +140,101 @@ let gateMacros = ["props_gates_orb_accelerator_01_macro", "props_gates_anc_gate_
 // place three bastion stations around each one, encircling it.
 type Location = { x: float; y: float; z: float }
 type MiningResource = { name: string; amount: int; location: Location }
-type Territory = { faction: string; cluster:string; sector: string; zone: string; resources: MiningResource list; gates: Location list }
-                   static member Default = { faction = ""; cluster = ""; sector = ""; zone = ""; resources = []; gates = [] }
+type Territory = { faction: string; cluster:string; resources: MiningResource list }
+                   static member Default = { faction = ""; cluster = ""; resources = []}
 
 // create a list of all the factions and their territories as Territory records
 // We'll pull resources and gates from the xml files, based on the sector name.
 // We will likely need to create a zone (or find) in each of these sectors to place the station
 let territories = [
     // core
-    { Territory.Default with faction = "argon"; sector = "Cluster_14_Sector001_macro" }      // Argon Prime
-    { Territory.Default with faction = "argon"; sector = "Cluster_29_Sector002_macro" }      // Hatikvah's choice III
-    { Territory.Default with faction = "hatikvah"; sector = "Cluster_29_Sector001_macro" }   // Hatikvah's choice I
-    { Territory.Default with faction = "antigone"; sector = "Cluster_27_Sector001_macro" }   // The Void
-    { Territory.Default with faction = "antigone"; sector = "Cluster_28_Sector001_macro" }   // Antigone Menorial
+    { Territory.Default with faction = "argon";    cluster = "Cluster_14_macro" }      // Argon Prime
+    { Territory.Default with faction = "argon";    cluster = "Cluster_29_macro" }      // Hatikvah's choice III
+    { Territory.Default with faction = "hatikvah"; cluster = "Cluster_29_macro" }   // Hatikvah's choice I
+    { Territory.Default with faction = "antigone"; cluster = "Cluster_27_macro" }   // The Void
+    { Territory.Default with faction = "antigone"; cluster = "Cluster_28_macro" }   // Antigone Menorial
 
-    { Territory.Default with faction = "teladi"; sector = "Cluster_15_Sector001_macro" }     // Ianamus Zura IV
-    { Territory.Default with faction = "teladi"; sector = "Cluster_15_Sector002_macro" }     // Ianamus Zura VII
-    { Territory.Default with faction = "ministry"; sector = "Cluster_15_Sector001_macro" }   // Ianamus Zura IV
-    { Territory.Default with faction = "ministry"; sector = "Cluster_15_Sector002_macro" }   // Ianamus Zura VII
+    { Territory.Default with faction = "teladi";   cluster = "Cluster_15_macro" }     // Ianamus Zura IV
+    { Territory.Default with faction = "ministry"; cluster = "Cluster_15_macro" }   // Ianamus Zura IV
 //    { faction = "scaleplate"; sector = "" }
 
-    { Territory.Default with faction = "paranid"; sector = "Cluster_47_Sector001_macro" }   // Trinity Sanctum VII
-    { Territory.Default with faction = "paranid"; sector = "Cluster_18_Sector001_macro" }   // Trinity Sanctum III
-    { Territory.Default with faction = "alliance"; sector = "Cluster_47_Sector001_macro" }  // Trinity Sanctum VII
-    { Territory.Default with faction = "holyorder"; sector = "Cluster_24_Sector001_macro" }  // Holy Vision
-    { Territory.Default with faction = "holyorder"; sector = "Cluster_11_Sector001_macro" }  // Pontifex Claim
+    { Territory.Default with faction = "paranid";   cluster = "Cluster_47_macro" }   // Trinity Sanctum VII
+    { Territory.Default with faction = "paranid";   cluster = "Cluster_18_macro" }   // Trinity Sanctum III
+    { Territory.Default with faction = "alliance";  cluster = "Cluster_47_macro" }  // Trinity Sanctum VII
+    { Territory.Default with faction = "holyorder"; cluster = "Cluster_24_macro" }  // Holy Vision
+    { Territory.Default with faction = "holyorder"; cluster = "Cluster_11_macro" }  // Pontifex Claim
 
     // split: zyarth. freesplit: free families
-    { Territory.Default with faction = "split"; sector = "Cluster_418_Sector001_macro" }      // Family Nhuut
-    { Territory.Default with faction = "split"; sector = "Cluster_401_Sector001_macro" }      // Family Zhin
-    { Territory.Default with faction = "freesplit"; sector = "Cluster_411_Sector001_macro" }  // Heart of Acrmony II
-    { Territory.Default with faction = "freesplit"; sector = "Cluster_410_Sector001_macro" }  // Tharkas Ravine XVI
-    { Territory.Default with faction = "freesplit"; sector = "Cluster_412_Sector001_macro" }  // Tharkas Ravine VIII
+    { Territory.Default with faction = "split";     cluster = "Cluster_418_macro" }      // Family Nhuut
+    { Territory.Default with faction = "split";     cluster = "Cluster_401_macro" }      // Family Zhin
+    { Territory.Default with faction = "freesplit"; cluster = "Cluster_411_macro" }  // Heart of Acrmony II
+    { Territory.Default with faction = "freesplit"; cluster = "Cluster_410_macro" }  // Tharkas Ravine XVI
+    { Territory.Default with faction = "freesplit"; cluster = "Cluster_412_macro" }  // Tharkas Ravine VIII
 
     // cradle of humanity
-    { Territory.Default with faction = "terran"; sector = "Cluster_101_Sector001_macro" }     // Mars
-    { Territory.Default with faction = "terran"; sector = "Cluster_100_Sector001_macro" }     // Asteroid belt
-    { Territory.Default with faction = "pioneers"; sector = "Cluster_113_Sector001_macro" }   // Segaris sectors are Cluster_113_Sector001_macro -> 115  - but we'll leave them unchanged.
-    { Territory.Default with faction = "pioneers"; sector = "Cluster_114_Sector001_macro" }   // Segaris sectors are Cluster_113_Sector001_macro -> 115  - but we'll leave them unchanged.
-    { Territory.Default with faction = "pioneers"; sector = "Cluster_115_Sector001_macro" }   // Segaris sectors are Cluster_113_Sector001_macro -> 115  - but we'll leave them unchanged.
+    { Territory.Default with faction = "terran";   cluster = "Cluster_101_macro" }     // Mars
+    { Territory.Default with faction = "terran";   cluster = "Cluster_100_macro" }     // Asteroid belt
+    { Territory.Default with faction = "pioneers"; cluster = "Cluster_113_macro" }   // Segaris sectors are Cluster_113_Sector001_macro -> 115  - but we'll leave them unchanged.
+    { Territory.Default with faction = "pioneers"; cluster = "Cluster_114_macro" }   // Segaris sectors are Cluster_113_Sector001_macro -> 115  - but we'll leave them unchanged.
+    { Territory.Default with faction = "pioneers"; cluster = "Cluster_115_macro" }   // Segaris sectors are Cluster_113_Sector001_macro -> 115  - but we'll leave them unchanged.
 
     // tides of avarice
     // :eave VIG/Scavengers mostly unchanged. Leave Windfall I for sure to avoid issues with Erlking.
-    { Territory.Default with faction = "scavenger"; cluster = "cluster_500" }   // RIP: Unchanged. All sectors in cluster_500
-    { Territory.Default with faction = "loanshark"; cluster = "cluster_501" }   // Leave VIG unchanged.
-    { Territory.Default with faction = "loanshark"; cluster = "cluster_502" }   // 
-    { Territory.Default with faction = "loanshark"; cluster = "cluster_503" }   // I considered removing this cluster, but it has the scrap VIG need, so will leave it.
+    { Territory.Default with faction = "scavenger"; cluster = "Cluster_500_macro" }   // RIP: Unchanged. All sectors in cluster_500
+    { Territory.Default with faction = "loanshark"; cluster = "Cluster_501_macro" }   // Leave VIG unchanged.
+    { Territory.Default with faction = "loanshark"; cluster = "Cluster_502_macro" }   // 
+    { Territory.Default with faction = "loanshark"; cluster = "Cluster_503_macro" }   // I considered removing this cluster, but it has the scrap VIG need, so will leave it.
 
     // boron
     // Boron: Economy is kinda screwed without player help anyway. Leave them alone for now?
     // Changing it could screw things with the default boron story if there are Xenon swarming around.
     // { Territory.Default with faction = "boron"; cluster = "cluster_601" }       // Watchful Gaze Not in territory by default.
-    { Territory.Default with faction = "boron"; cluster = "cluster_602" }       // Barren Shores 
-    { Territory.Default with faction = "boron"; cluster = "cluster_603" }       // Great Reef 
-    { Territory.Default with faction = "boron"; cluster = "cluster_604" }       // Ocean of Fantasy
+    { Territory.Default with faction = "boron"; cluster = "Cluster_602_macro" }       // Barren Shores 
+    { Territory.Default with faction = "boron"; cluster = "Cluster_603_macro" }       // Great Reef 
+    { Territory.Default with faction = "boron"; cluster = "Cluster_604_macro" }       // Ocean of Fantasy
     // { Territory.Default with faction = "boron"; cluster = "cluster_605" }       // Sanctuary of Darkness : The Khaak sector
-    { Territory.Default with faction = "boron"; cluster = "cluster_606" }       // Kingdom End (cluster with 3 sectors) : Kingdoms end I, Reflected Stars, Towering Waves 
-    { Territory.Default with faction = "boron"; cluster = "cluster_607" }       // Rolk's Demise 
-    { Territory.Default with faction = "boron"; cluster = "cluster_608" }       // Atreus' Clouds
-    { Territory.Default with faction = "boron"; cluster = "cluster_609" }       // Menelaus' Oasis 
+    { Territory.Default with faction = "boron"; cluster = "Cluster_606_macro" }       // Kingdom End (cluster with 3 sectors) : Kingdoms end I, Reflected Stars, Towering Waves 
+    { Territory.Default with faction = "boron"; cluster = "Cluster_607_macro" }       // Rolk's Demise 
+    { Territory.Default with faction = "boron"; cluster = "Cluster_608_macro" }       // Atreus' Clouds
+    { Territory.Default with faction = "boron"; cluster = "Cluster_609_macro" }       // Menelaus' Oasis 
 ]
 
 
-// Seems that most locations withing a cluster have the string 'cluster_xxx' in their name somewhere
-// Lets look for that.
-let getClusterFromLocation (location:string) =
-    // split the location string in to words separated by '_', and convert to lowercase 
-    let words = location.ToLower().Split('_') |> Array.toList
+// Given a cluster name, return the X4Cluster object representing it.
+let findCluster (clusterName:string) =
+    AllClusters |> List.tryFind (fun cluster -> cluster.Name =? clusterName)
 
-    let rec loop (words: string list) =
-        match words with
-        | [] -> None            // Empty list
-        | _last :: [] -> None    // If theres only one word left, it can't be a cluster followed by ID
-        | "cluster" :: id :: _tail -> Some $"cluster_{id}" 
-        | _head :: tail -> loop tail
-    loop words
+let getClusterMacroConnectionsByType connectionType (cluster:X4Cluster.Macro)  =
+    cluster.Connections
+    |> Array.toList
+    |> List.filter (fun connection -> connection.Ref = connectionType )
 
+// Given a cluster name, find it, and then return all of it's connections of the specific type in a list.
+// Note that here, unlike in other places, the type is pluralised. eg, don't search for 'sector', use 'sectors'
+// Returns empty list if no sectors found.
+let getClusterConnectionsByType connectionType clusterName =
+    findCluster clusterName
+    |> Option.map ( fun cluster -> getClusterMacroConnectionsByType connectionType cluster)
+    |> Option.defaultValue []
 
-
-// TODO: All these location sector/cluster functions need to be reconsidered as we
-// change how we're handling sectors and clusters for the mod
-
-
-let isLocationInCluster (location:string) (cluster:string) =
-    let locationCluster = getClusterFromLocation location|> Option.defaultValue "none"
-    let clusterName = getClusterFromLocation cluster |> Option.defaultValue "none"
-    locationCluster =? clusterName
-
-// Explicit check for whether we've defined a cluster in the mapping. For many factions, this will
-// return 'false' even if they do have presence in sectors in the cluster. For the more general case
-// you'll probably want to use 'doesFactionHavePresenceInLocationCluster' instead.
-let isFactionInCluster (faction: string) (cluster: string) =
-    let clusterName = getClusterFromLocation cluster |> Option.defaultValue "none"  // First step is that 'cluster' is often recorded as 'cluster_[id]_macro' - so extract the actual name
-    // First check is simply whether we have a cluster defined and it matches
-    territories |> List.exists (fun record -> record.faction = faction && record.cluster =? clusterName) 
+// Given a cluster name, return all the X4Sector objects in a list.
+let findSectorsInCluster (cluster:string) =
+    getClusterConnectionsByType "sectors" cluster
+    |> List.map (fun connection -> Option.defaultValue "no_sector_name" connection.Macro.Ref)
+    |> List.map (fun sector -> sector.ToLower()) // Lower case for consistency
 
 
-let findRecordsByFaction (faction: string) records =
-    records |> List.filter (fun record -> record.faction = faction)
-
-
-// This function returns whether a faction is ALLOWED to be in the sector as per our mod rules
-// For most factions this is a lot less than what is in the base game.
-// Normally the territories explitly list the sectors, but for some factions, like VIG, we
-// set sector to '', and List clusters instead. We'll have to check both.
-let isFactionInSector (faction: string) (sector: string) =
-    // The the given sector straigh up listed in the territories list? Otherwsie, check clusters
-    territories |> List.exists (fun record -> record.faction = faction && record.sector =? sector)
-    ||  isFactionInCluster faction sector
-
-
-
-
-// 'true' if the faction has any sort of presence in the cluster, even if it's just one sector.
-// Used for certain jobs, but not appropriate for stations, as those are assigned to a specific sector.
-let doesFactionHavePresenceInLocationCluster (faction: string) (location: string) =
-    isFactionInCluster faction location
-    || isFactionInSector faction location
-    || territories |> List.exists (
-        // Otherwise, lets try extract teh cluster from the sector for an approximate match.
-        fun record ->
-            let recordCluster = getClusterFromLocation record.sector |> Option.defaultValue "none"
-            record.faction = faction && isLocationInCluster record.sector location 
-    )
-
+// Given a sector name, which cluster does it belong to?
+let findClusterFromSector (sector:string) =
+    AllClusters |>
+    List.tryFind (
+        // For each cluster, we'll check if there's a connection to this sector.
+        fun cluster ->
+            getClusterMacroConnectionsByType "sectors" cluster
+            |> List.exists ( fun c -> Option.defaultValue "no_sector_name" c.Macro.Ref =? sector )
+        )
+    // If we actually found a match, change the return value from Some Cluster to Some Cluster.Name
+    |> Option.map (fun cluster -> cluster.Name)
 
 // Using the data in sector.xml, which is represented by the X4Sector type, find the name of
 // the sector given the name of the zone. the zone is stored as a connection in the sector definition.
@@ -284,55 +251,45 @@ let findSectorFromZone (zone:string) (sectors:X4Sector.Macro list) =
     |> Option.map (fun sector -> sector.Name.ToLower()) // return the sector name, but in lower case, as the case varies in the files. I prefer to make it consistent
 
 
-// Given a cluster name, return the X4Cluster object representing it.
-let findCluster (clusterName:string) =
-    AllClusters |> List.tryFind (fun cluster -> cluster.Name =? clusterName)
+// Explicit check for whether we've ALLOWED a faction in a cluster in our territory mapping.
+// For most factions this is a lot less than what is in the base game.
+let isFactionInCluster (faction: string) (cluster: string) =
+    territories |> List.exists (fun record -> record.faction = faction && record.cluster =? cluster)
 
+// This function returns whether a faction is ALLOWED to be in the sector as per our mod rules
+let isFactionInSector (faction: string) (sector: string) =
+    findClusterFromSector sector |> Option.map (fun cluster -> isFactionInCluster faction cluster) |> Option.defaultValue false
 
-// Given a cluster name, find it, and then return all of it's connections of the specific type in a list.
-// Note that here, unlike in other places, the type is pluralised. eg, don't search for 'sector', use 'sectors'
-// Returns empty list if no sectors found.
-let getClusterConnectionsByType clusterName connectionType =
-    findCluster clusterName
-    |>  Option.map (
-            fun cluster -> 
-                cluster.Connections
-                |> Array.toList 
-                |> List.filter (fun connection -> connection.Ref = connectionType
-        )
-    )
-    |> Option.defaultValue []
+// Have we ALLOWED the faction to be in this specific zone?
+let isFactionInZone (faction: string) (zone: string) =
+    match findSectorFromZone zone allSectors with
+    | None -> false
+    | Some sector -> isFactionInSector faction sector
 
+// Given any location name and class, return whether the faction is ALLOWED to be in that location.
+let isFactionInLocation (faction: string) (location: string) (locationClass:string) =
+    match locationClass with
+    | "galaxy"  -> true // well, if the class is galaxy, then definitely
+    | "sector"  -> isFactionInSector faction location
+    | "cluster" -> isFactionInCluster faction location
+    | "zone"    -> isFactionInZone faction location
+    | _ -> failwith ("Unhandled location class in job: " + locationClass)
 
-// Given a cluster name, return all the X4Sector objects in a list.
-let findSectorsInCluster (cluster:string) =
-    getClusterConnectionsByType cluster "sectors"
-    |> List.map (fun connection -> Option.defaultValue "no_sector_name" connection.Macro.Ref)
-    |> List.map (fun sector -> sector.ToLower()) // Lower case for consistency
-
-
-// Given a sector name, which cluster does it belong to?
-let findClusterFromSector (sector:string) =
-    getClusterFromLocation sector // Maybe we can do better by checking the connections explicitly, but Egosoft have reliably named the sectors with the cluster name in them.
 
 let findFactionFromCluster (cluster: string) =
     territories |> List.tryFind (fun record -> record.cluster =? cluster) |> Option.map (fun record -> record.faction)
 
 let findFactionFromSector (sector: string) =
-   match territories |> List.tryFind (fun record -> record.sector =? sector) |> Option.map (fun record -> record.faction) with
-   | Some faction -> Some faction
-   | None ->
-        match findClusterFromSector sector with
-        | None -> None
-        | Some cluster -> findFactionFromCluster cluster
+    match findClusterFromSector sector with
+    | Some cluster -> findFactionFromCluster cluster
+    | None -> None
 
 let findFactionFromZone (zone: string) =
-    let sector = findSectorFromZone zone allSectors
-    match sector with
+    match findSectorFromZone zone allSectors with
     | None -> None
     | Some sector -> findFactionFromSector sector
+
 
 let dump_sectors (sectors:X4Sector.Macro list) =
     for sector in sectors do
         printfn "Macro.%s," (sector.Name.ToLower())
-
