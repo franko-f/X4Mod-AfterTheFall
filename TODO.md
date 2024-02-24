@@ -1,5 +1,4 @@
 in progress:
-* find sectors in cluster
 * find sectors for faction.
 up next:
 * move faction shipyards to their new sector;

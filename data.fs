@@ -188,11 +188,11 @@ let territories = [
     // boron
     // Boron: Economy is kinda screwed without player help anyway. Leave them alone for now?
     // Changing it could screw things with the default boron story if there are Xenon swarming around.
-    // { Territory.Default with faction = "boron"; cluster = "cluster_601" }       // Watchful Gaze Not in territory by default.
+    // { Territory.Default with faction = "boron"; cluster = "cluster_601" }          // Watchful Gaze Not in territory by default.
     { Territory.Default with faction = "boron"; cluster = "Cluster_602_macro" }       // Barren Shores 
     { Territory.Default with faction = "boron"; cluster = "Cluster_603_macro" }       // Great Reef 
     { Territory.Default with faction = "boron"; cluster = "Cluster_604_macro" }       // Ocean of Fantasy
-    // { Territory.Default with faction = "boron"; cluster = "cluster_605" }       // Sanctuary of Darkness : The Khaak sector
+    // { Territory.Default with faction = "boron"; cluster = "cluster_605" }          // Sanctuary of Darkness : The Khaak sector
     { Territory.Default with faction = "boron"; cluster = "Cluster_606_macro" }       // Kingdom End (cluster with 3 sectors) : Kingdoms end I, Reflected Stars, Towering Waves 
     { Territory.Default with faction = "boron"; cluster = "Cluster_607_macro" }       // Rolk's Demise 
     { Territory.Default with faction = "boron"; cluster = "Cluster_608_macro" }       // Atreus' Clouds
@@ -223,6 +223,11 @@ let findSectorsInCluster (cluster:string) =
     |> List.map (fun connection -> Option.defaultValue "no_sector_name" connection.Macro.Ref)
     |> List.map (fun sector -> sector.ToLower()) // Lower case for consistency
 
+let getFactionClusters (faction: string) =
+    territories |> List.filter (fun record -> record.faction = faction) |> List.map (fun record -> record.cluster)
+
+let getFactionSectors (faction: string) =
+    getFactionClusters faction |> List.collect findSectorsInCluster
 
 // Given a sector name, which cluster does it belong to?
 let findClusterFromSector (sector:string) =
