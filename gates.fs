@@ -82,7 +82,7 @@ type Gate =
     // multiple gate connections, so we need to be specific about the connection we want.
     static member FromZone(zone: X4Zone.Macro) (connection: X4Zone.Connection ) =
         let connectionMacro = connection.Macro.Value   // the caller of FromZone must make sure this is always present: ie, this is a valid gate zone
-        let sector = findSectorFromZone zone.Name allSectors |> Option.defaultValue "Unknown"
+        let sector = findSectorFromZone zone.Name |> Option.defaultValue "Unknown"
         let faction = findFactionFromZone zone.Name |> Option.defaultValue "Unknown"
         let position = Position.FromOffset connection.Offset.Value.Position
         let quaternion = // Quarternians are almost, but not always, set

@@ -11,7 +11,21 @@ open X4.Utilities
 [<Literal>]
 let X4UnpackedDataFolder = __SOURCE_DIRECTORY__ + "/X4_unpacked_data"
 
+// The default GOD.xml file, etc, don't have an 'add/replace' XML section, so they can't
+// be used as type providers for our output XML. So we've created a template that has
+// versions of our types that we need (like station, product) as well as the XML selectors
+// for replace/add
+[<Literal>]
+let X4GodModFile = __SOURCE_DIRECTORY__ + "/mod_templates/god.xml"
+[<Literal>]
+let X4ObjectTemplatesFile = __SOURCE_DIRECTORY__ + "/mod_templates/object_templates.xml"
 
+[<Literal>]
+let X4GodFileCore   = X4UnpackedDataFolder + "/core/libraries/god.xml" // Core game data.
+let X4GodFileSplit  = X4UnpackedDataFolder + "/split/libraries/god.xml" // Core game data.
+let X4GodFileTerran = X4UnpackedDataFolder + "/terran/libraries/god.xml" // Core game data.
+let X4GodFilePirate = X4UnpackedDataFolder + "/pirate/libraries/god.xml" // Core game data.
+let X4GodFileBoron  = X4UnpackedDataFolder + "/boron/libraries/god.xml" // Core game data.
 
 [<Literal>]
 let X4ClusterFileCore = X4UnpackedDataFolder + "/core/maps/xu_ep2_universe/clusters.xml"
@@ -34,7 +48,6 @@ let X4ZoneFileTerran = X4UnpackedDataFolder + "/terran/maps/xu_ep2_universe/dlc_
 let X4ZoneFilePirate = X4UnpackedDataFolder + "/pirate/maps/xu_ep2_universe/dlc_pirate_zones.xml"
 let X4ZoneFileBoron = X4UnpackedDataFolder + "/boron/maps/xu_ep2_universe/dlc_boron_zones.xml"
 
-
 [<Literal>]
 let X4GalaxyFileCore = X4UnpackedDataFolder + "/core/maps/xu_ep2_universe/galaxy.xml"
 [<Literal>]  // the DLC galaxy files are in DIFF format, so we need a different type provider.
@@ -43,6 +56,15 @@ let X4GalaxyFileTerran = X4UnpackedDataFolder + "/terran/maps/xu_ep2_universe/ga
 let X4GalaxyFilePirate = X4UnpackedDataFolder + "/pirate/maps/xu_ep2_universe/galaxy.xml"
 let X4GalaxyFileBoron = X4UnpackedDataFolder + "/boron/maps/xu_ep2_universe/galaxy.xml"
 
+// TODO: Should we 'unify' all the types using 'Global=true,' parameter?
+// This means, for example, every instance of 'Location' type is trested as the same type, no matter
+// where it appears in the sample data file. It results in a lot of fields being set to an 'option'
+// type, as some will appear in some cases of location, but not in others. So requires some tweaks
+// to the parsing code.
+// https://fsprojects.github.io/FSharp.Data/library/XmlProvider.html#Global-inference-mode
+type X4WorldStart = XmlProvider<X4GodFileCore>
+type X4GodMod     = XmlProvider<X4GodModFile >
+type X4ObjectTemplates = XmlProvider<X4ObjectTemplatesFile>
 
 type X4Cluster    = XmlProvider<X4ClusterFileCore>
 type X4Sector     = XmlProvider<X4SectorFileCore>
@@ -51,6 +73,8 @@ type X4Galaxy     = XmlProvider<X4GalaxyFileCore>
 // the DLC galaxy files are in DIFF format, so we need a different type provider.
 type X4GalaxyDiff = XmlProvider<X4GalaxyFileSplit>
 
+
+// ====== LOAD DATA FROM XML FILES ======
 
 // Load the cluster data from each individual core/expansion cluster XML file. We'll combine them in to one list.
 // Convinience functions to search/manipulate these lists are defined below.
@@ -121,6 +145,59 @@ let allGalaxy =
                     loadFromDiff X4GalaxyPirate;
                     loadFromDiff X4GalaxyBoron;
                 ]
+
+
+// Read all thge stations and products from the core game and the DLCs.
+let allStations, allProducts =
+    // Helper functions. Extract the stations from the 'add' section of a DLCs god diff/mod file.
+    // While there are many 'add' sections, we're only interested in the one that that has the selectior '//god/stations'
+    let getStationsFromDiff (diff:X4GodMod.Add[]) =
+        let stationsAdd = Array.filter (fun (add:X4GodMod.Add) -> add.Sel = "/god/stations") diff
+        [ for stations in stationsAdd do
+                for station in stations.Stations do
+                    yield new X4WorldStart.Station(station.XElement)
+        ]
+
+    let getProductFromDiff (diff:X4GodMod.Add[]) =
+        let productsAdd = Array.filter (fun (add:X4GodMod.Add) -> add.Sel = "/god/products") diff
+        [ for products in productsAdd do
+                for product in products.Products do
+                    yield new X4WorldStart.Product(product.XElement)
+        ]
+
+    let X4GodCore   = X4WorldStart.Load(X4GodFileCore)
+    let X4GodSplit  = X4GodMod.Load(X4GodFileSplit)
+    let X4GodTerran = X4GodMod.Load(X4GodFileTerran)
+    let X4GodPirate = X4GodMod.Load(X4GodFilePirate)
+    let X4GodBoron  = X4GodMod.Load(X4GodFileBoron)
+
+    // Finally build up an uberlist of all our stations across all DLC and core game.
+    // The DLC stations are of a different type: they're an XML DIFF file, not the GOD
+    // file type. So we need to pull out the stations from the diff and convert them
+    // to the same type as the core stations using the underlying XElement.
+    let allStations =
+        List.concat [
+            Array.toList X4GodCore.Stations.Stations
+            getStationsFromDiff X4GodSplit.Adds
+            getStationsFromDiff X4GodTerran.Adds
+            getStationsFromDiff X4GodPirate.Adds
+            getStationsFromDiff X4GodBoron.Adds
+        ]
+
+    // Do the same for products
+    let allProducts =
+        List.concat [
+            Array.toList X4GodCore.Products
+            getProductFromDiff X4GodSplit.Adds
+            getProductFromDiff X4GodTerran.Adds
+            getProductFromDiff X4GodPirate.Adds
+            getProductFromDiff X4GodBoron.Adds
+        ]
+
+    allStations, allProducts
+
+
+// ===== FINISHED LOADING DATA FROM XML FILES =====
 
 // Gates are linked to a zone by using one of the following as a reference. So by looking
 // for these references in the zone file, we can find the gates in a zone.
@@ -243,7 +320,7 @@ let findClusterFromSector (sector:string) =
 
 // Using the data in sector.xml, which is represented by the X4Sector type, find the name of
 // the sector given the name of the zone. the zone is stored as a connection in the sector definition.
-let findSectorFromZone (zone:string) (sectors:X4Sector.Macro list) =
+let findSectorFromZone (zone:string) =
     // allSectors is a list of secto Macros. Each macro represents a sector. In that sector we'll find connections.
     // Each connection will have zero or more zones for use to check. So we try find a macro that contains a zone with the name we're looking for.
     // Then return the name of that macro.
@@ -267,7 +344,7 @@ let isFactionInSector (faction: string) (sector: string) =
 
 // Have we ALLOWED the faction to be in this specific zone?
 let isFactionInZone (faction: string) (zone: string) =
-    match findSectorFromZone zone allSectors with
+    match findSectorFromZone zone with
     | None -> false
     | Some sector -> isFactionInSector faction sector
 
@@ -290,7 +367,7 @@ let findFactionFromSector (sector: string) =
     | None -> None
 
 let findFactionFromZone (zone: string) =
-    match findSectorFromZone zone allSectors with
+    match findSectorFromZone zone with
     | None -> None
     | Some sector -> findFactionFromSector sector
 

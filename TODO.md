@@ -1,5 +1,4 @@
 in progress:
-* find sectors for faction.
 up next:
 * move faction shipyards to their new sector;
 
@@ -42,6 +41,8 @@ TEL/MIN: Hewa's Twin V, III
 VIG: Lets actually take Windfall I away from them, and limit them to Wind 1&2. Gives Xenon even more open pathways.
 BORON: Retreat to core sectors? Need to set gamestarts to already open gate.
 
+THIS MEANS WE'RE GOING TO HAVE TO:
+* ADD RESOURCE REGIONS
 
  
 ## Optional/Maybe do/other ideas:
@@ -72,7 +73,6 @@ BORON: Retreat to core sectors? Need to set gamestarts to already open gate.
         * We also have products allocated in 'friendly' sectors, such as PIO in Oort cloud.
         eg:     <location class="sector" macro="cluster_116_sector001_macro" relation="self" comparison="ge" />
         Also we have things like Xenon factories assigned to specific sectors: do NOT increase these limits.
-    * add 'matchextension="false"' to location tags. - Is this needed? (yes, turned out it was)
 
 
 
@@ -100,7 +100,8 @@ BORON: Retreat to core sectors? Need to set gamestarts to already open gate.
     * Reduce QUOTAS. Factor: try 2/3 of current allocation rounded up to start. Don't overdo, especially with increase X economy.
     * INCREASE Xenon product quota - so that new sectors are filled with stations and generation resources. 3x? 
     * write output REPLACE xml
-    * Give TER a few more solar stations: they're energy starved with the asteroid belt and mars
+    * Give TER a few more solar stations: they're energy starved with the asteroid belt and mars // AND REMOVE THIS AGAIN
+    * add 'matchextension="false"' to location tags. - Is this needed? (yes, turned out it was)
 
 * DLC:
     * Check if DLC exists

@@ -186,36 +186,23 @@ let getLocationFactionRelation (job:X4Job.Job) =
 // that makes it sa non standard faction job that were not interested in.
 // Returns None if we should ignore it, or Some FactionName
 let isMinorTask (job:X4Job.Job) =
-    match job.Task with | None -> false | Some task -> task.Task = "masstraffic.generic" || task.Task = "masstraffic.police"
-
-let getJobTags (job:X4Job.Job) =
-    match job.Category with
-    | None -> []
-    | Some category -> Utilities.parseStringList category.Tags
+    job.Task |> Option.exists (fun task -> task.Task = "masstraffic.generic" || task.Task = "masstraffic.police")
 
 // Subordinate jobs are things like escorts or 'subordinate' ships.
 // They're wings of fighters on carriers, etc. We want to ignore these,
 // as it would be easy to overtune the xenon by accidentally exponentially
 // increasing the number of ships in a fleet.
 let isSubordinate (job:X4Job.Job) =
-    match job.Modifiers with
-    | None -> false
-    | Some modifiers ->
-        match modifiers.Subordinate with
-        | None -> false
-        | Some subordinate -> true
+    job.Modifiers
+    |> Option.exists (fun modifiers -> Option.isSome modifiers.Subordinate)
 
 // Does this ship have subordinates? ie, is it a carrier? Destroyer group?
-let hasSubordinate (job:X4Job.Job) =
-    match job.Subordinates with
-    | None -> false
-    | Some subordinates -> true
+let hasSubordinate (job:X4Job.Job) = Option.isSome job.Subordinates
 
 let subordinateIds (job:X4Job.Job) =
     match job.Subordinates with
     | None -> [|""|]
-    | Some subordinates ->
-        subordinates.Subordinates |> Array.map (fun subordinate -> subordinate.Job)
+    | Some subordinates -> subordinates.Subordinates |> Array.map (fun subordinate -> subordinate.Job)
 
 // Some jobs are flagged to start immediately when the game begins.
 // Other jobs only activate on a given trigger. We want to ignore those.
@@ -262,7 +249,7 @@ let isJobInFactionTerritory (job:X4Job.Job) =
 // doing, so we can make meaningful choices on how to change the economy and balance.
 // This is not part of the mod generation, instead it helps us write the mod.
 let printJobInfo (job:X4Job.Job) =
-    let tags = "[" + (getJobTags job |> String.concat ", ") + "]"
+    let tags = "[" + (getTagList job |> String.concat ", ") + "]"
     match isMinorTask job with
     | true ->
         printfn "IGNORING JOB %s, tags: %A" job.Id tags
@@ -307,7 +294,7 @@ let printJobCategoryCount allJobs =
     let categoryTags =
         allJobs |> List.fold (
                         fun (tags:Map<string list, int>) (job:X4Job.Job) ->
-                            let jobtags = getJobTags job
+                            let jobtags = getTagList job
                             match Map.tryFind jobtags tags with
                             | None -> Map.add jobtags 1 tags
                             | Some count -> Map.add jobtags (count + 1) tags

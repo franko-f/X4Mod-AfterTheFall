@@ -31,35 +31,7 @@ module X4.God
 open System.Xml.Linq
 open FSharp.Data
 open X4.Utilities
-//open X4.Data
-
-[<Literal>]
-let X4GodFileCore = X4.Data.X4UnpackedDataFolder + "/core/libraries/god.xml" // Core game data.
-let X4GodFileSplit = X4.Data.X4UnpackedDataFolder + "/split/libraries/god.xml" // Core game data.
-let X4GodFileTerran = X4.Data.X4UnpackedDataFolder + "/terran/libraries/god.xml" // Core game data.
-let X4GodFilePirate = X4.Data.X4UnpackedDataFolder + "/pirate/libraries/god.xml" // Core game data.
-let X4GodFileBoron = X4.Data.X4UnpackedDataFolder + "/boron/libraries/god.xml" // Core game data.
-
-
-// The default GOD.xml file, etc, don't have an 'add/replace' XML section, so they can't
-// be used as type providers for our output XML. So we've created a template that has
-// versions of our types that we need (like station, product) as well as the XML selectors
-// for replace/add
-[<Literal>]
-let X4GodModFile = __SOURCE_DIRECTORY__ + "/mod_templates/god.xml"
-[<Literal>]
-let X4ObjectTemplatesFile = __SOURCE_DIRECTORY__ + "/mod_templates/object_templates.xml"
-
-
-// TODO: Should we 'unify' all the types using 'Global=true,' parameter?
-// This means, for example, every instance of 'Location' type is trested as the same type, no matter
-// where it appears in the sample data file. It results in a lot of fields being set to an 'option'
-// type, as some will appear in some cases of location, but not in others. So requires some tweaks
-// to the parsing code.
-// https://fsprojects.github.io/FSharp.Data/library/XmlProvider.html#Global-inference-mode
-type X4WorldStart = XmlProvider<X4GodFileCore>
-type X4GodMod = XmlProvider<X4GodModFile >
-type X4ObjectTemplates = XmlProvider<X4ObjectTemplatesFile>
+open X4.Data
 
 
 // the 'log' functions just extract a bit of data about a station, and log it
@@ -76,6 +48,24 @@ let logProduct (product:X4WorldStart.Product) =
     printfn "PROCESSING PRODUCT [%s:%s] %s/%s with quotas %i/%i" product.Owner product.Location.Faction product.Type product.Ware product.Quota.Galaxy (product.Quota.Sector |> Option.defaultValue -1)
 
 
+// Given a selector ID, search an instance of a GodMod xml file for the 'ADD' section
+// with that 'sel' value. This will be the XElement we will manipulate.
+let find_add_selector sel xml =
+   Array.find (fun (elem:X4GodMod.Add) -> elem.Sel = sel) xml
+
+
+let stationSectorName (station:X4WorldStart.Station) =
+    match station.Location.Class with
+    | Some "zone" -> X4.Data.findSectorFromZone (station.Location.Macro |> Option.defaultValue "") |> Option.defaultValue "none"
+    | Some "sector" -> station.Location.Macro |> Option.defaultValue "none"
+    | _ -> "none"
+
+// Is this station in a sector we're going to leave alone? ie, in the territory of the owning faction
+// or a faction we're ignoring and not changing?
+let ignoreStation (station:X4WorldStart.Station) =
+    let inTerritory = (X4.Data.isFactionInSector station.Owner (stationSectorName station))
+    let isIgnored = List.contains station.Owner ["khaak"; "xenon"; "yaki"; "scaleplate"; "buccaneers"; "player"]
+    inTerritory || isIgnored
 
 
 // Find and return the first occurrence of a station with the given faction and type.
@@ -107,76 +97,6 @@ let find_station (faction:string) (stationType:string) (stations:X4WorldStart.St
                 |> (Option.defaultValue "")
                 |> fun tags -> tags.Contains stationType ) stations
 
-
-// Extract the stations from the 'add' section of a DLCs god diff/mod file.
-// While there are many 'add' sections, we're only interested in the one that
-// that has the selectior '//god/stations'
-let getStationsFromDiff (diff:X4GodMod.Add[]) = 
-    let stationsAdd = Array.filter (fun (add:X4GodMod.Add) -> add.Sel = "/god/stations") diff
-    [ for stations in stationsAdd do
-            for station in stations.Stations do
-                yield new X4WorldStart.Station(station.XElement)
-    ]
-
-let getProductFromDiff (diff:X4GodMod.Add[]) = 
-    let productsAdd = Array.filter (fun (add:X4GodMod.Add) -> add.Sel = "/god/products") diff
-    [ for products in productsAdd do
-            for product in products.Products do
-                yield new X4WorldStart.Product(product.XElement)
-    ]
-
-
-// Read all thge stations and products from the core game and the DLCs.
-let allStations, allProducts =
-    let X4GodCore = X4WorldStart.Load(X4GodFileCore)
-    let X4GodSplit = X4GodMod.Load(X4GodFileSplit)
-    let X4GodTerran = X4GodMod.Load(X4GodFileTerran)
-    let X4GodPirate = X4GodMod.Load(X4GodFilePirate)
-    let X4GodBoron = X4GodMod.Load(X4GodFileBoron)
-
-    // Finally build up an uberlist of all our stations across all DLC and core game.
-    // The DLC stations are of a different type: they're an XML DIFF file, not the GOD
-    // file type. So we need to pull out the stations from the diff and convert them
-    // to the same type as the core stations using the underlying XElement.
-    let allStations =
-        List.concat [
-            Array.toList X4GodCore.Stations.Stations
-            getStationsFromDiff X4GodSplit.Adds
-            getStationsFromDiff X4GodTerran.Adds
-            getStationsFromDiff X4GodPirate.Adds
-            getStationsFromDiff X4GodBoron.Adds
-        ]
-
-    // Do the same for products
-    let allProducts =
-        List.concat [
-            Array.toList X4GodCore.Products
-            getProductFromDiff X4GodSplit.Adds
-            getProductFromDiff X4GodTerran.Adds
-            getProductFromDiff X4GodPirate.Adds
-            getProductFromDiff X4GodBoron.Adds
-        ]
-
-    allStations, allProducts
-
-
-// Given a selector ID, search an instance of a GodMod xml file for the 'ADD' section
-// with that 'sel' value. This will be the XElement we will manipulate.
-let find_add_selector sel xml =
-   Array.find (fun (elem:X4GodMod.Add) -> elem.Sel = sel) xml
-
-
-let stationSectorName (station:X4WorldStart.Station) =
-    match station.Location.Class with
-    | Some "zone" -> X4.Data.findSectorFromZone (station.Location.Macro |> Option.defaultValue "") X4.Data.allSectors |> Option.defaultValue "none"
-    | Some "sector" -> station.Location.Macro |> Option.defaultValue "none"
-    | _ -> "none"
-
-// Is this station in a sector we're going to leave alone? ie, in the territory of the owning faction
-// or a faction we're ignoring and not changing?
-let ignoreStation (station:X4WorldStart.Station) =
-    let sectorName = stationSectorName station
-    (X4.Data.isFactionInSector station.Owner sectorName) || List.contains station.Owner ["khaak"; "xenon"; "yaki"; "scaleplate"; "buccaneers"; "player"]
 
 // MAIN PROCESSING FUNCTIONS
 
@@ -307,11 +227,11 @@ let processProduct (product:X4WorldStart.Product) =
     match product.Owner, product.Ware with
     | "xenon", _ -> Some (product_replace_xml product.Id "galaxy" (product.Quota.Galaxy * 4) )// Xenon get a 4x quota
     | "khaak", _ | "yaki", _ | "scaleplate", _ | "buccaneers", _| "player",_ -> None // These are all fine as is.
-    | "terran", "energycells" ->
+    //| "terran", "energycells" -> Since we're moving TER back to earth, they no longer need this boost.
         // The sectors we've assigned Terra have low solar output, so they're already crippled.
         // We won't reduce production, but we will increase the limit per sector so that they
         // can spawn all their factories in the slightly less bad .4 sunlight sector.
-        Some (product_replace_xml product.Id "sector" ( Option.defaultValue 32 product.Quota.Sector * 2) )
+    //    Some (product_replace_xml product.Id "sector" ( Option.defaultValue 32 product.Quota.Sector * 2) )
     | _ -> Some (product_replace_xml product.Id "galaxy" (product.Quota.Galaxy / 2) ) // Everyone else gets half the quota
 
 
