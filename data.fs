@@ -225,51 +225,46 @@ type Territory = { faction: string; cluster:string; resources: MiningResource li
 // We will likely need to create a zone (or find) in each of these sectors to place the station
 let territories = [
     // core
-    { Territory.Default with faction = "argon";    cluster = "Cluster_14_macro" }      // Argon Prime
-    { Territory.Default with faction = "argon";    cluster = "Cluster_29_macro" }      // Hatikvah's choice III
-    { Territory.Default with faction = "hatikvah"; cluster = "Cluster_29_macro" }   // Hatikvah's choice I
+    { Territory.Default with faction = "argon";    cluster = "Cluster_44_macro" }   // Silent Witness XI
+    { Territory.Default with faction = "argon";    cluster = "Cluster_45_macro" }   // Silent Witness XII
+    { Territory.Default with faction = "hatikvah"; cluster = "Cluster_46_macro" }   // Morning Star IV
     { Territory.Default with faction = "antigone"; cluster = "Cluster_27_macro" }   // The Void
     { Territory.Default with faction = "antigone"; cluster = "Cluster_28_macro" }   // Antigone Menorial
 
-    { Territory.Default with faction = "teladi";   cluster = "Cluster_15_macro" }     // Ianamus Zura IV
-    { Territory.Default with faction = "ministry"; cluster = "Cluster_15_macro" }   // Ianamus Zura IV
+    { Territory.Default with faction = "teladi";   cluster = "Cluster_42_macro" }   // Hewas Twin III, IV, V
+    { Territory.Default with faction = "teladi";   cluster = "Cluster_43_macro" }
+    { Territory.Default with faction = "ministry"; cluster = "Cluster_32_macro" }
 //    { faction = "scaleplate"; sector = "" }
 
-    { Territory.Default with faction = "paranid";   cluster = "Cluster_47_macro" }   // Trinity Sanctum VII
-    { Territory.Default with faction = "paranid";   cluster = "Cluster_18_macro" }   // Trinity Sanctum III
-    { Territory.Default with faction = "alliance";  cluster = "Cluster_47_macro" }  // Trinity Sanctum VII
-    { Territory.Default with faction = "holyorder"; cluster = "Cluster_24_macro" }  // Holy Vision
-    { Territory.Default with faction = "holyorder"; cluster = "Cluster_11_macro" }  // Pontifex Claim
+    { Territory.Default with faction = "paranid";   cluster = "Cluster_37_macro" }  // Pious IV
+    { Territory.Default with faction = "paranid";   cluster = "Cluster_38_macro" }  // Pious XI
+    { Territory.Default with faction = "alliance";  cluster = "Cluster_38_macro" }  // If we have to move an ALI station, move it to PAR space.
+    { Territory.Default with faction = "holyorder"; cluster = "Cluster_35_macro" }  // Lasting Vengence
+    { Territory.Default with faction = "holyorder"; cluster = "Cluster_36_macro" }  // Cardinals Redress
 
     // split: zyarth. freesplit: free families
-    { Territory.Default with faction = "split";     cluster = "Cluster_418_macro" }      // Family Nhuut
-    { Territory.Default with faction = "split";     cluster = "Cluster_401_macro" }      // Family Zhin
-    { Territory.Default with faction = "freesplit"; cluster = "Cluster_411_macro" }  // Heart of Acrmony II
+    { Territory.Default with faction = "split";     cluster = "Cluster_405_macro" }  // Zyarth Dominion IV
+    { Territory.Default with faction = "split";     cluster = "Cluster_406_macro" }  // Zyarth Dominion X
     { Territory.Default with faction = "freesplit"; cluster = "Cluster_410_macro" }  // Tharkas Ravine XVI
+    { Territory.Default with faction = "freesplit"; cluster = "Cluster_411_macro" }  // Heart of Acrmony II
     { Territory.Default with faction = "freesplit"; cluster = "Cluster_412_macro" }  // Tharkas Ravine VIII
 
     // cradle of humanity
-    { Territory.Default with faction = "terran";   cluster = "Cluster_101_macro" }     // Mars
-    { Territory.Default with faction = "terran";   cluster = "Cluster_100_macro" }     // Asteroid belt
-    { Territory.Default with faction = "pioneers"; cluster = "Cluster_113_macro" }   // Segaris sectors are Cluster_113_Sector001_macro -> 115  - but we'll leave them unchanged.
-    { Territory.Default with faction = "pioneers"; cluster = "Cluster_114_macro" }   // Segaris sectors are Cluster_113_Sector001_macro -> 115  - but we'll leave them unchanged.
-    { Territory.Default with faction = "pioneers"; cluster = "Cluster_115_macro" }   // Segaris sectors are Cluster_113_Sector001_macro -> 115  - but we'll leave them unchanged.
+    { Territory.Default with faction = "terran";   cluster = "Cluster_104_macro" }   // Earth and the Moon
+    { Territory.Default with faction = "pioneers"; cluster = "Cluster_113_macro" }   // Segaris
+    { Territory.Default with faction = "pioneers"; cluster = "Cluster_114_macro" }   // Gaian Prophecy
 
     // tides of avarice
-    // :eave VIG/Scavengers mostly unchanged. Leave Windfall I for sure to avoid issues with Erlking.
+    // :eave VIG/Scavengers mostly unchanged. Leave Windfall I for sure to avoid issues with Erlking. (Or figure out how to move it in the future.)
     { Territory.Default with faction = "scavenger"; cluster = "Cluster_500_macro" }   // RIP: Unchanged. All sectors in cluster_500
     { Territory.Default with faction = "loanshark"; cluster = "Cluster_501_macro" }   // Leave VIG unchanged.
     { Territory.Default with faction = "loanshark"; cluster = "Cluster_502_macro" }   // 
-    { Territory.Default with faction = "loanshark"; cluster = "Cluster_503_macro" }   // I considered removing this cluster, but it has the scrap VIG need, so will leave it.
+    //{ Territory.Default with faction = "loanshark"; cluster = "Cluster_503_macro" }
 
     // boron
-    // Boron: Economy is kinda screwed without player help anyway. Leave them alone for now?
-    // Changing it could screw things with the default boron story if there are Xenon swarming around.
-    // { Territory.Default with faction = "boron"; cluster = "cluster_601" }          // Watchful Gaze Not in territory by default.
-    { Territory.Default with faction = "boron"; cluster = "Cluster_602_macro" }       // Barren Shores 
-    { Territory.Default with faction = "boron"; cluster = "Cluster_603_macro" }       // Great Reef 
-    { Territory.Default with faction = "boron"; cluster = "Cluster_604_macro" }       // Ocean of Fantasy
-    // { Territory.Default with faction = "boron"; cluster = "cluster_605" }          // Sanctuary of Darkness : The Khaak sector
+    // Boron: Economy is kinda screwed without player help anyway. Leave them a few more sectors than most.
+    // Removing These territories may screw up the default storyline, so players will need to set story complete in gamestart.
+    // Cluster_602_macro: Barren Shores, Cluster_603_macro: Great Reef, Cluster_604_macro: Ocean of Fantasy
     { Territory.Default with faction = "boron"; cluster = "Cluster_606_macro" }       // Kingdom End (cluster with 3 sectors) : Kingdoms end I, Reflected Stars, Towering Waves 
     { Territory.Default with faction = "boron"; cluster = "Cluster_607_macro" }       // Rolk's Demise 
     { Territory.Default with faction = "boron"; cluster = "Cluster_608_macro" }       // Atreus' Clouds

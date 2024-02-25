@@ -162,9 +162,8 @@ let isGateConnectionSafe (gate:Gate) =
 // unsafe gates when we determine where to place our defense stations.
 let findUnsafeGates =
     allGates
-        |> List.filter (fun gate -> gate.Faction <> "xenon" && gate.Faction <> "Unknown")
+        |> List.filter (fun gate -> gate.Faction <> "xenon" && gate.Faction <> "Unknown" && gate.Faction <> "ministry" && gate.Faction <> "alliance") // Ministry are embedded in Teladi space, so don't need their own defense. Besides, they have no defense stations in game. Similar for ALI
         |> List.filter (fun gate -> not (isGateConnectionSafe gate))
-
 
 
 let calculateStationPosition (position:Position) (rotation:Quaternion) (distance:float) (angle:float) =

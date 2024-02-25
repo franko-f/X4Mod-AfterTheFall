@@ -1,45 +1,12 @@
 in progress:
 up next:
-* move faction shipyards to their new sector;
+generate resource fields in new sectors sectors.
 
 BUGS:
 * Bastions are:
     * sometimes not alwayd generated in right place. Does the game move them?
 
 ## TODO:
-* Handle STATION
-    * MOVE/REPLACE one shipyards/wharves/trade station per faction rather than just removing.
-        * Replace at old location with xenon equivalent.
-        * Need to find a zone for these moved items. Or create. Some won't need it. 
-      Looks like I might be able to just specify a sector as location, and have it auto placed in sector.
-
-* Change the faction terratories again.
-To stop the new defense stations from blockading paths for the xenon, I think I should move the factions
-each to one or two sectors that are dead ends, and add resource to these zones.
-
-Note: 2024/02/18: Turns out that the instructions I was following for gates applies only to, well, gates.
-The superhighways and accellerators that take you between sectors in a cluster do NOT work like this,
-and do not have configuration in the 'connections' file. They seem to be defined as a connection in the
- *clusters* file, with connection ref "sechighways"
- Which kind of leads to a lore issue: Clusters seem to be a system, so easy to traverse. Maybe I should be
- limiting faction to whole clusters, rather than only some sectors in a cluster. Two reasons. Lore, otherwise
- it's easy for Xenon to ignore gates. and b) I don't need to process even more data to figure out superhighways.
-
-Here are some ideas, but maybe it's preferrable to find places I can give them TWO clusters, for more starting variety.
-Really need two sectors per faction, as often station placement is limited per sector. Even with two sectors, 
-some products won't be placed, reducing economies. This is ok, I think.
-
-ZYA: Eleventh hour    OR Guiding Star V & VII
-FREE FAMILIIES:  Heart of Acrimony II, Tharka Ravine XVI
-HAT: Hatikvahs choice III
-ARGON: Morning Star IV
-ANT: Antigone Memorial (add a tiny bit of methane)
-HOP: Cardinals Redress, Lasting Vengence
-PAR: Trinity Sactum VII
-TEL/MIN: Hewa's Twin V, III
-
-VIG: Lets actually take Windfall I away from them, and limit them to Wind 1&2. Gives Xenon even more open pathways.
-BORON: Retreat to core sectors? Need to set gamestarts to already open gate.
 
 THIS MEANS WE'RE GOING TO HAVE TO:
 * ADD RESOURCE REGIONS
@@ -85,6 +52,10 @@ THIS MEANS WE'RE GOING TO HAVE TO:
     * CHECK: Do I need to add 'matchextension' for 'REMOVE' tags?
       => Seems to have worked without it.
     * add DLC support => this gives MVP (WORKING ON RIGHT NOW)
+    * MOVE/REPLACE one shipyards/wharves/trade station per faction rather than just removing.
+        * Replace at old location with xenon equivalent.
+        * Need to find a zone for these moved items. Or create. Some won't need it.
+      Looks like I might be able to just specify a sector as location, and have it auto placed in sector.
 
 * Systems:
     * Assign 2 systems per faction
@@ -154,3 +125,30 @@ We may need to add a maxgalaxy in these cases to set to the original quota.
     * place 3 race-specific defence stations around gate.
         * Figure out how to rotate the defense station around the gate so it's not blocking things
 
+* Change the faction terratories again.
+To stop the new defense stations from blockading paths for the xenon, I think I should move the factions
+each to one or two sectors that are dead ends, and add resource to these zones.
+
+Note: 2024/02/18: Turns out that the instructions I was following for gates applies only to, well, gates.
+The superhighways and accellerators that take you between sectors in a cluster do NOT work like this,
+and do not have configuration in the 'connections' file. They seem to be defined as a connection in the
+ *clusters* file, with connection ref "sechighways"
+ Which kind of leads to a lore issue: Clusters seem to be a system, so easy to traverse. Maybe I should be
+ limiting faction to whole clusters, rather than only some sectors in a cluster. Two reasons. Lore, otherwise
+ it's easy for Xenon to ignore gates. and b) I don't need to process even more data to figure out superhighways.
+
+Here are some ideas, but maybe it's preferrable to find places I can give them TWO clusters, for more starting variety.
+Really need two sectors per faction, as often station placement is limited per sector. Even with two sectors, 
+some products won't be placed, reducing economies. This is ok, I think.
+
+ZYA: Eleventh hour    OR Guiding Star V & VII
+FREE FAMILIIES:  Heart of Acrimony II, Tharka Ravine XVI
+HAT: Hatikvahs choice III
+ARGON: Morning Star IV
+ANT: Antigone Memorial (add a tiny bit of methane)
+HOP: Cardinals Redress, Lasting Vengence
+PAR: Trinity Sactum VII
+TEL/MIN: Hewa's Twin V, III
+
+VIG: Lets actually take Windfall I away from them, and limit them to Wind 1&2. Gives Xenon even more open pathways.
+BORON: Retreat to core sectors? Need to set gamestarts to already open gate.
