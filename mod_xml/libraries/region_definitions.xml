@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Here are our definitions for new mining resource regions that we will add to sectors to ensure they
+    have enough resources, as many of our factions will have few, if any, resources in their new sectors.
+
+    The regions we want to add are specified in the data.fs, in the territories section. The territory
+    reference for each cluster will contain a list of regions we're adding to the cluster, selected from
+    the below list (or the default list from the vanilla region definitions).
+-->
+<regions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="region_definitions.xsd">
+  <region name="atf_40km_asteroid_field_high" density="4.5" rotation="0">
+    <boundary class="cylinder">
+      <size r="25000" linear="5000" />
+    </boundary>
+    <falloff>
+      <lateral>
+        <step position="0.0" value="0.0" />
+        <step position="0.1" value="1.0" />
+        <step position="0.9" value="1.0" />
+        <step position="1.0" value="0.0" />
+      </lateral>
+      <radial>
+        <step position="0.0" value="1.0" />
+        <step position="0.3" value="1.0" />
+        <step position="0.5" value="0.9" />
+        <step position="0.9" value="0.4" />
+        <step position="1.0" value="0.0" />
+      </radial>
+    </falloff>
+    <fields>
+      <asteroid groupref="asteroid_nividium_l" densityfactor="0.25" rotation="360" rotationvariation="4" noisescale="1500" seed="2001" minnoisevalue="0.8" maxnoisevalue="1"/>
+      <asteroid groupref="asteroid_ore_l" densityfactor="2.75" rotation="360" rotationvariation="4" noisescale="1500" seed="2001" minnoisevalue="0.6" maxnoisevalue="1"/>
+      <asteroid groupref="asteroid_silicon_l" densityfactor="2" rotation="360" rotationvariation="4" noisescale="1500" seed="2001" minnoisevalue="0.6" maxnoisevalue="1"/>
+      <asteroid groupref="asteroid_ore_m" densityfactor="1" rotation="360" rotationvariation="8" noisescale="1500" seed="2001" minnoisevalue="0.6" maxnoisevalue="1"/>
+      <asteroid groupref="asteroid_silicon_m" densityfactor="3" rotation="360" rotationvariation="8" noisescale="1500" seed="2001" minnoisevalue="0.6" maxnoisevalue="1"/>
+      <asteroid groupref="asteroid_ore_s" densityfactor="2" rotation="360" rotationvariation="16" noisescale="1500" seed="2001" minnoisevalue="0.5" maxnoisevalue="1"/>
+      <asteroid groupref="asteroid_silicon_s" densityfactor="1" rotation="360" rotationvariation="16" noisescale="1500" seed="2001" minnoisevalue="0.5" maxnoisevalue="1"/>
+      <asteroid groupref="asteroid_ore_xs" densityfactor="0.6" rotation="360" rotationvariation="32" noisescale="1500" seed="2001" minnoisevalue="0.35" maxnoisevalue="1"/>
+      <asteroid groupref="asteroid_silicon_xs" densityfactor="1" rotation="360" rotationvariation="32" noisescale="1500" seed="2001" minnoisevalue="0.35" maxnoisevalue="1"/>
+    </fields>
+    <resources>
+      <resource ware="ore" yield="highplus" />
+      <resource ware="silicon" yield="highplus" />
+      <resource ware="nividium" yield="high" />
+    </resources>
+  </region>
+
+
+  <region name="atf_40km_ice_field_high" density="1.5" rotation="0">
+    <boundary class="cylinder">
+      <size r="25000" linear="2500" />
+    </boundary>
+    <falloff>
+      <lateral>
+        <step position="0.0" value="0.0" />
+        <step position="0.1" value="1.0" />
+        <step position="0.9" value="1.0" />
+        <step position="1.0" value="0.0" />
+      </lateral>
+      <radial>
+        <step position="0.0" value="1.0" />
+        <step position="0.3" value="1.0" />
+        <step position="0.5" value="0.9" />
+        <step position="0.9" value="0.4" />
+        <step position="1.0" value="0.0" />
+      </radial>
+    </falloff>
+    <fields>
+      <asteroid groupref="asteroid_ice_l" densityfactor="3" rotation="0" rotationvariation="8" noisescale="5000" seed="26041984" minnoisevalue="0.75" maxnoisevalue="1"/>
+      <asteroid groupref="asteroid_ice_m" densityfactor="18" rotation="0" rotationvariation="16" noisescale="5000" seed="26041984" minnoisevalue="0.75" maxnoisevalue="1"/>
+      <asteroid groupref="asteroid_ice_s" densityfactor="24" rotation="0" rotationvariation="32" noisescale="5000" seed="26041984" minnoisevalue="0.75" maxnoisevalue="1"/>
+      <asteroid groupref="asteroid_ice_xs" densityfactor="30" rotation="0" rotationvariation="64" noisescale="5000" seed="26041984" minnoisevalue="0.75" maxnoisevalue="1"/>
+    </fields>
+    <resources>
+      <resource ware="ice" yield="high" />
+    </resources>
+  </region>
+
+
+  <region name="atf_wreckfield_xenon_battle_20km" density="1.5" rotation="0" noisescale="10000" seed="32" minnoisevalue="0.0" maxnoisevalue="1">
+    <boundary class="cylinder">
+      <size r="10000" linear="6000" />
+    </boundary>
+    <falloff>
+      <lateral>
+        <step position="0.0" value="0.0" />
+        <step position="0.1" value="1.0" />
+        <step position="0.9" value="1.0" />
+        <step position="1.0" value="0.0" />
+      </lateral>
+      <radial>
+        <step position="0.0" value="1.0" />
+        <step position="0.3" value="1.0" />
+        <step position="0.9" value="0.9" />
+        <step position="0.95" value="0.4" />
+        <step position="1.0" value="0.0" />
+      </radial>
+    </falloff>
+    <fields>
+      <!--Lockboxes-->
+      <object groupref="lockboxes_extra" densityfactor="0.00005" rotation="0" rotationvariation="70" minnoisevalue="0.1" maxnoisevalue="1"/>
+      <!--Lockboxes end-->
+
+      <volumetricfog multiplier="0.2" medium="fog_wreckfield" texture="assets/textures/environments/fog_smoothclouds_03" lodrule="nebulafar" size="10000" sizevariation="0.5" densityfactor="0.27" rotation="360" rotationvariation="0.0" noisescale="1000" seed="3214" minnoisevalue="0.0" maxnoisevalue="0.50" distancefactor="0.3"/>
+
+      <nebula ref="fogpattern_v2_macro" localred="200" localgreen="189" localblue="149" localdensity="0.085" uniformred="20" uniformgreen="18" uniformblue="14" uniformdensity="0.3" backgroundfog="false" resources="hydrogen" />
+
+      <debris groupref="debris_xenon_xl" densityfactor="0.7" rotation="360" rotationvariation="4" noisescale="10000" seed="32" minnoisevalue="0.50" maxnoisevalue="1" distancefactor="2.0"/>
+      <debris groupref="debris_xenon_l" densityfactor="0.3" rotation="360" rotationvariation="10" noisescale="10000" seed="32" minnoisevalue="0.50" maxnoisevalue="1" distancefactor="2.0"/>
+      <debris groupref="debris_xenon_m" densityfactor="0.1" rotation="360" rotationvariation="10" noisescale="10000" seed="32" minnoisevalue="0.50" maxnoisevalue="1" distancefactor="2.0"/>
+
+      <debris groupref="debris_teladi_xl" densityfactor="4.0" rotation="360" rotationvariation="10" noisescale="1000" seed="32" minnoisevalue="0.1" maxnoisevalue="1"/>
+      <debris groupref="debris_split_xl" densityfactor="1.15" rotation="360" rotationvariation="1" noisescale="1000" seed="32" minnoisevalue="0.1" maxnoisevalue="1"/>
+      <debris groupref="debris_paranid_xl" densityfactor="0.9" rotation="360" rotationvariation="1" noisescale="10000" seed="32" minnoisevalue="0.1" maxnoisevalue="1"/>
+      <debris groupref="debris_paranid_l" densityfactor="0.30" rotation="360" rotationvariation="1" noisescale="10000" seed="32" minnoisevalue="0.1" maxnoisevalue="1"/>
+
+      <debris groupref="debris_l" densityfactor="0.7" rotation="360" rotationvariation="10" noisescale="10000" seed="32" minnoisevalue="0.5" maxnoisevalue="1" distancefactor="2.0"/>
+      <debris groupref="debris_l" densityfactor="2" rotation="360" rotationvariation="10" noisescale="10000" seed="32" minnoisevalue="0.5" maxnoisevalue="1"/>
+      <debris groupref="debris_m" densityfactor="9" rotation="360" rotationvariation="10" noisescale="10000" seed="32" minnoisevalue="0.5" maxnoisevalue="1"/>
+      <debris groupref="debris_s" densityfactor="1" rotation="360" rotationvariation="10" noisescale="10000" seed="32" minnoisevalue="0.5" maxnoisevalue="1"/>
+    </fields>
+    <resources>
+      <resource ware="hydrogen" yield="medium" />
+      <resource ware="rawscrap" yield="medium" />
+    </resources>
+  </region>
+
+<!-- For gases, we can use the vanilla
+p1_40km_hydrogen_field
+p1_40km_helium_highyield_field
+p1_40km_methane_highyield_field 
+-->
+</regions>

@@ -1,6 +1,5 @@
 in progress:
 up next:
-generate resource fields in new sectors sectors.
 
 BUGS:
 * Bastions are:
@@ -8,16 +7,26 @@ BUGS:
 
 ## TODO:
 
-THIS MEANS WE'RE GOING TO HAVE TO:
-* ADD RESOURCE REGIONS
+
+* Move the default PlayerHQ location to somewhere safe
+
+## Post Beta/pre v1.0
+This is stuff I want to clean up during the beta period, prior to final release.
+* Remove TER cutscene for approaching mars gate: they don't pocess it any more.
 
  
-## Optional/Maybe do/other ideas:
+## Post V1: Optional/Maybe do/other ideas:
+Here's some optional stuff I may add after the initial release
+
+* Improve compatibility when we don't have DLC installed.
+    Move DLC specific stuff in to /extensions/dlc_name (I think this does the trick?)
+
 * Add more derelict ships around
-* Handle better ways to get blueprints: (limit economy == slow gain)
+* Handle better ways to get blueprints: (since I've limited economy => slow gain of resources to buy blueprints)
+  I think this is better left as optional to the user, let them install other mods, BUT:
     * Other mods?
     * Deconstructing ships?
-    * Loot drops?
+    * Loot drops? (I'm partial to this solution: some kind of drop system that sometimes drops blueprints when destroying Xenon.)
     * Lower prices?
 
 * Configure GAME START options.
@@ -31,11 +40,9 @@ THIS MEANS WE'RE GOING TO HAVE TO:
         * Looks like SOME factories/product are set to 'ownerless' for faction for HAT/SCA (spaceweed)
         So we might need to either override this to place in another faction, or create a 'safe'
         ownerless sector somewhere for them.
-        This actually is probably good:
-        WE SHOULD LEAVE AT LEAST ONE 'SAFE' OWNERLESS FOR THE PLAYER!
 
-* Handle PRODUCT
-    * I'm not sure the following really matter. Will move it to options.
+* Some more optional product stuff.
+    * I'm not sure the following really matters, so I'm putting it in the 'maybe' list
     * DLC slightly increases galaxy product module count with new product entries for existing factions: Remove these.
         * We also have products allocated in 'friendly' sectors, such as PIO in Oort cloud.
         eg:     <location class="sector" macro="cluster_116_sector001_macro" relation="self" comparison="ge" />
@@ -152,3 +159,33 @@ TEL/MIN: Hewa's Twin V, III
 
 VIG: Lets actually take Windfall I away from them, and limit them to Wind 1&2. Gives Xenon even more open pathways.
 BORON: Retreat to core sectors? Need to set gamestarts to already open gate.
+
+THIS MEANS WE'RE GOING TO HAVE TO:
+* ADD RESOURCE REGIONS
+    * Looking at definitions in files, it looks like regions can be reused. The vanilla clusters.xml, for
+    example, refers to the region `p1_40km_ice_field` multiple times. So we can just select some default
+    regions for each of our resources, and scatter them around by adding a cluster connection. eg:
+```
+      <connection name="C01S02_Region001_connection" ref="regions">
+        <offset>
+          <position x="-21136452" y="0" z="7237120" />
+        </offset>
+        <macro name="C01S02_Region001_macro">
+          <component connection="cluster" ref="standardregion" />
+          <properties>
+            <region ref="p1_40km_ice_field" />
+          </properties>
+        </macro>
+      </connection>
+```
+Position: Get basic position from the cluster position element. These positions are *much* larger than
+positions specified in the sector file for zones. I suspect that sector file zone positions are an offset
+from the sector center; while the cluster connection positions are offsets from the galactic center.
+Either way, from the cluster file, find the sector connection and gets it's position.
+Annoyingly, not all sector connection have a position. eg: Cluster_01_Sector001_connection.
+Does this mean it defaults to the cluster position in galaxy.xml? Looking at the data, this *might* be
+just defaulting to 0,0,0 when position isn't given. Cluster 01 is galactic center, after all.
+
+* generate resource fields in new sectors sectors.
+    * select some default regions for each type of resource
+    * place them randomly in the factions valid sectors if the faction needs it.

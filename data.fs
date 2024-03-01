@@ -56,6 +56,12 @@ let X4GalaxyFileTerran = X4UnpackedDataFolder + "/terran/maps/xu_ep2_universe/ga
 let X4GalaxyFilePirate = X4UnpackedDataFolder + "/pirate/maps/xu_ep2_universe/galaxy.xml"
 let X4GalaxyFileBoron = X4UnpackedDataFolder + "/boron/maps/xu_ep2_universe/galaxy.xml"
 
+[<Literal>]
+let X4RegionDefinitionsFile = X4UnpackedDataFolder + "/core/libraries/region_definitions.xml"
+
+[<Literal>]
+let X4RegionYieldsFile = X4UnpackedDataFolder + "/core/libraries/regionyields.xml"
+
 // TODO: Should we 'unify' all the types using 'Global=true,' parameter?
 // This means, for example, every instance of 'Location' type is trested as the same type, no matter
 // where it appears in the sample data file. It results in a lot of fields being set to an 'option'
@@ -73,6 +79,8 @@ type X4Galaxy     = XmlProvider<X4GalaxyFileCore>
 // the DLC galaxy files are in DIFF format, so we need a different type provider.
 type X4GalaxyDiff = XmlProvider<X4GalaxyFileSplit>
 
+type X4RegionDefinitions = XmlProvider<X4RegionDefinitionsFile>
+type X4RegionYields = XmlProvider<X4RegionYieldsFile>
 
 // ====== LOAD DATA FROM XML FILES ======
 
@@ -146,6 +154,8 @@ let allGalaxy =
                     loadFromDiff X4GalaxyBoron;
                 ]
 
+let allRegionDefinitions = X4RegionDefinitions.Load(X4RegionDefinitionsFile)
+let regionYields = X4RegionYields.Load(X4RegionYieldsFile)
 
 // Read all thge stations and products from the core game and the DLCs.
 let allStations, allProducts =
@@ -205,6 +215,21 @@ let allStations, allProducts =
 // identified by a zone connection ref="gates" instead. If correct, we can remove this.
 let gateMacros = ["props_gates_orb_accelerator_01_macro", "props_gates_anc_gate_macro", "props_ter_gate_01_macro"]
 
+
+// lookup map to the resource definitions from the XML that we will use to place extra resources
+// for factions now in sectors without resources.
+let resourceMap = Map [
+    "minerals", "atf_40km_asteroid_field_high";  // ore, silicon and a little bit of nvidium
+    "ice",      "atf_40km_ice_field_high";            // ice
+    "scrap",    "atf_40km_scrap_field_high";        // scrap
+    "hydrogen", "p1_40km_hydrogen_field";
+    "helium",   "p1_40km_helium_highyield_field";
+    "methane",  "p1_40km_methane_highyield_field"
+]
+// The standard resources that we'll use to populate the sectors. Two halves, one for each system.
+let standardResources1stHalf = ["hydrogen"; "helium"; "methane" ]
+let standardResources2ndHalf = [ "minerals"; "minerals"; "ice"; "scrap"; ] // 2x minerals to make it more common
+
 // Factions will be limited to only a sector or two of valid territory.
 // We'll put their defence stations and shipyards in these sectors. The game
 // will then generate product factories here.
@@ -215,9 +240,10 @@ let gateMacros = ["props_gates_orb_accelerator_01_macro", "props_gates_anc_gate_
 // Lastly, we'll need to place the Bastion stations near the jumpgates. We
 // can also find the location of the jumpgates in the xml files, and then
 // place three bastion stations around each one, encircling it.
-type Location = { x: float; y: float; z: float }
-type MiningResource = { name: string; amount: int; location: Location }
-type Territory = { faction: string; cluster:string; resources: MiningResource list }
+// type Position = { x: float; y: float; z: float }
+// type MiningResource = { name: string; positionOffset: Position }  // offset is distance from sector ceter,
+
+type Territory = { faction: string; cluster:string; resources: string list }
                    static member Default = { faction = ""; cluster = ""; resources = []}
 
 // create a list of all the factions and their territories as Territory records
@@ -225,41 +251,41 @@ type Territory = { faction: string; cluster:string; resources: MiningResource li
 // We will likely need to create a zone (or find) in each of these sectors to place the station
 let territories = [
     // core
-    { Territory.Default with faction = "argon";    cluster = "Cluster_44_macro" }   // Silent Witness XI
-    { Territory.Default with faction = "argon";    cluster = "Cluster_45_macro" }   // Silent Witness XII
-    { Territory.Default with faction = "hatikvah"; cluster = "Cluster_46_macro" }   // Morning Star IV
-    { Territory.Default with faction = "antigone"; cluster = "Cluster_27_macro" }   // The Void
-    { Territory.Default with faction = "antigone"; cluster = "Cluster_28_macro" }   // Antigone Menorial
+    { Territory.Default with faction = "argon";    cluster = "Cluster_44_macro"; resources=standardResources1stHalf }   // Silent Witness XI
+    { Territory.Default with faction = "argon";    cluster = "Cluster_45_macro"; resources=standardResources2ndHalf }   // Silent Witness XII
+    { Territory.Default with faction = "hatikvah"; cluster = "Cluster_46_macro"; resources=["ice"; "helium"; "methane"; "hydrogen";] }   // Morning Star IV. Already has plenty mineral resources.
+    { Territory.Default with faction = "antigone"; cluster = "Cluster_40_macro"; resources=["ice"; "methane"; "scrap"] } // Second Contact VII - already have some silicon and ore, and right next to substantial mineral resources.
+    { Territory.Default with faction = "antigone"; cluster = "Cluster_41_macro"; resources=["hydrogen"; "helium"] }      // Second Contact XI
 
-    { Territory.Default with faction = "teladi";   cluster = "Cluster_42_macro" }   // Hewas Twin III, IV, V
-    { Territory.Default with faction = "teladi";   cluster = "Cluster_43_macro" }
-    { Territory.Default with faction = "ministry"; cluster = "Cluster_32_macro" }
+    { Territory.Default with faction = "teladi";   cluster = "Cluster_42_macro"; resources=standardResources2ndHalf }   // Hewas Twin III, IV, V
+    { Territory.Default with faction = "teladi";   cluster = "Cluster_43_macro"; resources=standardResources1stHalf }   // Hewas Twin VI, VII, VIII
+    { Territory.Default with faction = "ministry"; cluster = "Cluster_43_macro" }   // No need for resources, they're in teladi sectors already.
 //    { faction = "scaleplate"; sector = "" }
 
-    { Territory.Default with faction = "paranid";   cluster = "Cluster_37_macro" }  // Pious IV
-    { Territory.Default with faction = "paranid";   cluster = "Cluster_38_macro" }  // Pious XI
+    { Territory.Default with faction = "paranid";   cluster = "Cluster_37_macro"; resources=["ice"] }        // Pious IV  - Already have plenty resources of other types
+    { Territory.Default with faction = "paranid";   cluster = "Cluster_38_macro"; resources=["scrap"] }      // Pious XI
     { Territory.Default with faction = "alliance";  cluster = "Cluster_38_macro" }  // If we have to move an ALI station, move it to PAR space.
-    { Territory.Default with faction = "holyorder"; cluster = "Cluster_35_macro" }  // Lasting Vengence
-    { Territory.Default with faction = "holyorder"; cluster = "Cluster_36_macro" }  // Cardinals Redress
+    { Territory.Default with faction = "holyorder"; cluster = "Cluster_35_macro"; resources=["helium"; "methane"; "ice"] }  // Lasting Vengence
+    { Territory.Default with faction = "holyorder"; cluster = "Cluster_36_macro"; resources=["minerals"; "scrap"] }  // Cardinals Redress
 
     // split: zyarth. freesplit: free families
-    { Territory.Default with faction = "split";     cluster = "Cluster_405_macro" }  // Zyarth Dominion IV
-    { Territory.Default with faction = "split";     cluster = "Cluster_406_macro" }  // Zyarth Dominion X
-    { Territory.Default with faction = "freesplit"; cluster = "Cluster_410_macro" }  // Tharkas Ravine XVI
-    { Territory.Default with faction = "freesplit"; cluster = "Cluster_411_macro" }  // Heart of Acrmony II
-    { Territory.Default with faction = "freesplit"; cluster = "Cluster_412_macro" }  // Tharkas Ravine VIII
+    { Territory.Default with faction = "split";     cluster = "Cluster_405_macro"; resources=standardResources1stHalf }  // Zyarth Dominion IV
+    { Territory.Default with faction = "split";     cluster = "Cluster_406_macro"; resources=standardResources2ndHalf }  // Zyarth Dominion X
+    { Territory.Default with faction = "freesplit"; cluster = "Cluster_410_macro"; resources=["scrap"; "methane"] }      // Tharkas Ravine XVI
+    { Territory.Default with faction = "freesplit"; cluster = "Cluster_411_macro"; resources=["helium"] }                // Heart of Acrmony II
+    //{ Territory.Default with faction = "freesplit"; cluster = "Cluster_412_macro" }  // Tharkas Ravine VIII
 
     // cradle of humanity
-    { Territory.Default with faction = "terran";   cluster = "Cluster_104_macro" }   // Earth and the Moon
-    { Territory.Default with faction = "pioneers"; cluster = "Cluster_113_macro" }   // Segaris
+    { Territory.Default with faction = "terran";   cluster = "Cluster_104_macro"; resources= List.concat([standardResources1stHalf; standardResources2ndHalf]) }   // Earth and the Moon
+    { Territory.Default with faction = "pioneers"; cluster = "Cluster_113_macro" }   // Segaris   - Plenty resources already
     { Territory.Default with faction = "pioneers"; cluster = "Cluster_114_macro" }   // Gaian Prophecy
 
     // tides of avarice
     // :eave VIG/Scavengers mostly unchanged. Leave Windfall I for sure to avoid issues with Erlking. (Or figure out how to move it in the future.)
     { Territory.Default with faction = "scavenger"; cluster = "Cluster_500_macro" }   // RIP: Unchanged. All sectors in cluster_500
     { Territory.Default with faction = "loanshark"; cluster = "Cluster_501_macro" }   // Leave VIG unchanged.
-    { Territory.Default with faction = "loanshark"; cluster = "Cluster_502_macro" }   // 
-    //{ Territory.Default with faction = "loanshark"; cluster = "Cluster_503_macro" }
+    { Territory.Default with faction = "loanshark"; cluster = "Cluster_502_macro"; resources=["scrap"] }   // 
+    //{ Territory.Default with faction = "loanshark"; cluster = "Cluster_503_macro" }  // Windfall IV.
 
     // boron
     // Boron: Economy is kinda screwed without player help anyway. Leave them a few more sectors than most.
@@ -347,9 +373,9 @@ let isFactionInZone (faction: string) (zone: string) =
 let isFactionInLocation (faction: string) (location: string) (locationClass:string) =
     match locationClass with
     | "galaxy"  -> true // well, if the class is galaxy, then definitely
-    | "sector"  -> isFactionInSector faction location
+    | "sector"  -> isFactionInSector  faction location
     | "cluster" -> isFactionInCluster faction location
-    | "zone"    -> isFactionInZone faction location
+    | "zone"    -> isFactionInZone    faction location
     | _ -> failwith ("Unhandled location class in job: " + locationClass)
 
 
@@ -367,6 +393,53 @@ let findFactionFromZone (zone: string) =
     | Some sector -> findFactionFromSector sector
 
 
+// Get the X, Y, Z position of a cluster, offset from galactic center.
+let getClusterPosition (clusterName: string) =
+    // Cluster positions are stored as a connection in the galaxy file, not the cluster file.
+    allGalaxy
+        |> List.tryFind (fun connection -> connection.Ref = "clusters" && connection.Macro.Ref =?? clusterName)
+        // Now that we've found the connection, we can get the position from it.
+        // This will raise an exception if there's no offset. We want it to fail if the schema has changed.
+        |> Option.map (fun connection -> connection.Offset.Value.Position.X, connection.Offset.Value.Position.Y, connection.Offset.Value.Position.Z)
+        |> Option.get
+
+// Get the X, Y, Z position of a sector, offset from the galactic center.
+// sector position *may* be defined in the cluster.xml connection. If it's not, I'm assuming it defaults
+// to the clusters position.
+let getSectorPosition (sectorName: string) =
+    // Search all clusters for the connection to the sector. We can use this to get the position,
+    // either in the connection, or by looking up the cluster position.
+    // Start by finding the cluster object that contains this sector.
+    let cluster =
+        findClusterFromSector sectorName
+        |> Option.defaultValue "no_cluster"
+        |> findCluster
+        |> Option.get   // Crap out if we can't find the cluster. This should never happen, and if it does, it means data has changed.
+
+    // Now look for the connection to the sector in the cluster, and get the position for that connection.
+    cluster.Connections
+    |> Array.tryFind (fun connection -> connection.Ref = "sectors" && connection.Macro.Ref =?? sectorName)
+    |> Option.map (
+        fun connection ->
+            connection.Offset
+            |> Option.map ( fun offset -> int(offset.Position.X), int(offset.Position.Y), int(offset.Position.Z))
+    )
+    |> Option.flatten
+    // The connection for the sector may not have had a position, in which case we'll default to the cluster position.
+    |> Option.defaultValue (getClusterPosition cluster.Name)
+
+
 let dump_sectors (sectors:X4Sector.Macro list) =
     for sector in sectors do
         printfn "Macro.%s," (sector.Name.ToLower())
+
+let dumpRegionDefinitions() =
+    for region in allRegionDefinitions.Regions do
+        printfn "Region.%s," (region.Name.ToLower())
+
+let dumpRegionYields() =
+    printfn "Discovered Region Yields:"
+    for ware in regionYields.Resources do
+        printfn "\nResource.%s:" (ware.Ware.ToLower())
+        for ryield in ware.Yields do
+            printfn "   %12s: yield: %6M over %6i minutes = %7.2f/h/km^2" ryield.Name ryield.Resourcedensity ryield.Replenishtime ((float(ryield.Resourcedensity) / float(ryield.Replenishtime) ) * 60.0)

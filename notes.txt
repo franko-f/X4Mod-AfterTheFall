@@ -309,8 +309,8 @@ This data did not include Boron and Pirates DLC, so:
 PIRATE
 500 : Avarice. Cluster contains 3 sectors
 501 : Windfall I
-502 : Windfall II
-503 : Windfall III
+502 : Windfall III
+503 : Windfall IV
 
 
 601 Watchful Gaze

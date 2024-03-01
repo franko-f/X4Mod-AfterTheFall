@@ -11,7 +11,8 @@ open System.Xml.Linq
 // Neat case insensitive string comparison function from https://stackoverflow.com/questions/1936767/f-case-insensitive-string-compare
 // It's important as the X4 data files often mix the case of identifiers like zone and sector names.
 let (=?) s1 s2 = System.String.Equals(s1, s2, System.StringComparison.CurrentCultureIgnoreCase)
-
+// Similar to =?, but it takes in an option string as s1; returning False if s1 is None.
+let (=??) (s1:Option<string>) s2 = Option.exists (fun s1 -> s1 =? s2) s1
 
 // Borrowed from. Promise to give it back
 // https://www.fssnip.net/gO/title/Copy-a-directory-of-files
