@@ -473,7 +473,7 @@ let getSectorPosition (sectorName: string) =
 
 
 // Get all the safe sectors in the game. that is, sectors where factions exist, rather than Xenon or neutral
-let getSafeSectors() =
+let getSafeSectors =
     allSectors |> List.filter (
         // Filter to every sector that is in a cluster mentioned in the territories list. Those are our safe clusters.
         fun sector ->
@@ -482,15 +482,15 @@ let getSafeSectors() =
     )
 
 // Get all the UNSAFE sectors in the game. That's the sectors that are Xenon in our mod, or neutral.
-let getUnsafeSectors() = allSectors |> List.except (getSafeSectors())
+let getUnsafeSectors = allSectors |> List.except getSafeSectors
 
 let selectRandomSector() = allSectors.[rand.Next(allSectors.Length)]
-let selectRandomSafeSector() = getSafeSectors().[rand.Next(getSafeSectors().Length)]
-let selectRandomUnsafeSector() = getUnsafeSectors().[rand.Next(getUnsafeSectors().Length)]
+let selectRandomSafeSector() = getSafeSectors.[rand.Next(getSafeSectors.Length)]
+let selectRandomUnsafeSector() = getUnsafeSectors.[rand.Next(getUnsafeSectors.Length)]
 
 let allShipMacros =
     [for entry in AllIndexMacros do
-        if entry.Name.StartsWith "ship_" then yield entry.Name
+        if entry.Name.StartsWith "ship_" then entry.Name
     ]
 
 let dumpShips() =
