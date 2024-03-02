@@ -1,5 +1,9 @@
 in progress:
 up next:
+    * increase job quota on
+        * xenon_destroyer_patrol_xl_cluster
+        * xenon_destroyer_patrol_xl_cluster
+    * too many traders running between factions - they will get destroyed. Need to cluster things closer?
 
 BUGS:
 * Bastions are:

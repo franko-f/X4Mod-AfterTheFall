@@ -47,9 +47,9 @@ So this would be a diff file with an ADD operation, with the selector being the 
 let rand = new Random(12345)    // Seed the random number generator so we get the same results each time, as long as we're not adding new regions or changing territory order.
 
 let processRegion cluster sector resource (count:int) =
-    // randomly place the region in the sector, offseting it between -40km to +40 in the x,z coordinates, and up to a km in the y coordinate.
+    // randomly place the region in the sector, offseting it between -80km to +80 in the x,z coordinates, and up to 5 km in the y coordinate.
     let x,y,z = getSectorPosition sector
-    let x, y, z = x + rand.Next(-40000, 40000), y + rand.Next(-1000, 1000), z + rand.Next(-40000, 40000)
+    let x, y, z = x + rand.Next(-80000, 80000), y + rand.Next(-5000, 5000), z + rand.Next(-80000, 80000)
     let region   = resourceMap.[resource]
     let regionName = $"{sector}_region_{resource}_{count}"   //%s_%s_Region00" cluster sector
     printfn "%s     Cluster: %s:%s,  Resource: %s:%s @ %A" regionName cluster sector resource region (x,y,z)

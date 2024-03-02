@@ -285,7 +285,7 @@ let territories = [
     { Territory.Default with faction = "scavenger"; cluster = "Cluster_500_macro" }   // RIP: Unchanged. All sectors in cluster_500
     { Territory.Default with faction = "loanshark"; cluster = "Cluster_501_macro" }   // Leave VIG unchanged.
     { Territory.Default with faction = "loanshark"; cluster = "Cluster_502_macro"; resources=["scrap"] }   // 
-    //{ Territory.Default with faction = "loanshark"; cluster = "Cluster_503_macro" }  // Windfall IV.
+    { Territory.Default with faction = "loanshark"; cluster = "Cluster_503_macro" }  // Windfall IV.
 
     // boron
     // Boron: Economy is kinda screwed without player help anyway. Leave them a few more sectors than most.
@@ -425,8 +425,8 @@ let getSectorPosition (sectorName: string) =
             |> Option.map ( fun offset -> int(offset.Position.X), int(offset.Position.Y), int(offset.Position.Z))
     )
     |> Option.flatten
-    // The connection for the sector may not have had a position, in which case we'll default to the cluster position.
-    |> Option.defaultValue (getClusterPosition cluster.Name)
+    // The connection for the sector may not have had a position, in which case it defaults to cluster center: ie, 0,0,0
+    |> Option.defaultValue (0, 0, 0)
 
 
 let dump_sectors (sectors:X4Sector.Macro list) =

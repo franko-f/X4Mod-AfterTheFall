@@ -65,7 +65,8 @@ let stationSectorName (station:X4WorldStart.Station) =
 let ignoreStation (station:X4WorldStart.Station) =
     let inTerritory = (X4.Data.isFactionInSector station.Owner (stationSectorName station))
     let isIgnored = List.contains station.Owner ["khaak"; "xenon"; "yaki"; "scaleplate"; "buccaneers"; "player"]
-    inTerritory || isIgnored
+    let isPirateBase = station.Station.Select |> Option.exists (fun s -> s.Tags = "[piratebase]")
+    inTerritory || isIgnored || isPirateBase
 
 
 // Find and return the first occurrence of a station with the given faction and type.
