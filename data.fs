@@ -280,7 +280,7 @@ type Territory = { faction: string; cluster:string; resources: string list }
 // We will likely need to create a zone (or find) in each of these sectors to place the station
 let territories = [
     // core
-    { Territory.Default with faction = "argon";    cluster = "Cluster_11_macro"; resources=standardResources1stHalf }   // The Reach
+    { Territory.Default with faction = "argon";    cluster = "Cluster_07_macro"; resources=standardResources1stHalf }   // The Reach
     { Territory.Default with faction = "argon";    cluster = "Cluster_14_macro"; resources=standardResources2ndHalf }   // Argon Prime
     { Territory.Default with faction = "hatikvah"; cluster = "Cluster_29_macro"; resources=["minerals";] }   // Hatikvahs Choice
     { Territory.Default with faction = "antigone"; cluster = "Cluster_27_macro"; resources=["ice"; "scrap"] } // The Void

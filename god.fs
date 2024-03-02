@@ -63,10 +63,12 @@ let stationSectorName (station:X4WorldStart.Station) =
 // Is this station in a sector we're going to leave alone? ie, in the territory of the owning faction
 // or a faction we're ignoring and not changing?
 let ignoreStation (station:X4WorldStart.Station) =
-    let inTerritory = (X4.Data.isFactionInSector station.Owner (stationSectorName station))
+    let sector = stationSectorName station
+    let inTerritory = isFactionInSector station.Owner sector   // Station already in the territory of the owning faction
+    let inFriendlyTerritory = List.exists (fun faction -> isFactionInSector faction sector) ["teladi"; "paranid"; "holyorder"; "split"; "freesplit"; "argon"; "antigone"; "hatikvah"; "ministry"] // Station is in the territory of a fr
     let isIgnored = List.contains station.Owner ["khaak"; "xenon"; "yaki"; "scaleplate"; "buccaneers"; "player"]
     let isPirateBase = station.Station.Select |> Option.exists (fun s -> s.Tags = "[piratebase]")
-    inTerritory || isIgnored || isPirateBase
+    inTerritory || isIgnored || isPirateBase || inFriendlyTerritory
 
 
 // Find and return the first occurrence of a station with the given faction and type.

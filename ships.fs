@@ -119,7 +119,7 @@ let ProcessShip ((ship:string), (sector:string), position, rotation) =
         <do_if value="$sector.exists">
           <create_ship name="$ship" macro="macro.{ship}" sector="$sector">
             <owner exact="faction.ownerless"/>
-            <position x="{x}KM" y="{y}KM" z="{z}KM"/>
+            <position x="{x}km" y="{y}km" z="{z}km"/>
             <rotation yaw="{yaw}deg" pitch="{pitch}deg" roll="{roll}deg"/>
           </create_ship>
         </do_if>
