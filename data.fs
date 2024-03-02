@@ -280,20 +280,19 @@ type Territory = { faction: string; cluster:string; resources: string list }
 // We will likely need to create a zone (or find) in each of these sectors to place the station
 let territories = [
     // core
-    { Territory.Default with faction = "argon";    cluster = "Cluster_44_macro"; resources=standardResources1stHalf }   // Silent Witness XI
-    { Territory.Default with faction = "argon";    cluster = "Cluster_45_macro"; resources=standardResources2ndHalf }   // Silent Witness XII
-    { Territory.Default with faction = "hatikvah"; cluster = "Cluster_46_macro"; resources=["ice"; "helium"; "methane"; "hydrogen";] }   // Morning Star IV. Already has plenty mineral resources.
-    { Territory.Default with faction = "antigone"; cluster = "Cluster_40_macro"; resources=["ice"; "methane"; "scrap"] } // Second Contact VII - already have some silicon and ore, and right next to substantial mineral resources.
-    { Territory.Default with faction = "antigone"; cluster = "Cluster_41_macro"; resources=["hydrogen"; "helium"] }      // Second Contact XI
+    { Territory.Default with faction = "argon";    cluster = "Cluster_11_macro"; resources=standardResources1stHalf }   // The Reach
+    { Territory.Default with faction = "argon";    cluster = "Cluster_14_macro"; resources=standardResources2ndHalf }   // Argon Prime
+    { Territory.Default with faction = "hatikvah"; cluster = "Cluster_29_macro"; resources=["minerals";] }   // Hatikvahs Choice
+    { Territory.Default with faction = "antigone"; cluster = "Cluster_27_macro"; resources=["ice"; "scrap"] } // The Void
+    { Territory.Default with faction = "antigone"; cluster = "Cluster_28_macro"; resources=["minerals"] }      // Antigone Memorial
 
-    { Territory.Default with faction = "teladi";   cluster = "Cluster_42_macro"; resources=standardResources2ndHalf }   // Hewas Twin III, IV, V
-    { Territory.Default with faction = "teladi";   cluster = "Cluster_43_macro"; resources=standardResources1stHalf }   // Hewas Twin VI, VII, VIII
-    { Territory.Default with faction = "ministry"; cluster = "Cluster_43_macro" }   // No need for resources, they're in teladi sectors already.
+    { Territory.Default with faction = "teladi";   cluster = "Cluster_15_macro"; resources=["minerals"; "scrap"] }   // Ianumas Zura
+    { Territory.Default with faction = "ministry"; cluster = "Cluster_15_macro" }   // No need for resources, they're in teladi sectors already.
 //    { faction = "scaleplate"; sector = "" }
 
-    { Territory.Default with faction = "paranid";   cluster = "Cluster_37_macro"; resources=["ice"] }        // Pious IV  - Already have plenty resources of other types
-    { Territory.Default with faction = "paranid";   cluster = "Cluster_38_macro"; resources=["scrap"] }      // Pious XI
-    { Territory.Default with faction = "alliance";  cluster = "Cluster_38_macro" }  // If we have to move an ALI station, move it to PAR space.
+    { Territory.Default with faction = "paranid";   cluster = "Cluster_18_macro"; resources=["minerals"] }    // Trinity III - already has some resources, but adding more.
+    { Territory.Default with faction = "paranid";   cluster = "Cluster_47_macro"; resources=["scrap"] }      // Trinity VII
+    { Territory.Default with faction = "alliance";  cluster = "Cluster_47_macro" }  // If we have to move an ALI station, move it to PAR space.
     { Territory.Default with faction = "holyorder"; cluster = "Cluster_35_macro"; resources=["helium"; "methane"; "ice"] }  // Lasting Vengence
     { Territory.Default with faction = "holyorder"; cluster = "Cluster_36_macro"; resources=["minerals"; "scrap"] }  // Cardinals Redress
 
@@ -306,7 +305,7 @@ let territories = [
 
     // cradle of humanity
     { Territory.Default with faction = "terran";   cluster = "Cluster_104_macro"; resources= List.concat([standardResources1stHalf; standardResources2ndHalf]) }   // Earth and the Moon
-    { Territory.Default with faction = "pioneers"; cluster = "Cluster_113_macro" }   // Segaris   - Plenty resources already
+    { Territory.Default with faction = "pioneers"; cluster = "Cluster_113_macro" }   // Segaris   - Plenty resources already, and next door to ANT.
     { Territory.Default with faction = "pioneers"; cluster = "Cluster_114_macro" }   // Gaian Prophecy
 
     // tides of avarice
@@ -437,12 +436,10 @@ let getClusterPosition (clusterName: string) =
 // We need this because the Boron DLC, for some reason, has positions in scientific notation.
 // eg, 1.234e+005
 let getIntValue (element:string) = int(float element)
-
 let parsePosition (element:XElement) =
     let x = getIntValue (element.Attribute("x").Value)
     let y = getIntValue (element.Attribute("y").Value)
     let z = getIntValue (element.Attribute("z").Value)
-    printfn $"""PARSING POSITION {element.Attribute("x").Value}, {element.Attribute("y").Value}, {element.Attribute("z").Value} => {x}, {y}, {z} """
     x, y, z
 
 // Get the X, Y, Z position of a sector, offset from the galactic center.
@@ -463,7 +460,6 @@ let getSectorPosition (sectorName: string) =
     |> Array.tryFind (fun connection -> connection.Ref = "sectors" && connection.Macro.Ref =?? sectorName)
     |> Option.map (
         fun connection ->
-            printfn $"sector: {sectorName}, cluster: {cluster.Name}, connection: {connection.Name}, offset: {connection.Offset}"
             connection.Offset
             |> Option.map ( fun offset -> parsePosition offset.Position.XElement )
     )

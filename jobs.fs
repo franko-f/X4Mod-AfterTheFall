@@ -77,7 +77,7 @@ let replaceQuotaXml (id:string) (galaxy:int) (maxGalaxy: Option<int>) (cluster:O
         new XAttribute("sel", $"//jobs/job[@id='{id}']/quota"),
         new XElement("quota", quota)
     )
-    printfn "  REPLACING JOB QUOTA %s with \n %s" id (xml.ToString())
+    printfn "     REPLACING JOB QUOTA %s with gal:%A maxGal:%A clust:%A sect:%A" id galaxy maxGalaxy cluster sector
     xml 
 
 
