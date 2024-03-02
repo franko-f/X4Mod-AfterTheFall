@@ -279,15 +279,18 @@ let economyShips =
         filterBy ["trans"]
     ]
 
-let generateRandomAbandonedShipFromList (shipList:string list) =
+let generateRandomAbandonedShipFromListInSector (sector:string) (shipList:string list) =
     let ship = shipList.[rand.Next(shipList.Length)]
-    let sector = X4.Data.selectRandomSector()
     // generate random coordinates within the sector, in KM offset from sector center (different from other coordinates)
     let x, y, z = rand.Next(-160, 160), rand.Next(-10, 10), rand.Next(-180, 180)
     // generate random yaw and pitch
     let yaw, pitch, roll = rand.Next(-180, 180), rand.Next(-180, 180), rand.Next(-180, 180)
-    printfn "GENERATING ABANDONED SHIP: %s, Sector: %s, Position: %A, Rotation: %A" ship sector.Name (x, y, z) (yaw, pitch, roll)
-    (ship, sector.Name, (x, y, z), (yaw, pitch, roll))
+    printfn "GENERATING ABANDONED SHIP: %s, Sector: %s, Position: %A, Rotation: %A" ship sector (x, y, z) (yaw, pitch, roll)
+    (ship, sector, (x, y, z), (yaw, pitch, roll))
+
+let generateRandomAbandonedShipFromList (shipList:string list) =
+    let sector = X4.Data.selectRandomUnsafeSector() // We don't want these wrecks to be in the faction sectors.
+    generateRandomAbandonedShipFromListInSector sector.Name shipList
 
 let generateRandomMilitaryAbandonedShips (count:int) (size:string) =
     let ships = filterListBy [size] militaryShips
@@ -323,6 +326,7 @@ let ProcessShip ((ship:string), (sector:string), position, rotation) =
 let generate_abandoned_ships_file (filename:string) =
 
     let shipDiff =  List.concat [
+        // A bunch of ships in unsafe space to being
         generateRandomMilitaryAbandonedShips 5 "XL" |> List.map ProcessShip
         generateRandomMilitaryAbandonedShips 10 "L" |>  List.map ProcessShip
         generateRandomMilitaryAbandonedShips 15 "m" |> List.map ProcessShip
@@ -334,6 +338,14 @@ let generate_abandoned_ships_file (filename:string) =
         [filterBy ["spl"; "xl"; "carrier"] |> generateRandomAbandonedShipFromList |> ProcessShip]      // Make sure there's at least one Raptor!
         [filterBy ["atf"; "xl"; "battleship"] |> generateRandomAbandonedShipFromList |> ProcessShip]   // And Asgard!
         [filterBy ["atf"; "l"; "destroyer"] |> generateRandomAbandonedShipFromList |> ProcessShip]     // And Syn.
+
+        // followed by a handful of M in safe space.
+        [
+            for i in 1..5 ->
+                militaryShips |> filterListBy ["m"] |> (generateRandomAbandonedShipFromListInSector (X4.Data.selectRandomSafeSector().Name)) |> ProcessShip
+            for i in 1..5 ->
+                economyShips |> filterListBy ["m"] |> (generateRandomAbandonedShipFromListInSector (X4.Data.selectRandomSafeSector().Name)) |> ProcessShip
+        ]
     ]
 
     // Create the new XML Diff document to contain our region additions

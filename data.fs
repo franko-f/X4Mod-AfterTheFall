@@ -471,9 +471,22 @@ let getSectorPosition (sectorName: string) =
     // The connection for the sector may not have had a position, in which case it defaults to cluster center: ie, 0,0,0
     |> Option.defaultValue (0, 0, 0)
 
-let selectRandomSector() =
-    let sector = allSectors.[rand.Next(allSectors.Length)]
-    sector
+
+// Get all the safe sectors in the game. that is, sectors where factions exist, rather than Xenon or neutral
+let getSafeSectors() =
+    allSectors |> List.filter (
+        // Filter to every sector that is in a cluster mentioned in the territories list. Those are our safe clusters.
+        fun sector ->
+            let cluster = findClusterFromSector sector.Name
+            territories |> List.exists (fun record -> cluster =?? record.cluster)
+    )
+
+// Get all the UNSAFE sectors in the game. That's the sectors that are Xenon in our mod, or neutral.
+let getUnsafeSectors() = allSectors |> List.except (getSafeSectors())
+
+let selectRandomSector() = allSectors.[rand.Next(allSectors.Length)]
+let selectRandomSafeSector() = getSafeSectors().[rand.Next(getSafeSectors().Length)]
+let selectRandomUnsafeSector() = getUnsafeSectors().[rand.Next(getUnsafeSectors().Length)]
 
 let allShipMacros =
     [for entry in AllIndexMacros do
