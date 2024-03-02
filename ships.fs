@@ -134,7 +134,6 @@ let ProcessShip ((ship:string), (sector:string), position, rotation) =
 // We don't want it completely random, as we want to make sure there's a good mix of ships in the game.
 // We lean slighly towards generated economy ships vs military, though there's plenty of both.
 // there should be, on average, one or two ships per sector.
-// TODO: Cluster some of them in a massive battlefield that will be exciting to discover.
 let generate_abandoned_ships_file (filename:string) =
     let shipDiff =  List.concat [
         // A bunch of ships in unsafe space to being

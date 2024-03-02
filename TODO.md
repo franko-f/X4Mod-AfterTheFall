@@ -28,7 +28,6 @@ Here's some optional stuff I may add after the initial release
 * Improve compatibility when we don't have DLC installed.
     Move DLC specific stuff in to /extensions/dlc_name (I think this does the trick?)
 
-* Add more derelict ships around
 * Handle better ways to get blueprints: (since I've limited economy => slow gain of resources to buy blueprints)
   I think this is better left as optional to the user, let them install other mods, BUT:
     * Other mods?
@@ -55,7 +54,10 @@ Here's some optional stuff I may add after the initial release
         eg:     <location class="sector" macro="cluster_116_sector001_macro" relation="self" comparison="ge" />
         Also we have things like Xenon factories assigned to specific sectors: do NOT increase these limits.
 
+
+# DONE
 ### How to add derelict ships
+* Add more derelict ships around
 `/md/placedobjects.xml`
 Append xml to list:
 /mdscript[@name='PlacedObjects']/cues/cue[@name='Place_Claimable_Ships']/actions
@@ -78,8 +80,6 @@ Append xml to list:
         </do_if>
 ```
 
-
-# DONE
 * add a gamestart to enable easy testing: show all sectors.
 * Handle STATION
     * write output ADD XML for stations we're added
