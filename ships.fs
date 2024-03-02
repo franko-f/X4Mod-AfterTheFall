@@ -4,7 +4,6 @@ open System
 open System.Xml
 open System.Xml.Linq
 
-
 let rand = new Random(12345)    // Seed the random number generator so we get the same results each time, as long as we're not adding new regions or changing territory order.
 
 // List of all ships that are valid candidates for being generated as abandoned ships.
@@ -177,4 +176,4 @@ let generate_abandoned_ships_file (filename:string) =
         diff.Add( new XText("\n")) // Add a newline after each element so the output is readible
     |] |> ignore
 
-    Utilities.write_xml_file filename diff
+    WriteModfiles.write_xml_file "core" filename diff

@@ -43,13 +43,6 @@ let check_and_create_dir (filename:string) =
     if not (System.IO.Directory.Exists(dir)) then
         System.IO.Directory.CreateDirectory(dir) |> ignore   // Should really catch the failure here. TODO
 
-// Write our XML output to a directory called 'mod'. If the directrory doesn't exist, create it.
-let write_xml_file (filename:string) (xml:XElement) =
-    let modDir = __SOURCE_DIRECTORY__ + "/mod/after_the_fall"
-    let fullname = modDir + "/" + filename
-    check_and_create_dir fullname   // filename may contain parent folder, so we use fullname when checking/creating dirs.
-    xml.Save(fullname)
-
 // Given a list of 2 element tuples, split them in to two lists.
 // The first list contains all the first elements, the second list contains all the second elements.
 // It will strip out any 'None' values.

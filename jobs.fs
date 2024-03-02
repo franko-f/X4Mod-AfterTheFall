@@ -398,5 +398,5 @@ let generate_job_file (filename:string) =
         diff.Add( new XText("\n")) // Add a newline after each element so the output is readible
     |] |> ignore
 
-    X4.Utilities.write_xml_file filename outJobFile.XElement
+    WriteModfiles.write_xml_file "core" filename outJobFile.XElement
   

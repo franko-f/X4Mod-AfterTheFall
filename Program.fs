@@ -12,7 +12,7 @@ printfn "%A" (findCluster "Cluster_44_macro")
 
 // Now actually generate the files in the mod directory by spitting out XML or copying
 // our templates.
-directoryCopy (__SOURCE_DIRECTORY__ + "/mod_xml") (__SOURCE_DIRECTORY__ + "/mod/after_the_fall") true
+X4.WriteModfiles.copy_templates_to_mod()
 X4.God.generate_god_file "libraries/god.xml"
 X4.Jobs.generate_job_file "libraries/jobs.xml"
 X4.Resources.generate_resource_definitions_file "maps/xu_ep2_universe/clusters.xml"
