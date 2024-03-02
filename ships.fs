@@ -56,32 +56,63 @@ let economyShips =
         filterBy ["trans"]
     ]
 
+// given a sector and a list of possible ships, select one of the ships,
+// and assign it coordinates in the given sector.
 let generateRandomAbandonedShipFromListInSector (sector:string) (shipList:string list) =
     let ship = shipList.[rand.Next(shipList.Length)]
     // generate random coordinates within the sector, in KM offset from sector center (different from other coordinates)
     let x, y, z = rand.Next(-160, 160), rand.Next(-10, 10), rand.Next(-180, 180)
     // generate random yaw and pitch
     let yaw, pitch, roll = rand.Next(-180, 180), rand.Next(-180, 180), rand.Next(-180, 180)
-    printfn "GENERATING ABANDONED SHIP: %s, Sector: %s, Position: %A, Rotation: %A" ship sector (x, y, z) (yaw, pitch, roll)
     (ship, sector, (x, y, z), (yaw, pitch, roll))
 
+// given a list of possible ships, select one, and place it randomly in any of the
+// unsafe sectors in the game.
 let generateRandomAbandonedShipFromList (shipList:string list) =
     let sector = X4.Data.selectRandomUnsafeSector() // We don't want these wrecks to be in the faction sectors.
     generateRandomAbandonedShipFromListInSector sector.Name shipList
 
+// Generate COUNT random abandoned military ships of the given size in a random unsafe sector.
+// 'size' is one of 'XL', 'L', 'm', 's'. - the standard X4 ship size classes.
 let generateRandomMilitaryAbandonedShips (count:int) (size:string) =
     let ships = filterListBy [size] militaryShips
     [ for i in 1..count -> generateRandomAbandonedShipFromList ships ]
 
+// As above, but for economy ships.
 let generateRandomEconomyAbandonedShips (count:int) (size:string) =
     let ships = filterListBy [size] economyShips
     [ for i in 1..count -> generateRandomAbandonedShipFromList ships ]
 
-// Generate the XML cue for creating an abandoned ship of the given class in the sector.
+// This function generates a bunch of abandoned ships near each other, as if a major battle occurred.
+// The parameters determine how many of each class are in the field. Ships are clustered within 5km of a point
+// in a random unsafe sector.
+let generateBattlefield (countXL:int) countL countM countS =
+    // First generate the ships for each class.
+    let xl, l, m, s =
+        generateRandomMilitaryAbandonedShips countXL "XL",
+        generateRandomMilitaryAbandonedShips countL "L",
+        generateRandomMilitaryAbandonedShips countM "m",
+        generateRandomMilitaryAbandonedShips countS "s"
+
+    // Then we update the location of each ship to be within 5km of the location of the first ship.
+    // First find the location of the first ship. We concat all the size classes, as we don't if any 
+    // size classes were empty for this battlefield.
+    let _ship, sector, (x, y, z), _rotation  = (List.concat [xl;l;m;s]).[0]
+    // Now update every ships sector and location to be near the first ship, keeping other data the same.
+    List.concat [
+        [ for (ship, _sector, _, rotation) in xl -> (ship, sector, (x + rand.Next(-5, 5), y + rand.Next(-5, 5), z + rand.Next(-5, 5)) , rotation) ]
+        [ for (ship, _sector, _, rotation) in l  -> (ship, sector, (x + rand.Next(-5, 5), y + rand.Next(-5, 5), z + rand.Next(-5, 5)) , rotation) ]
+        [ for (ship, _sector, _, rotation) in m  -> (ship, sector, (x + rand.Next(-5, 5), y + rand.Next(-5, 5), z + rand.Next(-5, 5)) , rotation) ]
+        [ for (ship, _sector, _, rotation) in s  -> (ship, sector, (x + rand.Next(-5, 5), y + rand.Next(-5, 5), z + rand.Next(-5, 5)) , rotation) ]
+   ]
+
+// Generate the XML diff for placing an abandoned ship in the game based
+// on the ship, sector, position and rotation given as parameters.
 let ProcessShip ((ship:string), (sector:string), position, rotation) =
     // Interestingly, the units of KM and deg are specified in the XML attribute fields for abandoned ships.
     // I've not seen this elsewhere, and don't know if it's necessary, but for safety I'll duplicate it.
     let ((x:int), (y:int), (z:int)), ((yaw:int), (pitch:int), (roll:int)) = position, rotation
+    printfn "GENERATING ABANDONED SHIP: %s, Sector: %s, Position: %A, Rotation: %A" ship sector (x, y, z) (yaw, pitch, roll)
     let xml = $"""
         <add sel="/mdscript[@name='PlacedObjects']/cues/cue[@name='Place_Claimable_Ships']/actions">
         <find_sector name="$sector" macro="macro.{sector}"/>
@@ -100,21 +131,29 @@ let ProcessShip ((ship:string), (sector:string), position, rotation) =
 
 // Create a list of random ships, assign them to random sectors, then generate XML that will place
 // them as abandoned ships in the game.
+// We don't want it completely random, as we want to make sure there's a good mix of ships in the game.
+// We lean slighly towards generated economy ships vs military, though there's plenty of both.
+// there should be, on average, one or two ships per sector.
+// TODO: Cluster some of them in a massive battlefield that will be exciting to discover.
 let generate_abandoned_ships_file (filename:string) =
-
     let shipDiff =  List.concat [
         // A bunch of ships in unsafe space to being
-        generateRandomMilitaryAbandonedShips 5 "XL" |> List.map ProcessShip
-        generateRandomMilitaryAbandonedShips 10 "L" |>  List.map ProcessShip
-        generateRandomMilitaryAbandonedShips 15 "m" |> List.map ProcessShip
-        generateRandomMilitaryAbandonedShips 20 "s" |> List.map ProcessShip
-        generateRandomEconomyAbandonedShips  4  "XL" |> List.map ProcessShip
-        generateRandomEconomyAbandonedShips 10 "L" |> List.map ProcessShip
-        generateRandomEconomyAbandonedShips 20 "m" |> List.map ProcessShip
-        generateRandomEconomyAbandonedShips 30 "s" |> List.map ProcessShip
-        [filterBy ["spl"; "xl"; "carrier"] |> generateRandomAbandonedShipFromList |> ProcessShip]      // Make sure there's at least one Raptor!
+        generateRandomMilitaryAbandonedShips 4 "XL" |> List.map ProcessShip
+        generateRandomMilitaryAbandonedShips 6 "L" |> List.map ProcessShip
+        generateRandomMilitaryAbandonedShips 10 "m" |> List.map ProcessShip
+        generateRandomMilitaryAbandonedShips 15 "s" |> List.map ProcessShip
+        generateRandomEconomyAbandonedShips 4  "XL" |> List.map ProcessShip
+        generateRandomEconomyAbandonedShips 10 "L"  |> List.map ProcessShip
+        generateRandomEconomyAbandonedShips 20 "m"  |> List.map ProcessShip
+        generateRandomEconomyAbandonedShips 30 "s"  |> List.map ProcessShip
+        [filterBy ["spl"; "xl"; "carrier"]    |> generateRandomAbandonedShipFromList |> ProcessShip]      // Make sure there's at least one Raptor!
         [filterBy ["atf"; "xl"; "battleship"] |> generateRandomAbandonedShipFromList |> ProcessShip]   // And Asgard!
-        [filterBy ["atf"; "l"; "destroyer"] |> generateRandomAbandonedShipFromList |> ProcessShip]     // And Syn.
+        [filterBy ["atf"; "l"; "destroyer"]   |> generateRandomAbandonedShipFromList |> ProcessShip]     // And Syn.
+
+        // Lets generate a few battlefields of varying sizes
+        generateBattlefield 1 3 2 2 |> List.map ProcessShip
+        generateBattlefield 0 1 4 5 |> List.map ProcessShip
+        generateBattlefield 0 0 4 8 |> List.map ProcessShip
 
         // followed by a handful of M in safe space.
         [
@@ -123,6 +162,7 @@ let generate_abandoned_ships_file (filename:string) =
             for i in 1..5 ->
                 economyShips |> filterListBy ["m"] |> (generateRandomAbandonedShipFromListInSector (X4.Data.selectRandomSafeSector().Name)) |> ProcessShip
         ]
+
     ]
 
     // Create the new XML Diff document to contain our region additions
