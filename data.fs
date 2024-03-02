@@ -7,6 +7,12 @@ module X4.Data
 
 open FSharp.Data
 open X4.Utilities
+open System
+open System.Xml
+open System.Xml.Linq
+
+let rand = new Random(12345)    // Seed the random number generator so we get the same results each time as long as were not changing code.
+
 
 [<Literal>]
 let X4UnpackedDataFolder = __SOURCE_DIRECTORY__ + "/X4_unpacked_data"
@@ -57,10 +63,18 @@ let X4GalaxyFilePirate = X4UnpackedDataFolder + "/pirate/maps/xu_ep2_universe/ga
 let X4GalaxyFileBoron = X4UnpackedDataFolder + "/boron/maps/xu_ep2_universe/galaxy.xml"
 
 [<Literal>]
+let X4IndexMacrosFile = X4UnpackedDataFolder + "/core/index/macros.xml"
+let X4IndexMacrosFileSplit = X4UnpackedDataFolder + "/split/index/macros.xml"
+let X4IndexMacrosFileTerran = X4UnpackedDataFolder + "/terran/index/macros.xml"
+let X4IndexMacrosFilePirate = X4UnpackedDataFolder + "/pirate/index/macros.xml"
+let X4IndexMacrosFileBoron = X4UnpackedDataFolder + "/boron/index/macros.xml"
+
+[<Literal>]
 let X4RegionDefinitionsFile = X4UnpackedDataFolder + "/core/libraries/region_definitions.xml"
 
 [<Literal>]
 let X4RegionYieldsFile = X4UnpackedDataFolder + "/core/libraries/regionyields.xml"
+
 
 // TODO: Should we 'unify' all the types using 'Global=true,' parameter?
 // This means, for example, every instance of 'Location' type is trested as the same type, no matter
@@ -76,8 +90,9 @@ type X4Cluster    = XmlProvider<X4ClusterFileCore>
 type X4Sector     = XmlProvider<X4SectorFileCore>
 type X4Zone       = XmlProvider<X4ZoneFileCore>
 type X4Galaxy     = XmlProvider<X4GalaxyFileCore>
-// the DLC galaxy files are in DIFF format, so we need a different type provider.
-type X4GalaxyDiff = XmlProvider<X4GalaxyFileSplit>
+type X4GalaxyDiff = XmlProvider<X4GalaxyFileSplit> // the DLC galaxy files are in DIFF format, so we need a different type provider.
+
+type X4IndexMacro = XmlProvider<X4IndexMacrosFile>
 
 type X4RegionDefinitions = XmlProvider<X4RegionDefinitionsFile>
 type X4RegionYields = XmlProvider<X4RegionYieldsFile>
@@ -153,6 +168,20 @@ let allGalaxy =
                     loadFromDiff X4GalaxyPirate;
                     loadFromDiff X4GalaxyBoron;
                 ]
+
+let AllIndexMacros =
+    let X4IndexMacrosCore   = X4IndexMacro.Load(X4IndexMacrosFile)
+    let X4IndexMacrosSplit  = X4IndexMacro.Load(X4IndexMacrosFileSplit)
+    let X4IndexMacrosTerran = X4IndexMacro.Load(X4IndexMacrosFileTerran)
+    let X4IndexMacrosPirate = X4IndexMacro.Load(X4IndexMacrosFilePirate)
+    let X4IndexMacrosBoron  = X4IndexMacro.Load(X4IndexMacrosFileBoron)
+    Array.concat [
+        X4IndexMacrosCore.Entries;
+        X4IndexMacrosSplit.Entries;
+        X4IndexMacrosTerran.Entries;
+        X4IndexMacrosPirate.Entries;
+        X4IndexMacrosBoron.Entries;
+    ]
 
 let allRegionDefinitions = X4RegionDefinitions.Load(X4RegionDefinitionsFile)
 let regionYields = X4RegionYields.Load(X4RegionYieldsFile)
@@ -403,6 +432,19 @@ let getClusterPosition (clusterName: string) =
         |> Option.map (fun connection -> connection.Offset.Value.Position.X, connection.Offset.Value.Position.Y, connection.Offset.Value.Position.Z)
         |> Option.get
 
+// this function wil take an XElement, and return the integer version of the value.
+// It will handle both decimals and floating point strings in scientific notation.
+// We need this because the Boron DLC, for some reason, has positions in scientific notation.
+// eg, 1.234e+005
+let getIntValue (element:string) = int(float element)
+
+let parsePosition (element:XElement) =
+    let x = getIntValue (element.Attribute("x").Value)
+    let y = getIntValue (element.Attribute("y").Value)
+    let z = getIntValue (element.Attribute("z").Value)
+    printfn $"""PARSING POSITION {element.Attribute("x").Value}, {element.Attribute("y").Value}, {element.Attribute("z").Value} => {x}, {y}, {z} """
+    x, y, z
+
 // Get the X, Y, Z position of a sector, offset from the galactic center.
 // sector position *may* be defined in the cluster.xml connection. If it's not, I'm assuming it defaults
 // to the clusters position.
@@ -421,13 +463,26 @@ let getSectorPosition (sectorName: string) =
     |> Array.tryFind (fun connection -> connection.Ref = "sectors" && connection.Macro.Ref =?? sectorName)
     |> Option.map (
         fun connection ->
+            printfn $"sector: {sectorName}, cluster: {cluster.Name}, connection: {connection.Name}, offset: {connection.Offset}"
             connection.Offset
-            |> Option.map ( fun offset -> int(offset.Position.X), int(offset.Position.Y), int(offset.Position.Z))
+            |> Option.map ( fun offset -> parsePosition offset.Position.XElement )
     )
     |> Option.flatten
     // The connection for the sector may not have had a position, in which case it defaults to cluster center: ie, 0,0,0
     |> Option.defaultValue (0, 0, 0)
 
+let selectRandomSector() =
+    let sector = allSectors.[rand.Next(allSectors.Length)]
+    sector
+
+let allShipMacros =
+    [for entry in AllIndexMacros do
+        if entry.Name.StartsWith "ship_" then yield entry.Name
+    ]
+
+let dumpShips() =
+    printfn "All Ship Macros:"
+    for ship in allShipMacros do printfn "macro.%s," (ship)
 
 let dump_sectors (sectors:X4Sector.Macro list) =
     for sector in sectors do

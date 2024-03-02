@@ -16,5 +16,4 @@ directoryCopy (__SOURCE_DIRECTORY__ + "/mod_xml") (__SOURCE_DIRECTORY__ + "/mod/
 X4.God.generate_god_file "libraries/god.xml"
 X4.Jobs.generate_job_file "libraries/jobs.xml"
 X4.Resources.generate_resource_definitions_file "maps/xu_ep2_universe/clusters.xml"
-
-//X4.Data.dumpRegionYields()
+X4.Ships.generate_abandoned_ships_file "/md/placedobjects.xml"

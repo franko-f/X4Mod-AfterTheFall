@@ -13,6 +13,9 @@ BUGS:
 
 
 * Move the default PlayerHQ location to somewhere safe
+    * Or should I leave it? It has plot immunity, and it might be a good challenge
+    to claim it, and try hold it from the Xenon, remote from other factions.
+    Consider moving it closer to faction territory, but not in it; like 2nd Contact.
 
 ## Post Beta/pre v1.0
 This is stuff I want to clean up during the beta period, prior to final release.
@@ -52,6 +55,28 @@ Here's some optional stuff I may add after the initial release
         eg:     <location class="sector" macro="cluster_116_sector001_macro" relation="self" comparison="ge" />
         Also we have things like Xenon factories assigned to specific sectors: do NOT increase these limits.
 
+### How to add derelict ships
+`/md/placedobjects.xml`
+Append xml to list:
+/mdscript[@name='PlacedObjects']/cues/cue[@name='Place_Claimable_Ships']/actions
+
+```
+        <!--deep in xenon space - L ship-->
+        <!--teleport sector="cluster_25_sector002_macro">
+          <offset>
+            <position x="-165396.516" y="-489.434" z="145876.938"/>
+            <rotation yaw="-112.03669" pitch="0.620682"/>
+          </offset>
+        </teleport-->
+        <find_sector name="$sector" macro="macro.cluster_25_sector002_macro"/>
+        <do_if value="$sector.exists">
+          <create_ship name="$ship" macro="macro.ship_par_l_destroyer_01_a_macro" sector="$sector">
+            <owner exact="faction.ownerless"/>
+            <position x="-165.396km" y="-0.489km" z="145.876km"/>
+            <rotation yaw="-112deg" pitch="0.6deg" roll="30deg"/>
+          </create_ship>
+        </do_if>
+```
 
 
 # DONE
