@@ -207,20 +207,6 @@ let processStation (station:X4WorldStart.Station) (stationsToMove:string list) (
                 (Some replacement.XElement, Some remove, None)  // return an add/remove options,
 
 
-// Given a list of stations, move each one to a 'safe' sector. that is, a sector we've assigned to a faction.
-let moveStationToSafeSector (stations:X4WorldStart.Station list) =
-    // Now we need to, for each of these, move them to one of the sectors we've assigned to the faction.
-    stations |> printfn "STATIONS THAT NEED MOVING: %A"
-
-    [ for station in stations do
-        printfn "  MOVING [%s]:%s :: %A" station.Owner (stationSectorName station) station.Id
-
-
-
-        yield station
-    ]
-
-
 // with the shifting around of valid territory, the various races have lost some of their critical wharfs and shipyards.
 // We need to re-add some, but not all. Just make sure each faction has at least one of each type.
 let findStationsThatNeedMoving (stations:X4WorldStart.Station list) =
