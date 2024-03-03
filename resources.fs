@@ -119,6 +119,12 @@ let generateDLCResources (dlc:string) (filename:string) =
     WriteModfiles.write_xml_file dlc filename diff
 
 
-let generate_resource_definitions_file (filename:string) =
-    for dlc in X4.WriteModfiles.dlcs do
-        generateDLCResources dlc filename
+let generate_resource_definitions_file () =
+    // Each DLC has a completely different naming scheme for the cluster file.
+    // The file *must* be named the same as the dlc, otherwise the patching will fail.
+    generateDLCResources "core"   "maps/xu_ep2_universe/clusters.xml"
+    generateDLCResources "terran" "maps/xu_ep2_universe/dlc_terran_clusters.xml"
+    generateDLCResources "boron"  "maps/xu_ep2_universe/dlc_boron_clusters.xml"
+    generateDLCResources "split"  "maps/xu_ep2_universe/dlc4_clusters.xml"
+    generateDLCResources "pirate" "maps/xu_ep2_universe/dlc_pirate_clusters.xml"
+

@@ -42,18 +42,31 @@ let dlcs = factionToDLCMap |> Map.values |> List.ofSeq |> List.distinct
 let DLCs = Map [
     "core", modOutDirectory;
     "split", modOutDirectory + "/extensions/ego_dlc_split";
-    "terran", modOutDirectory + "/extensions/ego_dlc__terran";
+    "terran", modOutDirectory + "/extensions/ego_dlc_terran";
     "pirate", modOutDirectory + "/extensions/ego_dlc_pirate";
     "boron", modOutDirectory + "/extensions/ego_dlc_boron";
 ]
 let getDLCOutDirectory (dlc:string) = DLCs.[dlc]
 
+let getDLCFileName dlc filename = (getDLCOutDirectory dlc) + "/" + filename
+
 // Write our XML output to a directory called 'mod'. If the directrory doesn't exist, create it.
 let write_xml_file (dlc:string) (filename:string) (xml:XElement) =
-    let fullname = (getDLCOutDirectory dlc) + "/" + filename
-    check_and_create_dir fullname   // filename may contain parent folder, so we use fullname when checking/creating dirs.
+    let fullname = (getDLCFileName dlc filename)
+    check_and_create_dir fullname
     xml.Save(fullname)
 
 let copy_templates_to_mod () =
     directoryCopy (__SOURCE_DIRECTORY__ + "/mod_xml") modOutDirectory true
     printfn "Templates copied to mod directory."
+
+let copyFileToDlc dlc (filename:string) =
+    let fullname = (getDLCFileName dlc filename)
+    check_and_create_dir fullname
+    System.IO.File.Copy(__SOURCE_DIRECTORY__ + "/mod_xml/" + filename, fullname, true) |> ignore
+    printfn "Copied %s to mod directory." filename
+
+let copyFileToAllDLCs (filename:string) =
+    for dlc in dlcs do
+        copyFileToDlc dlc filename
+        printfn "Copied %s to mod directory." filename

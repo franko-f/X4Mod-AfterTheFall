@@ -8,9 +8,9 @@
     the below list (or the default list from the vanilla region definitions).
 -->
 <regions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="region_definitions.xsd">
-  <region name="atf_40km_asteroid_field_high" density="4.5" rotation="0">
+  <region name="atf_60km_asteroid_field_high" density="4.5" rotation="0">
     <boundary class="cylinder">
-      <size r="25000" linear="5000" />
+      <size r="30000" linear="6000" />
     </boundary>
     <falloff>
       <lateral>
@@ -46,9 +46,9 @@
   </region>
 
 
-  <region name="atf_40km_ice_field_high" density="1.5" rotation="0">
+  <region name="atf_60km_ice_field_high" density="1.5" rotation="0">
     <boundary class="cylinder">
-      <size r="25000" linear="2500" />
+      <size r="30000" linear="4000" />
     </boundary>
     <falloff>
       <lateral>
@@ -77,9 +77,9 @@
   </region>
 
 
-  <region name="atf_wreckfield_xenon_battle_20km" density="1.5" rotation="0" noisescale="10000" seed="32" minnoisevalue="0.0" maxnoisevalue="1">
+  <region name="atf_wreckfield_xenon_battle_30km" density="1.5" rotation="0" noisescale="10000" seed="32" minnoisevalue="0.0" maxnoisevalue="1">
     <boundary class="cylinder">
-      <size r="10000" linear="6000" />
+      <size r="15000" linear="6000" />
     </boundary>
     <falloff>
       <lateral>

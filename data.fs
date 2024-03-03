@@ -248,9 +248,9 @@ let gateMacros = ["props_gates_orb_accelerator_01_macro", "props_gates_anc_gate_
 // lookup map to the resource definitions from the XML that we will use to place extra resources
 // for factions now in sectors without resources.
 let resourceMap = Map [
-    "minerals", "atf_40km_asteroid_field_high";  // ore, silicon and a little bit of nvidium
-    "ice",      "atf_40km_ice_field_high";            // ice
-    "scrap",    "atf_40km_scrap_field_high";        // scrap
+    "minerals", "atf_60km_asteroid_field_high";     // ore, silicon and a little bit of nvidium
+    "ice",      "atf_60km_ice_field_high";          // ice
+    "scrap",    "atf_wreckfield_xenon_battle_30km"; // scrap
     "hydrogen", "p1_40km_hydrogen_field";
     "helium",   "p1_40km_helium_highyield_field";
     "methane",  "p1_40km_methane_highyield_field"

@@ -336,9 +336,9 @@ let processJob (job:X4Job.Job) =
         // XENON: Determine the quota mupliplier based on ship size and military/civilian
         let multiplier =
             match isMilitaryJob job, size with
-            | true, "ship_xl" -> 1.6    // battleships and carriers
+            | true, "ship_xl" -> 1.8    // battleships and carriers
             | true, "ship_l"  -> 1.6    // destroyers: of which Xenon should have none in vanilla
-            | true, _         -> 1.8    // S and M military ships
+            | true, _         -> 2.5    // S and M military ships
             | false, _        -> 1.4    // s & m civilian ships
 
         // Calculate the new quotas.
