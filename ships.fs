@@ -4,6 +4,11 @@ open System
 open System.Xml
 open System.Xml.Linq
 
+// Define a few types for ship location that we'll use when we place an abandoned ship
+type Position = int * int * int
+type Rotation = int * int * int
+type ShipLocation = string * string * Position * Rotation   // Ship name, sector name, position, rotation. Should probably use a record type here.
+
 let rand = new Random(12345)    // Seed the random number generator so we get the same results each time, as long as we're not adding new regions or changing territory order.
 
 // List of all ships that are valid candidates for being generated as abandoned ships.
@@ -57,7 +62,7 @@ let economyShips =
 
 // given a sector and a list of possible ships, select one of the ships,
 // and assign it coordinates in the given sector.
-let generateRandomAbandonedShipFromListInSector (sector:string) (shipList:string list) =
+let generateRandomAbandonedShipFromListInSector (sector:string) (shipList:string list) :ShipLocation =
     let ship = shipList.[rand.Next(shipList.Length)]
     // generate random coordinates within the sector, in KM offset from sector center (different from other coordinates)
     let x, y, z = rand.Next(-160, 160), rand.Next(-10, 10), rand.Next(-180, 180)
@@ -107,10 +112,9 @@ let generateBattlefield (countXL:int) countL countM countS =
 
 // Generate the XML diff for placing an abandoned ship in the game based
 // on the ship, sector, position and rotation given as parameters.
-let ProcessShip ((ship:string), (sector:string), position, rotation) =
+let ProcessShip ((ship, sector, (x, y, z), (yaw, pitch, roll)):ShipLocation) =
     // Interestingly, the units of KM and deg are specified in the XML attribute fields for abandoned ships.
     // I've not seen this elsewhere, and don't know if it's necessary, but for safety I'll duplicate it.
-    let ((x:int), (y:int), (z:int)), ((yaw:int), (pitch:int), (roll:int)) = position, rotation
     printfn "GENERATING ABANDONED SHIP: %s, Sector: %s, Position: %A, Rotation: %A" ship sector (x, y, z) (yaw, pitch, roll)
     let xml = $"""
         <add sel="/mdscript[@name='PlacedObjects']/cues/cue[@name='Place_Claimable_Ships']/actions">

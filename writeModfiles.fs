@@ -32,10 +32,10 @@ let factionToDLCMap = Map [
 // This maps that code to the output directory in the mod for that DLC
 let DLCOutDirectory = Map [
     "core", modOutDirectory;
-    "split", modOutDirectory + "extensions/ego_dlc_split";
-    "terran", modOutDirectory + "extensions/ego_dlc__terran";
-    "pirate", modOutDirectory + "extensions/ego_dlc_pirate";
-    "boron", modOutDirectory + "extensions/ego_dlc_boron";
+    "split", modOutDirectory + "/extensions/ego_dlc_split";
+    "terran", modOutDirectory + "/extensions/ego_dlc__terran";
+    "pirate", modOutDirectory + "/extensions/ego_dlc_pirate";
+    "boron", modOutDirectory + "/extensions/ego_dlc_boron";
 ]
 let GetDLCOutDirectory (dlc:string) = DLCOutDirectory.[dlc]
 
