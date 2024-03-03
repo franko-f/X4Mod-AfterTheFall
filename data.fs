@@ -325,6 +325,12 @@ let territories = [
     { Territory.Default with faction = "boron"; cluster = "Cluster_609_macro" }       // Menelaus' Oasis 
 ]
 
+// Get all the factions defined in the speficied DLC
+let dlcFactions dlc = X4.WriteModfiles.dlcFactions dlc
+// Filter the territories list to only include those that are in the specified DLC
+let dlcTerritories dlc =
+    let factions = dlcFactions dlc
+    territories |> List.filter (fun t -> List.contains t.faction factions)
 
 // Given a cluster name, return the X4Cluster object representing it.
 let findCluster (clusterName:string) =

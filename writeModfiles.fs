@@ -27,21 +27,30 @@ let factionToDLCMap = Map [
     "boron", "boron";
 ]
 
+// find the DLC that this faction is part of.
+let factionDLC faction = factionToDLCMap.[faction]
+// find the factions that are part of this DLC
+let dlcFactions dlc = factionToDLCMap |> Map.filter (fun k v -> v = dlc) |> Map.keys |> List.ofSeq
+// A list of all the DLC codes. eg, core, split, etc.
+let dlcs = factionToDLCMap |> Map.values |> List.ofSeq |> List.distinct
+
 
 // different DLC are referred by names such as 'split', 'terran', 'pirate', 'boron'
-// This maps that code to the output directory in the mod for that DLC
-let DLCOutDirectory = Map [
+// This maps that code to the output directory in the mod for that DLC.
+// Technically, this really isn't the map of DLCs, as it contains the core game as well, 
+// but hey, what you gonna do?
+let DLCs = Map [
     "core", modOutDirectory;
     "split", modOutDirectory + "/extensions/ego_dlc_split";
     "terran", modOutDirectory + "/extensions/ego_dlc__terran";
     "pirate", modOutDirectory + "/extensions/ego_dlc_pirate";
     "boron", modOutDirectory + "/extensions/ego_dlc_boron";
 ]
-let GetDLCOutDirectory (dlc:string) = DLCOutDirectory.[dlc]
+let getDLCOutDirectory (dlc:string) = DLCs.[dlc]
 
 // Write our XML output to a directory called 'mod'. If the directrory doesn't exist, create it.
 let write_xml_file (dlc:string) (filename:string) (xml:XElement) =
-    let fullname = (GetDLCOutDirectory dlc) + "/" + filename
+    let fullname = (getDLCOutDirectory dlc) + "/" + filename
     check_and_create_dir fullname   // filename may contain parent folder, so we use fullname when checking/creating dirs.
     xml.Save(fullname)
 

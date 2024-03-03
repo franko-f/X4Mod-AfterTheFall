@@ -80,10 +80,12 @@ let processRegion cluster sector resource (count:int) =
 let cycle (data:string list) =
     Seq.initInfinite (fun i -> data.[i % data.Length])
 
-let generate_resource_definitions_file (filename:string) =
+let generateDLCResources (dlc:string) (filename:string) =
+    printfn "======= Generating resources for DLC: %s" dlc
+
     // allocate resources to specific sectors.
     let resource_definitions = [
-        for territory in territories do
+        for territory in (X4.Data.dlcTerritories dlc) do
             // extract each cluster and list of resource definition from territories, then look up the sectors in the cluster
             // 'sectors' is an infinite sequence that will start again at the first sector in the cluster when it reaches the end
             let sectors = findSectorsInCluster territory.cluster |> cycle
@@ -114,4 +116,9 @@ let generate_resource_definitions_file (filename:string) =
         diff.Add( new XText("\n")) // Add a newline after each element so the output is readible
     |] |> ignore
 
-    WriteModfiles.write_xml_file "core" filename diff
+    WriteModfiles.write_xml_file dlc filename diff
+
+
+let generate_resource_definitions_file (filename:string) =
+    for dlc in X4.WriteModfiles.dlcs do
+        generateDLCResources dlc filename
