@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+<!-- TER DLC by default doesn't add any Xenon patrols, as the TER dlc didn't have Xenon sectors.
+So our newly converted xenon sectors are pretty sparse, and just see S ships built in the shipyard.
+Lets add a little excitement to the terrans day, and stop them steamrolling through.
+ -->
+
+<add sel="/jobs">
+
+  <!-- Lets put a Xenon I in the asteroid belt to cause a little mayhem -->
+  <job id="xenon_carrier_patrol_xl_border_zone_defence_atf_terran_asteroid" name="{20204,3801}" comment="one">
+    <modifiers commandeerable="false"/>
+    <orders>
+      <order order="Patrol" default="true">
+        <param name="range" value="class.zone"/>
+      </order>
+    </orders>
+    <category faction="xenon" tags="[military, carrier]" size="ship_xl"/>
+    <quota galaxy="1"/>
+    <location class="sector" macro="Cluster_100_Sector001_macro" faction="xenon" relation="self" comparison="exact" matchextension="false"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="xenon" tags="[military, carrier]" size="ship_xl"/>
+      <owner exact="xenon" overridenpc="true"/>
+    </ship>
+    <subordinates>
+      <subordinate job="xenon_destroyer_escort_xl" assignment="attack"/>
+    </subordinates>
+  </job>
+
+  <job id="xenon_destroyer_patrol_xl_comp_atf_terran_saturn" name="{20204,3801}" comment="compression">
+    <modifiers commandeerable="true"/>
+    <orders>
+      <order order="Patrol" default="true">
+        <param name="range" value="class.zone"/>
+      </order>
+    </orders>
+    <category faction="xenon" tags="[military, destroyer]" size="ship_xl"/>
+    <quota cluster="2" sector="1"/>
+    <location class="cluster" macro="Cluster_108_macro" faction="xenon" relation="self" comparison="exact" matchextension="false"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="xenon" tags="[military, destroyer]" size="ship_xl"/>
+      <owner exact="xenon" overridenpc="true"/>
+    </ship>
+    <subordinates>
+      <subordinate job="xenon_frigate_escort_m"/>
+    </subordinates>
+  </job>
+
+  <job id="xenon_destroyer_patrol_xl_comp_atf_terran_venus" name="{20204,3801}" comment="compression">
+    <modifiers commandeerable="true"/>
+    <orders>
+      <order order="Patrol" default="true">
+        <param name="range" value="class.zone"/>
+      </order>
+    </orders>
+    <category faction="xenon" tags="[military, destroyer]" size="ship_xl"/>
+    <quota cluster="1" sector="1"/>
+    <location class="cluster" macro="Cluster_102_macro" faction="xenon" relation="self" comparison="exact" matchextension="false"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="xenon" tags="[military, destroyer]" size="ship_xl"/>
+      <owner exact="xenon" overridenpc="true"/>
+    </ship>
+    <subordinates>
+      <subordinate job="xenon_frigate_escort_m"/>
+    </subordinates>
+  </job>
+
+
+  <job id="xenon_frigate_patrol_m_sector_atf_terran" name="{20204,3401}" comment="asymmetrical">
+    <modifiers commandeerable="true"/>
+    <orders>
+      <order order="Patrol" default="true">
+        <param name="range" value="class.sector"/>
+      </order>
+    </orders>
+    <category faction="xenon" tags="[factionlogic, military, frigate]" size="ship_m"/>
+    <quota cluster="3" sector="3"/>
+    <location class="cluster" macro="Cluster_109_macro" faction="xenon" relation="self" comparison="exact" matchextension="false"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="xenon" tags="[military, medium]" size="ship_m"/>
+      <owner exact="xenon" overridenpc="true"/>
+    </ship>
+    <subordinates>
+      <subordinate job="xenon_frigate_escort_m"/>
+    </subordinates>
+  </job>
+
+</add>
+</diff>
