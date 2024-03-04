@@ -165,18 +165,26 @@ let processStation (station:X4WorldStart.Station) (stationsToMove:string list) (
             // 2. Create some XML that will remove the old station from the game. Later, we're toing to check the list of
             //   remove stations and actually move a few of them to a new location instead.
             let id = station.Id
-
-            // Update location and ID of the clone. 
-            // create a new Xenon station to replace it
-            let replacement = new X4GodMod.Station(stationClone)
-            replacement.XElement.SetAttributeValue(XName.Get("id"), replacement.Id + "_x_" + id)   // Give it a new unique ID
-            // update location. As they're different types (as far as the type provider is concerned), we have to manually set
-            // the important zone and macro fields.
             let locationClass= Option.defaultValue "none" station.Location.Class
             let locationMacro= Option.defaultValue "none" station.Location.Macro
-            replacement.Location.XElement.SetAttributeValue(XName.Get("class"), locationClass)
-            replacement.Location.XElement.SetAttributeValue(XName.Get("macro"), locationMacro)
-            logAddStation "REPLACE" replacement
+            let cluster = X4.Data.findClusterFromLocation locationClass locationMacro   |> Option.defaultValue "none"    // Find out which cluster this location is in.
+
+            let replacement =
+                match X4.Data.neutralClusters |> List.contains cluster with
+                | true ->
+                    // If this is a neutral cluster, then we're going to clear all stations out of it.
+                    // ie; we're not going to replace this station with a xenon whatever.
+                    None
+                | false ->
+                    // create a new Xenon station to replace it
+                    let replacement = new X4GodMod.Station(stationClone)
+                    replacement.XElement.SetAttributeValue(XName.Get("id"), replacement.Id + "_x_" + id)   // Give it a new unique ID
+                    // update location. As they're different types (as far as the type provider is concerned), we have to manually set
+                    // the important zone and macro fields.
+                    replacement.Location.XElement.SetAttributeValue(XName.Get("class"), locationClass)
+                    replacement.Location.XElement.SetAttributeValue(XName.Get("macro"), locationMacro)
+                    logAddStation "REPLACE" replacement
+                    Some replacement.XElement
 
             // Now that's done, decide whether to REMOVE or MOVE the old station.
             if List.contains id stationsToMove then
@@ -198,13 +206,13 @@ let processStation (station:X4WorldStart.Station) (stationsToMove:string list) (
                         randomSector
                     )
                 ]
-                (Some replacement.XElement, None, Some replaceXml)
+                (replacement, None, Some replaceXml)
             else
                 // create XML tag that will remove the old station
                 let remove = new XElement( "remove",
                     new XAttribute("sel", $"//god/stations/station[@id='{id}']") // XML remove tag for the station we're replacing with Xenon.
                 )
-                (Some replacement.XElement, Some remove, None)  // return an add/remove options,
+                (replacement, Some remove, None)  // return an add/remove options,
 
 
 // with the shifting around of valid territory, the various races have lost some of their critical wharfs and shipyards.
@@ -262,7 +270,7 @@ let processProduct (product:X4WorldStart.Product) =
 // and then updating the location to the new coordinates, and finally renaming the station to be
 // '(gate.name).defense_[id]' so that it's unique.
 let generateGateDefenseStations() =
-    let gateStations = X4.Gates.getRequiredDefenseStationLocations 5 10000 // 5 stations per gate, 10000m from the gate. Give them almost overlapping fields of fire for long range plasma
+    let gateStations = X4.Gates.getRequiredDefenseStationLocations 6 15000 // 5 stations per gate, 10000m from the gate. Give them almost overlapping fields of fire for long range plasma
 
     [ for gate, n, location  in gateStations do
         printfn "GENERATING DEFENSE STATION FOR %s GATE %s" gate.Faction gate.ConnectionName

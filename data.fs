@@ -269,8 +269,18 @@ let standardResources2ndHalf = [ "minerals"; "minerals"; "ice"; "scrap"; ] // 2x
 // Lastly, we'll need to place the Bastion stations near the jumpgates. We
 // can also find the location of the jumpgates in the xml files, and then
 // place three bastion stations around each one, encircling it.
-// type Position = { x: float; y: float; z: float }
-// type MiningResource = { name: string; positionOffset: Position }  // offset is distance from sector ceter,
+
+// In addition to the games default collection of sectors/clusters that have no owners, we're going
+// to add a few more, so that players have options on almost-safe sectors in which to start their own
+// empire should they wish it
+let neutralClusters = [
+    "Cluster_01_macro"      // Grand Exchange, 3 sectors
+    "Cluster_27_macro"      // Eighteen Billion
+    "Cluster_46_macro"      // Morningstar IV
+    "Cluster_401_macro"     // Family Zhin
+    "Cluster_422_macro"     // Wretched Skies X
+    "Cluster_116_macro"     // Oort Cloud
+]
 
 type Territory = { faction: string; cluster:string; resources: string list }
                    static member Default = { faction = ""; cluster = ""; resources = []}
@@ -387,6 +397,12 @@ let findSectorFromZone (zone:string) =
     )
     |> Option.map (fun sector -> sector.Name.ToLower()) // return the sector name, but in lower case, as the case varies in the files. I prefer to make it consistent
 
+let findClusterFromLocation (locationClass:string) (locationMacro:string) =
+    match locationClass with
+    | "zone" -> findSectorFromZone locationMacro |> Option.map findClusterFromSector |> Option.flatten
+    | "sector" -> findClusterFromSector locationMacro
+    | "cluster" -> Some locationMacro
+    | _ -> None
 
 // Explicit check for whether we've ALLOWED a faction in a cluster in our territory mapping.
 // For most factions this is a lot less than what is in the base game.

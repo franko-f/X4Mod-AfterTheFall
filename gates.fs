@@ -3,8 +3,6 @@ module X4.Gates
 open System
 open MathNet.Numerics.LinearAlgebra.Double
 
-open FSharp.Data
-open X4.Utilities
 open X4.Data
 
 // Data on gates is scattered in a two primary places.
