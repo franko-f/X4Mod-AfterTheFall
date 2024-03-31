@@ -14,8 +14,13 @@ let rand = new Random(12345)    // Seed the random number generator so we get th
 // List of all ships that are valid candidates for being generated as abandoned ships.
 let abandonedShipsList =
     // Our filters. Factions we'll look for, and tags we'll omit. Both must be true.
-    let factions = [ "_arg_"; "_par_"; "_tel_"; "_spl_"; "_ter_"; "_atf_"; "_yak_"; "_pir_"; "_bor_";]
-    let omit = ["_xs_"; "_plot_"; "_landmark_"; "_story"; "_highcapacity_"; "ship_spl_xl_battleship_01_a_macro"; "ship_pir_xl_battleship_01_a_macro"]
+    let factions = [ "_arg_"; "_par_"; "_tel_"; "_spl_"; "_ter_"; "_atf_"; "_yak_"; "_pir_"; ]  // Removed boron '_bor_', as they're spawning without engins
+    let omit = [
+        "_xs_"; "_plot_"; "_landmark_"; "_story"; "_highcapacity_"; 
+        "ship_spl_xl_battleship_01_a_macro"; "ship_pir_xl_battleship_01_a_macro"; // specific ships that seems unsupported or don't exist in game
+        // Some terran destroyers that are spawning without main guns.
+        "ship_atf_l_destroyer_01_a_macro"; "ship_atf_xl_battleship_01_a_macro"; "ship_ter_l_destroyer_01_a_macro"
+    ]
 
     X4.Data.allShipMacros
     |> List.filter (
@@ -149,8 +154,9 @@ let generate_abandoned_ships_file (filename:string) =
         generateRandomEconomyAbandonedShips 20 "m"  |> List.map ProcessShip
         generateRandomEconomyAbandonedShips 30 "s"  |> List.map ProcessShip
         [filterBy ["spl"; "xl"; "carrier"]    |> generateRandomAbandonedShipFromList |> ProcessShip]      // Make sure there's at least one Raptor!
-        [filterBy ["atf"; "xl"; "battleship"] |> generateRandomAbandonedShipFromList |> ProcessShip]   // And Asgard!
-        [filterBy ["atf"; "l"; "destroyer"]   |> generateRandomAbandonedShipFromList |> ProcessShip]     // And Syn.
+        // Until we figure out how to generate these with faction specific equipment, we'll leave them out. Currently, they're spawning without main batteries.
+        //[filterBy ["atf"; "xl"; "battleship"] |> generateRandomAbandonedShipFromList |> ProcessShip]   // And Asgard!
+        //[filterBy ["atf"; "l"; "destroyer"]   |> generateRandomAbandonedShipFromList |> ProcessShip]     // And Syn.
 
         // Lets generate a few battlefields of varying sizes
         generateBattlefield 1 3 2 2 |> List.map ProcessShip
