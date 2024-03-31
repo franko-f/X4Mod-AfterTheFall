@@ -98,8 +98,8 @@ let generateRandomEconomyAbandonedShips (count:int) (size:string) =
 let generateBattlefield (countXL:int) countL countM countS =
     // First generate the ships for each class.
     let xl, l, m, s =
-        generateRandomMilitaryAbandonedShips countXL "XL",
-        generateRandomMilitaryAbandonedShips countL "L",
+        generateRandomMilitaryAbandonedShips countXL "xl",
+        generateRandomMilitaryAbandonedShips countL "l",
         generateRandomMilitaryAbandonedShips countM "m",
         generateRandomMilitaryAbandonedShips countS "s"
 
@@ -145,12 +145,12 @@ let ProcessShip ((ship, sector, (x, y, z), (yaw, pitch, roll)):ShipLocation) =
 let generate_abandoned_ships_file (filename:string) =
     let shipDiff =  List.concat [
         // A bunch of ships in unsafe space to being
-        generateRandomMilitaryAbandonedShips 4 "XL" |> List.map ProcessShip
-        generateRandomMilitaryAbandonedShips 6 "L" |> List.map ProcessShip
+        generateRandomMilitaryAbandonedShips 4 "xl" |> List.map ProcessShip
+        generateRandomMilitaryAbandonedShips 6 "l" |> List.map ProcessShip
         generateRandomMilitaryAbandonedShips 10 "m" |> List.map ProcessShip
         generateRandomMilitaryAbandonedShips 15 "s" |> List.map ProcessShip
-        generateRandomEconomyAbandonedShips 4  "XL" |> List.map ProcessShip
-        generateRandomEconomyAbandonedShips 10 "L"  |> List.map ProcessShip
+        generateRandomEconomyAbandonedShips 4  "xl" |> List.map ProcessShip
+        generateRandomEconomyAbandonedShips 10 "l"  |> List.map ProcessShip
         generateRandomEconomyAbandonedShips 20 "m"  |> List.map ProcessShip
         generateRandomEconomyAbandonedShips 30 "s"  |> List.map ProcessShip
         [filterBy ["spl"; "xl"; "carrier"]    |> generateRandomAbandonedShipFromList |> ProcessShip]      // Make sure there's at least one Raptor!
