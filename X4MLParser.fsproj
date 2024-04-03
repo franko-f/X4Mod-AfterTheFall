@@ -16,6 +16,7 @@
     <Compile Include="gates.fs" />
     <Compile Include="jobs.fs" />
     <Compile Include="god.fs" />
+    <Compile Include="productQuotaInfo.fs" />
     <Content Include="mod_templates\macros.xml" />
     <None Include="mod_templates\ReadMe.md" />
     <Compile Include="Program.fs" />
