@@ -28,6 +28,27 @@ Lets add a little excitement to the terrans day, and stop them steamrolling thro
     </subordinates>
   </job>
 
+   <job id="xenon_frigate_patrol_m_sector_atf_terran_asteroid" name="{20204,3401}" comment="asymmetrical">
+    <modifiers commandeerable="true"/>
+    <orders>
+      <order order="Patrol" default="true">
+        <param name="range" value="class.sector"/>
+      </order>
+    </orders>
+    <category faction="xenon" tags="[factionlogic, military, frigate]" size="ship_m"/>
+    <quota cluster="3" sector="3"/>
+    <location class="sector" macro="Cluster_100_Sector001_macro" faction="xenon" relation="self" comparison="exact" matchextension="false"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="xenon" tags="[military, medium]" size="ship_m"/>
+      <owner exact="xenon" overridenpc="true"/>
+    </ship>
+    <subordinates>
+      <subordinate job="xenon_frigate_escort_m"/>
+    </subordinates>
+  </job>
+ 
+
   <job id="xenon_destroyer_patrol_xl_comp_atf_terran_saturn" name="{20204,3801}" comment="compression">
     <modifiers commandeerable="true"/>
     <orders>
@@ -48,7 +69,8 @@ Lets add a little excitement to the terrans day, and stop them steamrolling thro
     </subordinates>
   </job>
 
-  <job id="xenon_destroyer_patrol_xl_comp_atf_terran_venus" name="{20204,3801}" comment="compression">
+  <job id="xenon_destroyer_patrol_xl_comp_atf_terran_mercury" name="{20204,3801}" comment="compression">
+    <!-- Mercury is useless on it's own, with no resources Xenon can use, and it's cut off. But lets make it tough to reclaim with heavy Xenon patrols. -->
     <modifiers commandeerable="true"/>
     <orders>
       <order order="Patrol" default="true">
@@ -56,8 +78,8 @@ Lets add a little excitement to the terrans day, and stop them steamrolling thro
       </order>
     </orders>
     <category faction="xenon" tags="[military, destroyer]" size="ship_xl"/>
-    <quota cluster="1" sector="1"/>
-    <location class="cluster" macro="Cluster_102_macro" faction="xenon" relation="self" comparison="exact" matchextension="false"/>
+    <quota cluster="3" sector="3"/>
+    <location class="cluster" macro="Cluster_106_macro" faction="xenon" relation="self" comparison="exact" matchextension="false"/>
     <environment buildatshipyard="true"/>
     <ship>
       <select faction="xenon" tags="[military, destroyer]" size="ship_xl"/>
@@ -69,7 +91,7 @@ Lets add a little excitement to the terrans day, and stop them steamrolling thro
   </job>
 
 
-  <job id="xenon_frigate_patrol_m_sector_atf_terran" name="{20204,3401}" comment="asymmetrical">
+  <job id="xenon_frigate_patrol_m_sector_atf_terran_uranus" name="{20204,3401}" comment="asymmetrical">
     <modifiers commandeerable="true"/>
     <orders>
       <order order="Patrol" default="true">

@@ -280,6 +280,8 @@ let neutralClusters = [
     "Cluster_401_macro"     // Family Zhin
     "Cluster_422_macro"     // Wretched Skies X
     "Cluster_116_macro"     // Oort Cloud
+    "Cluster_13_macro"      // second contact - Give ARG/ANt some breathing room, just a little, before Xenon storm through.
+    "Cluster_09_macro"      // Bright promise - again, sector between TEL and PAR, to give a little bit of time before xenon play havoc
 ]
 
 type Territory = { faction: string; cluster:string; resources: string list }
@@ -292,31 +294,40 @@ let territories = [
     // core
     { Territory.Default with faction = "argon";    cluster = "Cluster_07_macro"; resources=standardResources1stHalf }   // The Reach
     { Territory.Default with faction = "argon";    cluster = "Cluster_14_macro"; resources=standardResources2ndHalf }   // Argon Prime
-    { Territory.Default with faction = "hatikvah"; cluster = "Cluster_29_macro"; resources=["minerals";] }   // Hatikvahs Choice
-    { Territory.Default with faction = "antigone"; cluster = "Cluster_27_macro"; resources=["ice"; "scrap"] } // The Void
+    { Territory.Default with faction = "hatikvah"; cluster = "Cluster_29_macro"; resources=standardResources1stHalf }     // Hatikvahs Choice . ARG also have a station in one of the sectors in Hat choice via manual station assignment.
+    { Territory.Default with faction = "antigone"; cluster = "Cluster_27_macro"; resources=["ice"; "scrap"] }  // The Void
     { Territory.Default with faction = "antigone"; cluster = "Cluster_28_macro"; resources=["minerals"] }      // Antigone Memorial
+    { Territory.Default with faction = "antigone"; cluster = "Cluster_49_macro"; resources=[] }                // Frontiers Edge.
 
     { Territory.Default with faction = "teladi";   cluster = "Cluster_15_macro"; resources=["minerals"; "scrap"] }   // Ianumas Zura
+    { Territory.Default with faction = "teladi";   cluster = "Cluster_408_macro"; resources=List.concat([standardResources1stHalf; standardResources2ndHalf]) }   // Thuruks Demise: A sector from Split DLC. Leaves Freelsplit just slightly less isolated.
     { Territory.Default with faction = "ministry"; cluster = "Cluster_15_macro" }   // No need for resources, they're in teladi sectors already.
 //    { faction = "scaleplate"; sector = "" }
 
     { Territory.Default with faction = "paranid";   cluster = "Cluster_18_macro"; resources=["minerals"] }    // Trinity III - already has some resources, but adding more.
     { Territory.Default with faction = "paranid";   cluster = "Cluster_47_macro"; resources=["scrap"] }      // Trinity VII
+    { Territory.Default with faction = "paranid";   cluster = "Cluster_10_macro"; resources=standardResources1stHalf }      // Unholy Retribution
     { Territory.Default with faction = "alliance";  cluster = "Cluster_47_macro" }  // If we have to move an ALI station, move it to PAR space.
-    { Territory.Default with faction = "holyorder"; cluster = "Cluster_35_macro"; resources=["helium"; "methane"; "ice"] }  // Lasting Vengence
-    { Territory.Default with faction = "holyorder"; cluster = "Cluster_36_macro"; resources=["minerals"; "scrap"] }  // Cardinals Redress
+    // Can't give another sector easily to HOP without blocking off Xenon attack path, or putting HOP next to PAR. Should I move them all the way up to litany of fury/wretched skies?
+    { Territory.Default with faction = "holyorder"; cluster = "Cluster_35_macro"; resources=["helium"; "methane"; "ice"; "minerals"; "minerals"] }  // Lasting Vengence
+    { Territory.Default with faction = "holyorder"; cluster = "Cluster_36_macro"; resources=["minerals"; "scrap"; "helium"; "methane"] }  // Cardinals Redress =
+    { Territory.Default with faction = "holyorder"; cluster = "Cluster_11_macro"; resources=[] }  // Pontifax claim. Lets make it spicy - HOP have a short hop (heh) through enemy territory.
 
     // split: zyarth. freesplit: free families
     { Territory.Default with faction = "split";     cluster = "Cluster_405_macro"; resources=standardResources1stHalf }  // Zyarth Dominion IV
     { Territory.Default with faction = "split";     cluster = "Cluster_406_macro"; resources=standardResources2ndHalf }  // Zyarth Dominion X
+    { Territory.Default with faction = "split";     cluster = "Cluster_419_macro"; resources=["minerals"; "helium"; "methane"; "hydrogen"] }  // Open Market: Former Teladi, but added in split DLC.
+
     { Territory.Default with faction = "freesplit"; cluster = "Cluster_410_macro"; resources=["scrap"; "methane"] }      // Tharkas Ravine XVI
     { Territory.Default with faction = "freesplit"; cluster = "Cluster_411_macro"; resources=["helium"] }                // Heart of Acrmony II
-    //{ Territory.Default with faction = "freesplit"; cluster = "Cluster_412_macro" }  // Tharkas Ravine VIII
+    { Territory.Default with faction = "freesplit"; cluster = "Cluster_412_macro"; resources=[] }  // Tharkas Ravine VIII
 
     // cradle of humanity
     { Territory.Default with faction = "terran";   cluster = "Cluster_104_macro"; resources= List.concat([standardResources1stHalf; standardResources2ndHalf]) }   // Earth and the Moon
+    { Territory.Default with faction = "terran";   cluster = "Cluster_102_macro"; resources= List.concat([standardResources1stHalf; standardResources2ndHalf]) }   // venus
     { Territory.Default with faction = "pioneers"; cluster = "Cluster_113_macro" }   // Segaris   - Plenty resources already, and next door to ANT.
     { Territory.Default with faction = "pioneers"; cluster = "Cluster_114_macro" }   // Gaian Prophecy
+    { Territory.Default with faction = "pioneers"; cluster = "Cluster_115_macro" }   // Brennans Triumph. Since pioneers never seem to take territory, we'll leave them with their full original range.
 
     // tides of avarice
     // :eave VIG/Scavengers mostly unchanged. Leave Windfall I for sure to avoid issues with Erlking. (Or figure out how to move it in the future.)

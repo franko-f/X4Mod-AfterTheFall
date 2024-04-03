@@ -29,15 +29,8 @@ type X4Job = XmlProvider<X4JobFileSplit>
 type X4JobMod = XmlProvider<X4JobFileBoron>  // Use this as a sample file so we can parse the DLC jobs files that use the DIFF format.
 
 // This string is the starting point for the output job we'll write.
+// The jobs file also already contains some predefined xenon jobs we're adding to TER territory.
 let X4JobModTemplate = System.IO.File.ReadAllText(__SOURCE_DIRECTORY__ + "/mod_templates/jobs.xml")
-(*
-"<?xml version=\"1.0\" encoding=\"utf-8\"?>
-        <diff>
-            <add sel=\"/jobs\">
-            </add>
-        </diff>
-    "
-*)
 
 // Since we're dealing with different job file formats between the base game and different mods, we need
 // to convert them all to one canonical format for processing. We cheat a little, knowing that the type
