@@ -211,12 +211,6 @@ let subordinateIds (job:X4Job.Job) =
 // defaults to true when not set
 let isStartActive (job:X4Job.Job) = job.Startactive  |> Option.defaultValue true
 
-let sectorQuota (job:X4Job.Job) = job.Quota.Sector |> Option.defaultValue 0
-let galaxyQuota (job:X4Job.Job) = job.Quota.Galaxy |> Option.defaultValue 0
-let maxGalaxyQuota (job:X4Job.Job) = job.Quota.Maxgalaxy |> Option.defaultValue 0
-let clusterQuota (job:X4Job.Job) = job.Quota.Cluster |> Option.defaultValue 0
-let wingQuota (job:X4Job.Job) = job.Quota.Wing |> Option.defaultValue 0
-
 let getTagList (job:X4Job.Job) =
     match job.Category with
     | None -> []
@@ -272,11 +266,11 @@ let printJobInfo (job:X4Job.Job) =
             | Some category -> Option.defaultValue "----" category.Size
 
         let quota =
-            let galaxy    = job |> galaxyQuota
-            let maxGalaxy = job |> maxGalaxyQuota
-            let sector    = job |> sectorQuota
-            let cluster   = job |> clusterQuota
-            let wing      = job |> wingQuota
+            let galaxy    = job.Quota.Galaxy    |> Option.defaultValue 0
+            let maxGalaxy = job.Quota.Maxgalaxy |> Option.defaultValue 0
+            let sector    = job.Quota.Sector    |> Option.defaultValue 0
+            let cluster   = job.Quota.Cluster   |> Option.defaultValue 0
+            let wing      = job.Quota.Wing      |> Option.defaultValue 0
             sprintf "%3d/%-3d, %3d, %3d, %3d" galaxy maxGalaxy cluster sector wing
 
         let subordinate = isSubordinate job |> either "escort" ""
