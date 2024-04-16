@@ -210,7 +210,7 @@ let getTagList (job:X4Job.Job) =
     | Some category -> Utilities.parseStringList category.Tags
 
 let isMilitaryJob (job:X4Job.Job) =
-    getTagList job |> List.exists (fun tag -> tag = "military")
+    getTagList job |> List.exists (fun tag -> List.contains tag ["military"; "plunderer"])
 
 // 'preferbuilding' means that the ships won't be autospawned. In theory, they
 // will get queued to build at shipyards instead.
@@ -316,6 +316,25 @@ let printJobCategoryCount allJobs =
 // The station gate defense should be enough to keep the xenon at bay without these.
 let processJob (job:X4Job.Job) =
     printJobInfo job
+
+    // Given a quota and a multiplier, apply the multiplier to any quota element that is actually set for the job.
+    // A quota that is None is still None. Some quota will become Some quota*multiplier, for each cluster/sector/etc quota
+    let quotaMultiply (quota:X4Job.Quota) multiplier =
+        let galaxyQuota = maybeMultiply quota.Galaxy multiplier
+        let maxGalaxyQuota = maybeMultiply quota.Maxgalaxy multiplier
+        let clusterQuota = maybeMultiply quota.Cluster multiplier
+        let sectorQuota = maybeMultiply quota.Sector multiplier
+        galaxyQuota, maxGalaxyQuota, clusterQuota, sectorQuota
+
+    // If the job has any non-None quotas, multiply it, then create the new quota replacement XML
+    let maybeGenerateQuotaReplacementXML (quota:X4Job.Quota) multiplier =
+        // Calculate the new quotas.
+        let galaxyQuota, maxGalaxyQuota, clusterQuota, sectorQuota = quotaMultiply quota multiplier
+        // We only need to create a replace tag if we're actually changing something. Check if any quotas are 'Some x'.
+        if List.exists Option.isSome [galaxyQuota; maxGalaxyQuota; clusterQuota; sectorQuota] then
+            Some  (replaceQuotaXml job.Id (galaxyQuota |> Option.defaultValue 0) maxGalaxyQuota clusterQuota sectorQuota)
+        else None
+
     let size = match job.Category with | None -> "NONE" | Some category -> Option.defaultValue "NONE" category.Size
 
     if not (isStartActive job) then None        // Any job that is not active at game start can be ignored. These are usually plot/story progress related.
@@ -330,19 +349,15 @@ let processJob (job:X4Job.Job) =
             | true, _         -> 2.5    // S and M military ships
             | false, _        -> 1.4    // s & m civilian ships
 
-        // Calculate the new quotas.
-        let galaxyQuota = maybeMultiply job.Quota.Galaxy multiplier
-        let maxGalaxyQuota = maybeMultiply job.Quota.Maxgalaxy multiplier
-        let clusterQuota = maybeMultiply job.Quota.Cluster multiplier
-        let sectorQuota = maybeMultiply job.Quota.Sector multiplier
-
-        // We only need to create a replace tag if we're actually changing something. Check if any quotas are 'Some x'.
-        if List.exists Option.isSome [galaxyQuota; maxGalaxyQuota; clusterQuota; sectorQuota] then
-            Some  (replaceQuotaXml job.Id (galaxyQuota |> Option.defaultValue 0) maxGalaxyQuota clusterQuota sectorQuota)
-        else None
+        maybeGenerateQuotaReplacementXML job.Quota multiplier
 
     // Handle the NON-XENON factions
     else if not (isMilitaryJob job) then None   // Leave the economy alone.
+    // reduce the number of pirates, as they're much more dangerous to the weakened economies.
+    else if isFaction(job, "scaleplate") || isFaction(job, "fallensplit") || isFaction(job, "yaki") then
+        let multiplier = 0.4
+        maybeGenerateQuotaReplacementXML job.Quota multiplier
+
     else if List.contains size ["ship_s"; "ship_m"] then None  // We don't care about small ships, just the big ones:
     else
         // So now, all we'll do is set the 'preferbuild' tag to make sure the factions start the game
