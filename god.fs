@@ -258,7 +258,9 @@ let processProduct (product:X4WorldStart.Product) =
         // We won't reduce production, but we will increase the limit per sector so that they
         // can spawn all their factories in the slightly less bad .4 sunlight sector.
     //    Some (product_replace_xml product.Id "sector" ( Option.defaultValue 32 product.Quota.Sector * 2) )
-    | _ -> Some (product_replace_xml product.Id "galaxy" (product.Quota.Galaxy / 2) ) // Everyone else gets half the quota
+    | _ ->
+        let divideAndRoundUp dividend divisor = ((dividend-1)/divisor) + 1 // We want to round UP the result to ensure we don't ever get a 0 quota.
+        Some (product_replace_xml product.Id "galaxy" (divideAndRoundUp product.Quota.Galaxy 2) ) // Everyone else gets half the quota.
 
 
 // Ok, now to generate the new defense stations that we need around each unsage gate.
