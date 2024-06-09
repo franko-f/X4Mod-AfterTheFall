@@ -243,13 +243,13 @@ type XenonStation =
 
 // add new Xenon shipyards/wharfs to the following clusters:
 let newXenonStations = [
-    XenonShipyard   ("sector", "Cluster_46_sector_001_macro");  // Morningstar IV
-    XenonWharf      ("sector", "Cluster_46_sector_001_macro");
+    XenonShipyard   ("sector", "Cluster_46_sector001_macro");  // Morningstar IV
+    XenonWharf      ("sector", "Cluster_46_sector001_macro");
 
-    XenonShipyard   ("sector", "Cluster_100_sector_001_macro");   // Asteroid belt
-    XenonShipyard   ("sector", "Cluster_109_sector_001_macro");   // Uranus
+    XenonShipyard   ("sector", "Cluster_100_sector001_macro");   // Asteroid belt
+    XenonShipyard   ("sector", "Cluster_109_sector001_macro");   // Uranus
 
-    XenonWharf      ("sector", "Cluster_413_sector_001_macro");      // Tharka Ravine IV: Tharkas Fall
+    XenonWharf      ("sector", "Cluster_413_sector001_macro");      // Tharka Ravine IV: Tharkas Fall
 ]
 
 // ===== FINISHED LOADING DATA FROM XML FILES =====
@@ -292,7 +292,7 @@ let standardResources2ndHalf = [ "minerals"; "minerals"; "ice"; "scrap"; ] // 2x
 let neutralClusters = [
     "Cluster_01_macro"      // Grand Exchange, 3 sectors
     "Cluster_27_macro"      // Eighteen Billion
-    "Cluster_46_macro"      // Morningstar IV
+    // "Cluster_46_macro"      // Morningstar IV  - Changed to Xenon now that we've moved ARG to Morningstar III
     "Cluster_401_macro"     // Family Zhin
     "Cluster_422_macro"     // Wretched Skies X
     "Cluster_116_macro"     // Oort Cloud
@@ -318,8 +318,8 @@ let territories = [
     { Territory.Default with faction = "antigone"; cluster = "Cluster_28_macro"; resources=["minerals"] }      // Antigone Memorial
     { Territory.Default with faction = "antigone"; cluster = "Cluster_49_macro"; resources=[] }                // Frontiers Edge.
 
-    { Territory.Default with faction = "teladi";   cluster = "Cluster_15_macro"; resources=["minerals"; "scrap"; "methane"; "hydrogen"] }   // Ianumas Zura
-    { Territory.Default with faction = "teladi";   cluster = "Cluster_408_macro"; resources=List.concat([standardResources1stHalf; standardResources2ndHalf]) }   // Thuruks Demise: A sector from Split DLC. Leaves Freelsplit just slightly less isolated.
+    { Territory.Default with faction = "teladi";   cluster = "Cluster_15_macro"; resources=List.concat([standardResources1stHalf; standardResources2ndHalf; ["minerals"; "scrap"; "methane"; "hydrogen"]]) }   // Ianumas Zura
+    { Territory.Default with faction = "teladi";   cluster = "Cluster_408_macro"; resources=[] }   // Thuruks Demise: A sector from Split DLC. Leaves Freelsplit just slightly less isolated. Won't put resources here due to a flaw in our code. Needs a refactor to permit added resources to another factions DLC sector.
     { Territory.Default with faction = "ministry"; cluster = "Cluster_15_macro" }   // No need for resources, they're in teladi sectors already.
 //    { faction = "scaleplate"; sector = "" }
 
