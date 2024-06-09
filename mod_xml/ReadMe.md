@@ -80,6 +80,15 @@ Each faction will have two or 3 sectors, spread over one or two clusters. Some f
 back with each other, and are thus a slightly safer and stronger start. Starting with one of those
 factions locations would give more options for missions and trade, and an easier game.
 
+#### Neutral sectors:
+I've also cleared any factions & Xenon from some sectors to give players a few options to set up base, and give some factions a little bit of breathing room and protection for their trade from Xenon raids. Be warned - it won't take long for Xenon to expand in to these territories.
+
+* Grand Exchange (all 3 sectors. Good starting location if you set up defences, but there is Xenon territory between you and other factions for trade)
+* Family Zhin
+* Wretched Skies X
+* Oort Cloud
+* Second Contact (right between Arg and Ant. If you claim this, you'll help Ant/Argt trade without being raided by Xenon.)
+* Bright Promise (Between TEL and PAR. Claiming this helps protect PAR/TEL trade and makes these two stronger.)
 
 #### Easier Starts:
 Vigor and Riptide pirate factions: With all the xenon raiding parties, a scrap processing 
