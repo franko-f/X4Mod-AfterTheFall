@@ -314,6 +314,24 @@ let generateGateDefenseStations() =
     ]
 
 
+// There are several new xenon stations we want to add to specific sectors defined in 'Data.newXenonStations'.
+// Here we create the XML oibjects that represent these in the approriate location.
+let addNewXenonStations (xenonShipyard:XElement) (xenonWharf:XElement) =
+    [ for xenonStation in Data.newXenonStations do
+        // Extract the type of station, and it's location information. Create the apporpriate station XElement
+        let (station, locClass, location) =
+            match xenonStation with
+            | XenonShipyard (locClass, location) -> (new X4GodMod.Station(new XElement(xenonShipyard)), locClass, location)
+            | XenonWharf    (locClass, location) -> (new X4GodMod.Station(new XElement(xenonWharf)),    locClass, location)
+
+        // Update the location and ID of our new station.
+        station.Location.XElement.SetAttributeValue(XName.Get("class"), locClass)
+        station.Location.XElement.SetAttributeValue(XName.Get("macro"), location)
+        station.XElement.SetAttributeValue(XName.Get("id"), station.Id + location)   // Give it a new unique ID
+        logAddStation "ADDING" station
+        station.XElement
+    ]
+
 // Process the GOD file from the core game, and the DLCs. 
 // extract the stations and products, tweak some values, then write out a new GOD file.
 let generate_god_file (filename:string) =
@@ -334,6 +352,7 @@ let generate_god_file (filename:string) =
     ]
 
     let newDefenseStations = generateGateDefenseStations()
+    let newXenonStations = addNewXenonStations xenonShipyard xenonWharf
 
     // Now that everything has been processed, and we've got new stations and products, 
     // we generate the modded XML, and write it out.
@@ -353,7 +372,7 @@ let generate_god_file (filename:string) =
 
     let stationsAddElem = find_add_selector "//god/stations" outGodFile.Adds
     // The stations we're replacing with Xenon.
-    [ for element in addStations do
+    [ for element in addStations  do
         stationsAddElem.XElement.Add(element)
         stationsAddElem.XElement.Add( new XText("\n")) // Add a newline after each element so the output is readible
     ] |> ignore
@@ -363,6 +382,13 @@ let generate_god_file (filename:string) =
         stationsAddElem.XElement.Add(element)
         stationsAddElem.XElement.Add( new XText("\n")) // Add a newline after each element so the output is readible
     ] |> ignore
+
+    // The handful of specific new extra Xenon worfsa/shipyards we're adding to apply preassure in specific sectors.
+    [ for element in newXenonStations  do
+        stationsAddElem.XElement.Add(element)
+        stationsAddElem.XElement.Add( new XText("\n")) // Add a newline after each element so the output is readible
+    ] |> ignore
+
 
     // Add out 'remove' tags to the end of the diff block.
     let diff = outGodFile.XElement // the root element is actually the 'diff' tag.

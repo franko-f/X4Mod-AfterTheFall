@@ -91,6 +91,29 @@ Lets add a little excitement to the terrans day, and stop them steamrolling thro
   </job>
 
 
+
+  <job id="xenon_destroyer_patrol_xl_comp_atf_terran_mars" name="{20204,3801}" comment="compression">
+    <!-- We'll make Mars heavily defended too, so slow TER expansion and reconnection to PIO. -->
+    <modifiers commandeerable="true"/>
+    <orders>
+      <order order="Patrol" default="true">
+        <param name="range" value="class.zone"/>
+      </order>
+    </orders>
+    <category faction="xenon" tags="[military, destroyer]" size="ship_xl"/>
+    <quota cluster="3" sector="3"/>
+    <location class="cluster" macro="Cluster_101_macro" faction="xenon" relation="self" comparison="exact" matchextension="false"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="xenon" tags="[military, destroyer]" size="ship_xl"/>
+      <owner exact="xenon" overridenpc="true"/>
+    </ship>
+    <subordinates>
+      <subordinate job="xenon_frigate_escort_m"/>
+    </subordinates>
+  </job>
+
+
   <job id="xenon_frigate_patrol_m_sector_atf_terran_uranus" name="{20204,3401}" comment="asymmetrical">
     <modifiers commandeerable="true"/>
     <orders>
@@ -110,6 +133,52 @@ Lets add a little excitement to the terrans day, and stop them steamrolling thro
       <subordinate job="xenon_frigate_escort_m"/>
     </subordinates>
   </job>
+
+
+
+  <job id="xenon_destroyer_patrol_xl_comp_atf_hop_holy_vision" name="{20204,3801}" comment="compression">
+    <!-- Strong Xenon patrol to keep HOP under pressure, and reduce chance of quickly expanding out. -->
+    <modifiers commandeerable="true"/>
+    <orders>
+      <order order="Patrol" default="true">
+        <param name="range" value="class.zone"/>
+      </order>
+    </orders>
+    <category faction="xenon" tags="[military, destroyer]" size="ship_xl"/>
+    <quota cluster="3" sector="3"/>
+    <location class="cluster" macro="Cluster_24_macro" faction="xenon" relation="self" comparison="exact" matchextension="false"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="xenon" tags="[military, destroyer]" size="ship_xl"/>
+      <owner exact="xenon" overridenpc="true"/>
+    </ship>
+    <subordinates>
+      <subordinate job="xenon_frigate_escort_m"/>
+    </subordinates>
+  </job>
+
+
+  <job id="xenon_destroyer_patrol_xl_comp_atf_morningstar_iv" name="{20204,3801}" comment="compression">
+    <!-- Force ARG to fight to reclaim morningstar IV. . -->
+    <modifiers commandeerable="true"/>
+    <orders>
+      <order order="Patrol" default="true">
+        <param name="range" value="class.zone"/>
+      </order>
+    </orders>
+    <category faction="xenon" tags="[military, destroyer]" size="ship_xl"/>
+    <quota cluster="1" sector="1"/>
+    <location class="cluster" macro="Cluster_46_macro" faction="xenon" relation="self" comparison="exact" matchextension="false"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="xenon" tags="[military, destroyer]" size="ship_xl"/>
+      <owner exact="xenon" overridenpc="true"/>
+    </ship>
+    <subordinates>
+      <subordinate job="xenon_frigate_escort_m"/>
+    </subordinates>
+  </job>
+
 
 </add>
 </diff>
