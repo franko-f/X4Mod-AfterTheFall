@@ -38,8 +38,8 @@ Some missions might be very hard to complete though, given galaxy state!
 resources. It's a few small, moderately dense resource fields to keep the factions economies slowly moving,
 but you'll need to help them get new territory.
 
-4. Weakened faction economies slightly be reducing the number of starting factories. They can expand to
-build more, but at the start, they're slightly weakend, with a slightly stronger xenon.
+4. Weakened faction economies by reducing the number of starting factories. They can expand to
+build more, but at the start, they're  weakend, with a  stronger xenon.
 
 5. Added 5 race-specific defence stations around each gate.
 I tried to position them exactly in a ring around each gate; but the game moves them around on game start.
@@ -88,35 +88,45 @@ setup would do well!
 
 PIO and ANT
     They start next to each other in
-    Segaris, Gaian prophecy
-    Antigone Memorial, The Void
+    Segaris, Gaian prophecy, Brennans Triumph
+    Antigone Memorial, The Void, Fronteirs Edge
 
-#### Harder starts
-Argon:
+Argon: Bundled with HAT in
     Argon Prime
     The Reach
+    Morningstar III
+    Hatikvahs choice
+
+
+#### Harder starts
 
 Teladi:
     They're slightly isolated in
     Ianumus Zura
+    Thuraks Demise II & III
+
 
 PAR:
     Trinity Sanctum III & VII
+    Unholy Retribution
 
 HOP:
-    they've been forced back to a corner,
+    they've been forced back to a corner, with strong Xenon presense on their border.
     Cardinals Redress
     Lasting Vengence.
+    Freedoms Reach
 
 Zya:
     Far from anyone else, and surrounded by Xenon.
     Zyarth Dominion IV & X
+    Eleventh Hour
 
 Freesplit:
     Also far from help
     Tharka's Ravine XVI
     Heart of Acrimony II
 
-
+Terran:
+    Pushed back to Earth and Venus. They may have Asgards, but there's a strong Xenon presence in the solar system.
 
 

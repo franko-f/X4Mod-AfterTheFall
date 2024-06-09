@@ -1,22 +1,9 @@
 in progress:
 up next:
-    * increase job quota on
-        * xenon_destroyer_patrol_xl_cluster
-        * xenon_destroyer_patrol_xl_cluster
-    * too many traders running between factions - they will get destroyed. Need to cluster things closer?
-
 BUGS:
 * Bastions are:
     * sometimes not alwayd generated in right place. Does the game move them?
       * testing shows its close enough to work, so won't worry about it.
-* Pirate density too high now: Cripples economies. Drop to 1/3
-* Increase faction territory and resources in attempt to reduce factions trading through Xenon space,
-loosing all ships, and crippling economy. Pick to make trade routes a bit safer.
-  * increase: ZYA, CURB, ANT, TEL, PAR
-  * Can we increase HOP without completely blocking Xenon routes to 2nd contact?
-
-* increase resources
-* Check product factory spawns: Do some factions spawn with less, increase requirement for external trade?
 
 
 ## TODO:
@@ -234,3 +221,12 @@ just defaulting to 0,0,0 when position isn't given. Cluster 01 is galactic cente
 * Don't spawn Terran L & XL destroyers: no main gun.
 * rebalance abandoned ships:
   * reduce count of small ships, and put them in 'safe' sectors. Make exploration more valuable by having unsafe sectors mostly M, L and XL ships
+
+* Pirate density too high now: Cripples economies. Drop to 1/3
+* Increase faction territory and resources in attempt to reduce factions trading through Xenon space,
+loosing all ships, and crippling economy. Pick to make trade routes a bit safer.
+  * increase: ZYA, CURB, ANT, TEL, PAR
+  * Can we increase HOP without completely blocking Xenon routes to 2nd contact?
+
+* increase resources
+* Check product factory spawns: Do some factions spawn with less, increase requirement for external trade?
