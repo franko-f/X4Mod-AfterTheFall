@@ -45,7 +45,7 @@ let logAddStation (action:string) (station:X4GodMod.Station) =
     printfn "   %s STATION %s race: %s, owner: %s, type: %s, location: %s:%s, id: %s, station: \"none\"   " action tags station.Race station.Owner station.Type station.Location.Class station.Location.Macro station.Id
 
 let logProduct (product:X4WorldStart.Product) =
-    printfn "PROCESSING PRODUCT [%s:%s] %s/%s with quotas %i/%i" product.Owner product.Location.Faction product.Type product.Ware product.Quota.Galaxy (product.Quota.Sector |> Option.defaultValue -1)
+    printfn "PROCESSING PRODUCT [%s:%s] %s/%s with quotas %i/%i" product.Owner (product.Location.Faction |> Option.defaultValue "UNKNOWN") product.Type product.Ware product.Quota.Galaxy (product.Quota.Sector |> Option.defaultValue -1)
 
 
 // Given a selector ID, search an instance of a GodMod xml file for the 'ADD' section
