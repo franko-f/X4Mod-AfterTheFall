@@ -43,9 +43,9 @@ let X4ClusterFileBoron = X4UnpackedDataFolder + "/boron/maps/xu_ep2_universe/dlc
 [<Literal>]
 let X4SectorFileCore = X4UnpackedDataFolder  + "/core/maps/xu_ep2_universe/sectors.xml" // This core sectors file needs to be a literal, as it's also our type provider
 let X4SectorFileSplit = X4UnpackedDataFolder + "/split/maps/xu_ep2_universe/dlc4_sectors.xml"   // This one is normal string, as we can load and parse using X4SectorCore literal
-let X4SectorFileTerran = X4UnpackedDataFolder + "/terran/maps/xu_ep2_universe/dlc_terran_sectors.xml" 
-let X4SectorFilePirate = X4UnpackedDataFolder + "/pirate/maps/xu_ep2_universe/dlc_pirate_sectors.xml" 
-let X4SectorFileBoron = X4UnpackedDataFolder + "/boron/maps/xu_ep2_universe/dlc_boron_sectors.xml"   
+let X4SectorFileTerran = X4UnpackedDataFolder + "/terran/maps/xu_ep2_universe/dlc_terran_sectors.xml"
+let X4SectorFilePirate = X4UnpackedDataFolder + "/pirate/maps/xu_ep2_universe/dlc_pirate_sectors.xml"
+let X4SectorFileBoron = X4UnpackedDataFolder + "/boron/maps/xu_ep2_universe/dlc_boron_sectors.xml"
 
 [<Literal>]
 let X4ZoneFileCore = X4UnpackedDataFolder + "/core/maps/xu_ep2_universe/zones.xml"
@@ -116,18 +116,18 @@ let AllClusters =
                 ]
 
 // Load the sector data from each individual sector file. We'll combine them in to one list.
-let allSectors = 
+let allSectors =
     let X4SectorCore = X4Sector.Load(X4SectorFileCore)
     let X4SectorSplit = X4Sector.Load(X4SectorFileSplit)
     let X4SectorTerran = X4Sector.Load(X4SectorFileTerran)
     let X4SectorPirate = X4Sector.Load(X4SectorFilePirate)
     let X4SectorBoron = X4Sector.Load(X4SectorFileBoron)
     Array.toList <| Array.concat [
-                    X4SectorCore.Macros; 
-                    X4SectorSplit.Macros; 
-                    X4SectorTerran.Macros; 
+                    X4SectorCore.Macros;
+                    X4SectorSplit.Macros;
+                    X4SectorTerran.Macros;
                     X4SectorPirate.Macros;
-                    X4SectorBoron.Macros; 
+                    X4SectorBoron.Macros;
                 ]
 
 let allZones =
@@ -344,7 +344,7 @@ let territories = [
 
     // cradle of humanity
     { Territory.Default with faction = "terran";   cluster = "Cluster_104_macro"; resources= List.concat([standardResources1stHalf; standardResources2ndHalf]) }   // Earth and the Moon
-    { Territory.Default with faction = "terran";   cluster = "Cluster_102_macro"; resources= List.concat([standardResources1stHalf; standardResources2ndHalf]) }   // venus
+    { Territory.Default with faction = "terran";   cluster = "Cluster_102_macro"; resources= List.concat([standardResources1stHalf; standardResources2ndHalf; ["helium"; "hydrogen"; "methane"; "minerals"]]) }   // venus
     { Territory.Default with faction = "pioneers"; cluster = "Cluster_113_macro" }   // Segaris   - Plenty resources already, and next door to ANT.
     { Territory.Default with faction = "pioneers"; cluster = "Cluster_114_macro" }   // Gaian Prophecy
     { Territory.Default with faction = "pioneers"; cluster = "Cluster_115_macro" }   // Brennans Triumph. Since pioneers never seem to take territory, we'll leave them with their full original range.
@@ -353,17 +353,17 @@ let territories = [
     // :eave VIG/Scavengers mostly unchanged. Leave Windfall I for sure to avoid issues with Erlking. (Or figure out how to move it in the future.)
     { Territory.Default with faction = "scavenger"; cluster = "Cluster_500_macro" }   // RIP: Unchanged. All sectors in cluster_500
     { Territory.Default with faction = "loanshark"; cluster = "Cluster_501_macro" }   // Leave VIG unchanged.
-    { Territory.Default with faction = "loanshark"; cluster = "Cluster_502_macro"; resources=["scrap"] }   // 
+    { Territory.Default with faction = "loanshark"; cluster = "Cluster_502_macro"; resources=["scrap"] }   //
     { Territory.Default with faction = "loanshark"; cluster = "Cluster_503_macro" }  // Windfall IV.
 
     // boron
     // Boron: Economy is kinda screwed without player help anyway. Leave them a few more sectors than most.
     // Removing These territories may screw up the default storyline, so players will need to set story complete in gamestart.
     // Cluster_602_macro: Barren Shores, Cluster_603_macro: Great Reef, Cluster_604_macro: Ocean of Fantasy
-    { Territory.Default with faction = "boron"; cluster = "Cluster_606_macro"; resources=standardResources1stHalf }       // Kingdom End (cluster with 3 sectors) : Kingdoms end I, Reflected Stars, Towering Waves 
-    { Territory.Default with faction = "boron"; cluster = "Cluster_607_macro" }       // Rolk's Demise 
+    { Territory.Default with faction = "boron"; cluster = "Cluster_606_macro"; resources=standardResources1stHalf }       // Kingdom End (cluster with 3 sectors) : Kingdoms end I, Reflected Stars, Towering Waves
+    { Territory.Default with faction = "boron"; cluster = "Cluster_607_macro" }       // Rolk's Demise
     { Territory.Default with faction = "boron"; cluster = "Cluster_608_macro"; resources=standardResources2ndHalf }       // Atreus' Clouds
-    { Territory.Default with faction = "boron"; cluster = "Cluster_609_macro" }       // Menelaus' Oasis 
+    { Territory.Default with faction = "boron"; cluster = "Cluster_609_macro" }       // Menelaus' Oasis
 ]
 
 // Get all the factions defined in the speficied DLC
@@ -421,10 +421,10 @@ let findSectorFromZone (zone:string) =
     // Each connection will have zero or more zones for use to check. So we try find a macro that contains a zone with the name we're looking for.
     // Then return the name of that macro.
     allSectors |> List.tryFind (
-        fun sector -> 
+        fun sector ->
             sector.Connections |> Array.tryFind (
                 fun connection -> connection.Ref = "zones" && connection.Macro.Connection = "sector" && connection.Macro.Ref =? zone
-            ) |> Option.isSome 
+            ) |> Option.isSome
     )
     |> Option.map (fun sector -> sector.Name.ToLower()) // return the sector name, but in lower case, as the case varies in the files. I prefer to make it consistent
 
