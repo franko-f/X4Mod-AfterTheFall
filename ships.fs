@@ -16,7 +16,7 @@ let abandonedShipsList =
     // Our filters. Factions we'll look for, and tags we'll omit. Both must be true.
     let factions = [ "_arg_"; "_par_"; "_tel_"; "_spl_"; "_ter_"; "_atf_"; "_yak_"; "_pir_"; ]  // Removed boron '_bor_', as they're spawning without engins
     let omit = [
-        "_xs_"; "_plot_"; "_landmark_"; "_story"; "_highcapacity_"; 
+        "_xs_"; "_plot_"; "_landmark_"; "_story"; "_highcapacity_";
         "ship_spl_xl_battleship_01_a_macro"; "ship_pir_xl_battleship_01_a_macro"; // specific ships that seems unsupported or don't exist in game
         // Some terran destroyers that are spawning without main guns.
         "ship_atf_l_destroyer_01_a_macro"; "ship_atf_xl_battleship_01_a_macro"; "ship_ter_l_destroyer_01_a_macro"
@@ -26,7 +26,7 @@ let abandonedShipsList =
     |> List.filter (
         fun shipName ->
             ( factions |> List.exists (fun tag -> shipName.Contains tag) )        // Must contain one of the factions we're interested in.
-            && (not ( omit |> List.exists (fun tag -> shipName.Contains tag) )))  // Must not contain any of the tags we're not interested in from the omit list. 
+            && (not ( omit |> List.exists (fun tag -> shipName.Contains tag) )))  // Must not contain any of the tags we're not interested in from the omit list.
 
 
 // Quickly filter by a search string substring. eg, 'bor' will return all the Boron ships by filtering for '_bor_'.
@@ -105,7 +105,7 @@ let generateBattlefield (countXL:int) countL countM countS =
         generateRandomMilitaryAbandonedShips countS "s"
 
     // Then we update the location of each ship to be within 5km of the location of the first ship.
-    // First find the location of the first ship. We concat all the size classes, as we don't if any 
+    // First find the location of the first ship. We concat all the size classes, as we don't if any
     // size classes were empty for this battlefield.
     let _ship, sector, (x, y, z), _rotation  = (List.concat [xl;l;m;s]).[0]
     // Now update every ships sector and location to be near the first ship, keeping other data the same.
@@ -123,7 +123,7 @@ let ProcessShip ((ship, sector, (x, y, z), (yaw, pitch, roll)):ShipLocation) =
     // I've not seen this elsewhere, and don't know if it's necessary, but for safety I'll duplicate it.
     printfn "GENERATING ABANDONED SHIP: %s, Sector: %s, Position: %A, Rotation: %A" ship sector (x, y, z) (yaw, pitch, roll)
     let xml = $"""
-        <add sel="/mdscript[@name='PlacedObjects']/cues/cue[@name='Place_Claimable_Ships']/actions">
+    <add sel="/mdscript[@name='PlacedObjects']/cues/cue[@name='Place_Claimable_Ships']/actions">
         <find_sector name="$sector" macro="macro.{sector}"/>
         <do_if value="$sector.exists">
           <create_ship name="$ship" macro="macro.{ship}" sector="$sector">
