@@ -59,3 +59,17 @@ let parseStringList (input: string) : string list =
 // so I don't need to do full if then else. Unlike C-style '?', The check value is the last parameter,
 // so I can chain via |>
 let either a b check = match check with true -> a | false -> b
+
+
+let tagStringToList (tags:String) =
+    // Convert a space separated string of tags into a list of tags.
+    System.Text.RegularExpressions.Regex.Split(tags.Trim(), @"\s+") |> List.ofArray
+
+type OptionBuilder() =
+    member _.Bind(value, binder) =
+        match value with
+        | Some x -> binder x
+        | None -> None
+    member _.Return(value) = Some value
+
+let option = OptionBuilder()

@@ -5,6 +5,7 @@
 
 module X4.Data
 
+open Microsoft.FSharp.Core
 open FSharp.Data
 open X4.Utilities
 open System
@@ -17,7 +18,16 @@ let rand = new Random(12345)    // Seed the random number generator so we get th
 let ContentDirectories   = ["core"; "split"; "terran"; "pirate"; "boron"; "timelines"]
 let ShipSizeClasses      = ["ship_s"; "ship_m"; "ship_l"; "ship_xl"]
 let ShipSizeDirectories  = ["size_s"; "size_m"; "size_l"; "size_xl"]  // Oddly, the ship size directory names are not the same as the ship size classes.
-let ShipEquipmentClasses = [ "engine"; "shieldgenerator"; "missile"; "weapon"; "missileturret"; "missilelauncher"; "turret"; ]
+let ComponentSizeClasses = ["small"; "medium"; "large"; "extralarge"] // I really wish there was some kind of consistency when it comes to referring to sizes.
+let ShipEquipmentClasses = [
+    // Allow us to filter down all assets to the ship equipment we're interested in.
+    // Ship mounted equipment
+    "engine"; "shieldgenerator"; "weapon"; "missileturret"; "missilelauncher"; "turret"; 
+    // Ship deployables.
+    "missile"; "resource_probe"; "satellite"
+]
+
+let ShipEquipmentConnectionTag  = ["weapon"; "turret"; "shield"; "engine"; "thruster" ]
 
 [<Literal>]
 let X4UnpackedDataFolder = __SOURCE_DIRECTORY__ + "/X4_unpacked_data"
@@ -125,27 +135,17 @@ type ShipInfo = {
 let X4EquipmentDirectory = "/assets/props"
 [<Literal>]
 let X4EquipmentXMLProviderTemplateFile = X4UnpackedDataFolder + "/core" + X4EquipmentDirectory + "/WeaponSystems/capital/weapon_arg_l_destroyer_01_mk1.xml"
-let EquipmentDirs = [
-    "Engines";                  // Includes thrusters
-    "WeaponSystems/capital";
-    "WeaponSystems/dumbfire";
-    "WeaponSystems/energy";
-    "WeaponSystems/guided";
-    "WeaponSystems/heavy";
-    "WeaponSystems/mines";
-    "WeaponSystems/mining";
-    "WeaponSystems/missile";
-    "WeaponSystems/standard";
-    "WeaponSystems/torpedo";
-    "SurfaceElements"           // includes shields.
-    ]
 
 type X4Equipment  = XmlProvider<X4EquipmentXMLProviderTemplateFile>
 type EquipmentInfo = {
     Name: String
+    Macro: String  // Same as name with _macro suffix
+    Class: String
     Size: String
     Tags: String List
-    Connections: X4Equipment.Components
+    ComponentName: String
+    ComponentConnection: X4Equipment.Connection
+    Connections: X4Equipment.Connection array
 }
 
 
@@ -631,6 +631,15 @@ let allShips =
         |> List.filter( fun ship -> ShipSizeClasses |> List.contains ship.Size ) // There are some things defined as ships, that aren't really ships. Ignore them by checking the size class.
 
 
+let findShipByName (shipName:string) =
+    // Find a ship by its name, case insensitive.
+    allShips |> List.tryFind (fun ship -> ship.Name =? shipName)
+
+let printShipInfo (ship:ShipInfo) =
+    // Print the ship info in a nice format.
+    printfn "\n Ship: %s" ship.Name
+    ship.Connections
+    |> Seq.iter (fun connection -> printfn "  Connection %-50s/%-20s / %s" connection.Name (Option.defaultValue "" connection.Group ) connection.Tags) 
 
 // Each DLC is in a separate directory; and the different types of files describing ships
 // and equipment are in a different set of subdirs off of that base of subtype.
@@ -653,6 +662,7 @@ let getDlcXmlFiles dlcs dataDir =
     )
 
 
+
 // Get all the assets defined in the core game and the DLCs. This includes
 // equipment for ships, as well as miscellaneous assets like wares, adsigns, etc
 let allAssets =
@@ -665,7 +675,7 @@ let allAssets =
             let parsed = X4Equipment.Load(x)
             // Sometimes the Component.Class may have an extra space at the end, so trim it.
             parsed.Component.XElement.SetAttributeValue("name", parsed.Component.Name.Trim()) // Ensure the name is set correctly in the XElement.
-            printfn "Loaded equipment: %-35s %-10s from %s" parsed.Component.Name parsed.Component.Class x
+            // printfn "Loaded equipment: %-35s %-20s from %s" parsed.Component.Name parsed.Component.Class x
             [parsed.Component]
         with
         | ex ->
@@ -694,25 +704,60 @@ let allAssetClasses =
 
 // Get all the assets, and filter them down to only the classes that are ship
 // equipment we need to generation ship loadouts.
+// Convert the xmln asset to a simplified ShipEquipment type, which gives us easy access
+//  to the name, macro, class, tags, size and component connection.
 let allShipEquipment =
     // Find out all the different unique classes of assests
     allAssets
     |> List.filter (fun asset -> ShipEquipmentClasses |> List.contains asset.Class)
-    |> List.map (fun asset -> printfn """ "%s";""" asset.Class; asset)
+    |> List.map (fun asset ->
+        option {
+            let! componentConnection =
+                asset.Connections
+                |> Array.tryFind (fun connection ->
+                    let tags = tagStringToList connection.Tags
+                    tags |> List.exists (fun tag -> tag =? "component")
+                )
+
+            let tags = tagStringToList componentConnection.Tags |> List.filter (fun tag -> tag <> "component") // Remove the 'component' tag, as it's not needed in the final result.
+            return {
+                Name  = asset.Name
+                Macro = asset.Name + "_macro"
+                Class = asset.Class
+                Tags  = tags
+                Size  =
+                    tags
+                    |> List.tryFind (
+                        fun tag -> ComponentSizeClasses |> List.exists (fun t -> t =? tag)
+                    )
+                    |> Option.defaultValue "none" // Default to size_s if not found
+                ComponentName = componentConnection.Name
+                ComponentConnection = componentConnection
+                Connections = asset.Connections
+            }
+        }
+    )
+    |> List.choose id
+
 
 // Tags in X4 are given as a single string with a list of space separated words.
 // If all the tahs in searchTags are present in targetTags, then we have a match,
 // regardless of order, and even if target?s has more tags than searchTags.
-let compareTags (searchTags:String) (targetTags:String) =
+let compareTagStrings (searchTags:String) (targetTags:String) =
     // Split the tags by space, and then check if all searchTags are in targetTags.
-    let searchTagList = searchTags.Split(' ') |> List.ofArray
-    let targetTagList = targetTags.Split(' ') |> List.ofArray
+    let searchTagList = tagStringToList searchTags
+    let targetTagList = tagStringToList targetTags
     searchTagList |> List.forall (fun tag -> targetTagList |> List.exists (fun t -> t =? tag))
+
+let compareTags (searchTags:list<String>) (targetTags:list<String>) =
+    // Split the tags by space, and then check if all searchTags are in targetTags.
+    searchTags |> List.forall (fun tag -> targetTags |> List.exists (fun t -> t =? tag))
+
 
 // Find an asset by its class and tags. The tags are a space separated string of tags.
 // Every one of the tags in searchTags must be present in the asset's tags for a match.
 // An asset has multiple connections, each with a set of tags. We just need a match in one of them.
-let findMatchingAsset (assetClass:string) searchTags (assets:list<X4Equipment.Component>) =
+let findMatchingAsset (assetClass:string) searchTags (assets:list<EquipmentInfo>) =
     let TODO_how_do_we_make__sure_we_dont_use_mining_assets_on_combat_ships = true
     // Find an asset by its name, case insensitive.
     assets 
@@ -720,9 +765,16 @@ let findMatchingAsset (assetClass:string) searchTags (assets:list<X4Equipment.Co
         // Filter down to only those that match the tags.
         |> List.filter (fun asset ->
             // Check if any of the connections have the tags we're looking for.
-            asset.Connections
-            |> Array.exists (fun connection -> compareTags searchTags connection.Tags )
+            compareTags searchTags asset.Tags
         )
+
+let dumpEquipment(asset: EquipmentInfo) =
+    printfn "%45s %-15s %-10s %-20s %A" asset.Name asset.Class asset.Size asset.ComponentName asset.Tags
+
+let dumpAllEquipment() =
+    printfn "\nAll Equipment:"
+    allShipEquipment
+    |> List.iter dumpEquipment
 
 let dumpShips() =
     printfn "All Ship Macros:"
