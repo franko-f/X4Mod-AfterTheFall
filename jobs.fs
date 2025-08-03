@@ -16,12 +16,12 @@ open X4.Utilities
 
 
 let X4JobFileCore = X4UnpackedDataFolder + "/core/libraries/jobs.xml"
-let X4JobFileTerran = X4UnpackedDataFolder + "/terran/libraries/jobs.xml"
-let X4JobFilePirate = X4UnpackedDataFolder + "/pirate/libraries/jobs.xml"
+let X4JobFileTerran = X4UnpackedDataFolder + "/extensions/ego_dlc_terran/libraries/jobs.xml"
+let X4JobFilePirate = X4UnpackedDataFolder + "/extensions/ego_dlc_pirate/libraries/jobs.xml"
 [<Literal>] // split will be the template for normal job files, as the core game file doesn't use some tags (eg, 'preferbuilding')
-let X4JobFileSplit = X4UnpackedDataFolder + "/split/libraries/jobs.xml"
+let X4JobFileSplit = X4UnpackedDataFolder + "/extensions/ego_dlc_split/libraries/jobs.xml"
 [<Literal>] // We're going to use the boron as a template for diff/Add Job format file. Not all DLC use this format (eg, split, above).
-let X4JobFileBoron = X4UnpackedDataFolder + "/boron/libraries/jobs.xml"
+let X4JobFileBoron = X4UnpackedDataFolder + "/extensions/ego_dlc_boron/libraries/jobs.xml"
 
 // two job file formats to parse:
 // One normal game XML file, and the other is a DIFF file with jobs inside an 'add' selector tag.

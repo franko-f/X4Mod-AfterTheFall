@@ -65,6 +65,8 @@ let tagStringToList (tags:String) =
     // Convert a space separated string of tags into a list of tags.
     System.Text.RegularExpressions.Regex.Split(tags.Trim(), @"\s+") |> List.ofArray
 
+// Really useful computation expression build for options (credit somewhere online.)
+// allows us to write cleaner and easier to understand code filled with option types
 type OptionBuilder() =
     member _.Bind(value, binder) =
         match value with

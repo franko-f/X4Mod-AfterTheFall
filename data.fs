@@ -15,7 +15,7 @@ open System.Xml.Linq
 
 let rand = new Random(12345)    // Seed the random number generator so we get the same results each time as long as were not changing code.
 
-let ContentDirectories   = ["core"; "split"; "terran"; "pirate"; "boron"; "timelines"]
+let ContentDirectories   = [""; "ego_dlc_split"; "ego_dlc_terran"; "ego_dlc_pirate"; "ego_dlc_boron"; "ego_dlc_timelines"]
 let ShipSizeClasses      = ["ship_s"; "ship_m"; "ship_l"; "ship_xl"]
 let ShipSizeDirectories  = ["size_s"; "size_m"; "size_l"; "size_xl"]  // Oddly, the ship size directory names are not the same as the ship size classes.
 let ComponentSizeClasses = ["small"; "medium"; "large"; "extralarge"] // I really wish there was some kind of consistency when it comes to referring to sizes.
@@ -42,55 +42,51 @@ let X4GodModFile = __SOURCE_DIRECTORY__ + "/mod_templates/god.xml"
 let X4ObjectTemplatesFile = __SOURCE_DIRECTORY__ + "/mod_templates/object_templates.xml"
 
 [<Literal>]
-let X4GodFileCore   = X4UnpackedDataFolder + "/core/libraries/god.xml" // Core game data.
-let X4GodFileSplit  = X4UnpackedDataFolder + "/split/libraries/god.xml" // Core game data.
-let X4GodFileTerran = X4UnpackedDataFolder + "/terran/libraries/god.xml" // Core game data.
-let X4GodFilePirate = X4UnpackedDataFolder + "/pirate/libraries/god.xml" // Core game data.
-let X4GodFileBoron  = X4UnpackedDataFolder + "/boron/libraries/god.xml" // Core game data.
+let X4GodFileCore   = X4UnpackedDataFolder + "/libraries/god.xml" // Core game data.
+let X4GodFileSplit  = X4UnpackedDataFolder + "/extensions/ego_dlc_split/libraries/god.xml" // Core game data.
+let X4GodFileTerran = X4UnpackedDataFolder + "/extensions/ego_dlc_terran/libraries/god.xml" // Core game data.
+let X4GodFilePirate = X4UnpackedDataFolder + "/extensions/ego_dlc_pirate/libraries/god.xml" // Core game data.
+let X4GodFileBoron  = X4UnpackedDataFolder + "/extensions/ego_dlc_boron/libraries/god.xml" // Core game data.
 
 [<Literal>]
-let X4ClusterFileCore = X4UnpackedDataFolder + "/core/maps/xu_ep2_universe/clusters.xml"
-let X4ClusterFileSplit = X4UnpackedDataFolder + "/split/maps/xu_ep2_universe/dlc4_clusters.xml"
-let X4ClusterFileTerran = X4UnpackedDataFolder + "/terran/maps/xu_ep2_universe/dlc_terran_clusters.xml"
-let X4ClusterFilePirate = X4UnpackedDataFolder + "/pirate/maps/xu_ep2_universe/dlc_pirate_clusters.xml"
-let X4ClusterFileBoron = X4UnpackedDataFolder + "/boron/maps/xu_ep2_universe/dlc_boron_clusters.xml"
+let X4ClusterFileCore = X4UnpackedDataFolder + "/maps/xu_ep2_universe/clusters.xml"
+let X4ClusterFileSplit = X4UnpackedDataFolder + "/extensions/ego_dlc_split/maps/xu_ep2_universe/dlc4_clusters.xml"
+let X4ClusterFileTerran = X4UnpackedDataFolder + "/extensions/ego_dlc_terran/maps/xu_ep2_universe/dlc_terran_clusters.xml"
+let X4ClusterFilePirate = X4UnpackedDataFolder + "/extensions/ego_dlc_pirate/maps/xu_ep2_universe/dlc_pirate_clusters.xml"
+let X4ClusterFileBoron = X4UnpackedDataFolder + "/extensions/ego_dlc_boron/maps/xu_ep2_universe/dlc_boron_clusters.xml"
 
 [<Literal>]
-let X4SectorFileCore = X4UnpackedDataFolder  + "/core/maps/xu_ep2_universe/sectors.xml" // This core sectors file needs to be a literal, as it's also our type provider
-let X4SectorFileSplit = X4UnpackedDataFolder + "/split/maps/xu_ep2_universe/dlc4_sectors.xml"   // This one is normal string, as we can load and parse using X4SectorCore literal
-let X4SectorFileTerran = X4UnpackedDataFolder + "/terran/maps/xu_ep2_universe/dlc_terran_sectors.xml"
-let X4SectorFilePirate = X4UnpackedDataFolder + "/pirate/maps/xu_ep2_universe/dlc_pirate_sectors.xml"
-let X4SectorFileBoron = X4UnpackedDataFolder + "/boron/maps/xu_ep2_universe/dlc_boron_sectors.xml"
+let X4SectorFileCore = X4UnpackedDataFolder  + "/maps/xu_ep2_universe/sectors.xml" // This core sectors file needs to be a literal, as it's also our type provider
+let X4SectorFileSplit = X4UnpackedDataFolder + "/extensions/ego_dlc_split/maps/xu_ep2_universe/dlc4_sectors.xml"   // This one is normal string, as we can load and parse using X4SectorCore literal
+let X4SectorFileTerran = X4UnpackedDataFolder + "/extensions/ego_dlc_terran/maps/xu_ep2_universe/dlc_terran_sectors.xml"
+let X4SectorFilePirate = X4UnpackedDataFolder + "/extensions/ego_dlc_pirate/maps/xu_ep2_universe/dlc_pirate_sectors.xml"
+let X4SectorFileBoron = X4UnpackedDataFolder + "/extensions/ego_dlc_boron/maps/xu_ep2_universe/dlc_boron_sectors.xml"
 
 [<Literal>]
-let X4ZoneFileCore = X4UnpackedDataFolder + "/core/maps/xu_ep2_universe/zones.xml"
-let X4ZoneFileSplit = X4UnpackedDataFolder + "/split/maps/xu_ep2_universe/dlc4_zones.xml"
-let X4ZoneFileTerran = X4UnpackedDataFolder + "/terran/maps/xu_ep2_universe/dlc_terran_zones.xml"
-let X4ZoneFilePirate = X4UnpackedDataFolder + "/pirate/maps/xu_ep2_universe/dlc_pirate_zones.xml"
-let X4ZoneFileBoron = X4UnpackedDataFolder + "/boron/maps/xu_ep2_universe/dlc_boron_zones.xml"
+let X4ZoneFileCore = X4UnpackedDataFolder + "/maps/xu_ep2_universe/zones.xml"
+let X4ZoneFileSplit = X4UnpackedDataFolder + "/extensions/ego_dlc_split/maps/xu_ep2_universe/dlc4_zones.xml"
+let X4ZoneFileTerran = X4UnpackedDataFolder + "/extensions/ego_dlc_terran/maps/xu_ep2_universe/dlc_terran_zones.xml"
+let X4ZoneFilePirate = X4UnpackedDataFolder + "/extensions/ego_dlc_pirate/maps/xu_ep2_universe/dlc_pirate_zones.xml"
+let X4ZoneFileBoron = X4UnpackedDataFolder + "/extensions/ego_dlc_boron/maps/xu_ep2_universe/dlc_boron_zones.xml"
 
 [<Literal>]
-let X4GalaxyFileCore = X4UnpackedDataFolder + "/core/maps/xu_ep2_universe/galaxy.xml"
+let X4GalaxyFileCore = X4UnpackedDataFolder + "/maps/xu_ep2_universe/galaxy.xml"
 [<Literal>]  // the DLC galaxy files are in DIFF format, so we need a different type provider.
-let X4GalaxyFileSplit = X4UnpackedDataFolder + "/split/maps/xu_ep2_universe/galaxy.xml"
-let X4GalaxyFileTerran = X4UnpackedDataFolder + "/terran/maps/xu_ep2_universe/galaxy.xml"
-let X4GalaxyFilePirate = X4UnpackedDataFolder + "/pirate/maps/xu_ep2_universe/galaxy.xml"
-let X4GalaxyFileBoron = X4UnpackedDataFolder + "/boron/maps/xu_ep2_universe/galaxy.xml"
+let X4GalaxyFileSplit = X4UnpackedDataFolder + "/extensions/ego_dlc_split/maps/xu_ep2_universe/galaxy.xml"
+let X4GalaxyFileTerran = X4UnpackedDataFolder + "/extensions/ego_dlc_terran/maps/xu_ep2_universe/galaxy.xml"
+let X4GalaxyFilePirate = X4UnpackedDataFolder + "/extensions/ego_dlc_pirate/maps/xu_ep2_universe/galaxy.xml"
+let X4GalaxyFileBoron = X4UnpackedDataFolder + "/extensions/ego_dlc_boron/maps/xu_ep2_universe/galaxy.xml"
 
 // Regions for mining fields
 [<Literal>]
-let X4RegionDefinitionsFile = X4UnpackedDataFolder + "/core/libraries/region_definitions.xml"
+let X4RegionDefinitionsFile = X4UnpackedDataFolder + "/libraries/region_definitions.xml"
 
 [<Literal>]
-let X4RegionYieldsFile = X4UnpackedDataFolder + "/core/libraries/regionyields.xml"
+let X4RegionYieldsFile = X4UnpackedDataFolder + "/libraries/regionyields.xml"
 
 // Ships
 [<Literal>]
-let X4IndexMacrosFile = X4UnpackedDataFolder + "/core/index/macros.xml"
-let X4IndexMacrosFileSplit = X4UnpackedDataFolder + "/split/index/macros.xml"
-let X4IndexMacrosFileTerran = X4UnpackedDataFolder + "/terran/index/macros.xml"
-let X4IndexMacrosFilePirate = X4UnpackedDataFolder + "/pirate/index/macros.xml"
-let X4IndexMacrosFileBoron = X4UnpackedDataFolder + "/boron/index/macros.xml"
+let X4IndexMacrosFile = X4UnpackedDataFolder + "/index/macros.xml"
 
 
 // TODO: Should we 'unify' all the types using 'Global=true,' parameter?
@@ -115,17 +111,25 @@ type X4RegionYields = XmlProvider<X4RegionYieldsFile>
 
 // Ships and loadouts
 [<Literal>]
-let X4UnitsDirectory = "/assets/units"
-[<Literal>]
 // Use the Argon detroyer as an XMLProvider template for loading units
-let X4UnitsXMLProviderTemplateFile = X4UnpackedDataFolder + "/core" + X4UnitsDirectory + "/size_l/ship_arg_l_destroyer_01.xml"
+let X4ShipsXMLProviderTemplateFile     = X4UnpackedDataFolder + "/assets/units/size_l/ship_arg_l_destroyer_01.xml"
+[<Literal>]
+let X4ShipMacroXMLProviderTemplateFile = X4UnpackedDataFolder + "/assets/units/size_l/macros/ship_arg_l_destroyer_01_b_macro.xml"
 
 type X4IndexMacro = XmlProvider<X4IndexMacrosFile>
-type X4Ships      = XmlProvider<X4UnitsXMLProviderTemplateFile> // in the 'units' assets directory, but we only care about the ships.
+type X4Ships      = XmlProvider<X4ShipsXMLProviderTemplateFile> // in the 'units' assets directory, but we only care about the ships.
+type X4ShipsMacro = XmlProvider<X4ShipMacroXMLProviderTemplateFile> // in the 'units' assets directory, but we only care about the ships.
 
 type ShipInfo = {
     Name: String
+    MacroName: String
     Size: String
+    DLC: String
+    Type: String
+    Thruster: String
+    ComponentRef: String
+    ComponentFile: String
+    Macro: X4ShipsMacro.Macro
     Connections: X4Ships.Connection array
 }
 
@@ -134,12 +138,12 @@ type ShipInfo = {
 [<Literal>]
 let X4EquipmentDirectory = "/assets/props"
 [<Literal>]
-let X4EquipmentXMLProviderTemplateFile = X4UnpackedDataFolder + "/core" + X4EquipmentDirectory + "/WeaponSystems/capital/weapon_arg_l_destroyer_01_mk1.xml"
+let X4EquipmentXMLProviderTemplateFile = X4UnpackedDataFolder + X4EquipmentDirectory + "/WeaponSystems/capital/weapon_arg_l_destroyer_01_mk1.xml"
 
 type X4Equipment  = XmlProvider<X4EquipmentXMLProviderTemplateFile>
 type EquipmentInfo = {
     Name: String
-    Macro: String  // Same as name with _macro suffix
+    MacroName: String  // Same as name with _macro suffix
     Class: String
     Size: String
     Tags: String List
@@ -148,8 +152,28 @@ type EquipmentInfo = {
     Connections: X4Equipment.Connection array
 }
 
+// Encapsulates information on an  entry in an index file:
+// Name of the entity being referred to; the file the entity is defined in, along with the DLC it belongs to.
+type Index = {
+    Name: String
+    File: String
+    DLC: String
+}
 
 // ====== LOAD DATA FROM XML FILES ======
+
+// Generate a path to a sub directory for either base game of specific DLC
+let getDlcDirectory dlc subDir =
+    match dlc with
+    | "" -> X4UnpackedDataFolder + "/" + subDir  // base game files are in the root of the unpacked data folder.
+    | dir -> X4UnpackedDataFolder + "/extensions/" + dir + subDir
+
+
+// Function that given a subdir, will expand out a list of directories, one for each DLC and the core game.
+let getDlcDirectories subDir =
+    ContentDirectories
+    |> List.map(fun dlc -> getDlcDirectory dlc subDir)
+
 
 // Load the cluster data from each individual core/expansion cluster XML file. We'll combine them in to one list.
 // Convinience functions to search/manipulate these lists are defined below.
@@ -221,19 +245,25 @@ let allGalaxy =
                     loadFromDiff X4GalaxyBoron;
                 ]
 
-let AllIndexMacros =
-    let X4IndexMacrosCore   = X4IndexMacro.Load(X4IndexMacrosFile)
-    let X4IndexMacrosSplit  = X4IndexMacro.Load(X4IndexMacrosFileSplit)
-    let X4IndexMacrosTerran = X4IndexMacro.Load(X4IndexMacrosFileTerran)
-    let X4IndexMacrosPirate = X4IndexMacro.Load(X4IndexMacrosFilePirate)
-    let X4IndexMacrosBoron  = X4IndexMacro.Load(X4IndexMacrosFileBoron)
-    Array.concat [
-        X4IndexMacrosCore.Entries;
-        X4IndexMacrosSplit.Entries;
-        X4IndexMacrosTerran.Entries;
-        X4IndexMacrosPirate.Entries;
-        X4IndexMacrosBoron.Entries;
+// The 'index' xml files contain 'entries' that are used to map an entity name (component or macro)
+// to a file name containing the definition of that entity.
+// This function will load the index entries across all the DLCs and core game for a specific index file,
+// such as 'macros.xml' or 'components.xml'.
+let LoadIndexes (index:string) =
+    [
+        for dlc in ContentDirectories do
+            let X4IndexMacrosFile = getDlcDirectory dlc "/index/" + index
+            if File.Exists(X4IndexMacrosFile) then
+                X4IndexMacro.Load(X4IndexMacrosFile).Entries |> Array.map (fun entry -> { Name = entry.Name; File = entry.Value.Replace("\\", "/") + ".xml"; DLC = dlc })
+            else
+                printfn "Warning: No index macros file found for %s" dlc
+                [||]
     ]
+    |> Array.concat
+
+
+let AllIndexMacros = LoadIndexes "macros.xml"
+let AllComponentMacros = LoadIndexes "components.xml"
 
 let allRegionDefinitions = X4RegionDefinitions.Load(X4RegionDefinitionsFile)
 let regionYields = X4RegionYields.Load(X4RegionYieldsFile)
@@ -595,40 +625,73 @@ let allShipMacros =
     ]
 
 
-
-// Here we're pulling the actual ship data definition for use in generating loadouts.
-// This will deprecate the previous allShipMacros
+// Pull all the information about all the ships in the game by filtering down to the ship macros in the index macros,
+// then loading those files; finding the name of relevant ship component reference, then using that reference to find
+// the component file from the component index to get the file that contains the actual ship definition we're interested in.
+// This will replace the 'allShipMacros' function.
 let allShips =
-    // We have to get the ships for each DLC, in a different root dir.
-    // Define some helper functions for this.
-    let getDLCShips (dlcDir:String) =
-        let files = ShipSizeDirectories
-                  |> List.map ( fun size -> X4UnpackedDataFolder + "/" + dlcDir + X4UnitsDirectory + "/" + size )
-                  |> List.toArray
-                  |> Array.collect (fun dir -> Directory.GetFiles(dir, "*.xml") )
-
-        files
-            |> Array.filter (fun filename -> not (filename.EndsWith("_macro.xml")))  // Some DLCs save the macro file in this dir too.
-            |> Array.choose ( fun file ->
-            try
-                let parsed = X4Ships.Load(file)
-                let name   = parsed.Component.Name
-                let macro  = parsed.Component.Class
-                let connections = parsed.Component.Connections
-                printfn "Loaded ship: %-35s %-7s from %s" name macro file
-                let todo_filter_connections_for_equipment_types_and_tags = true
-                Some {Name = name; Size = macro; Connections = connections}
-            with
-            | ex ->
-                printfn $"Error loading ship:  {file}: {ex.Message}"
+    // 1. Get all the ship macros from the index macros, and filter them to only those that start with "ship_"
+    AllIndexMacros
+    |> Array.filter (fun entry -> entry.Name.StartsWith "ship_")
+    |> Array.filter (fun entry -> not (entry.Name.Contains "_xs_")) // we don't wan't xs ships - plus they have no thruster entry, breaking our template file parser.
+    // 2. For each ship macro, find the file it points to, and load it.
+    |> Array.choose (fun entry ->
+        try
+            // Get the file name from the entry, and load it.
+            let fileName = X4UnpackedDataFolder + "/" + entry.File
+            if File.Exists(fileName) then
+                Some (entry, X4ShipsMacro.Load(fileName))
+            else
+                printfn "Warning: Ship macro file %s not found." fileName
                 None
-        ) |> Array.toList
+        with
+        | ex ->
+            printfn $"Error loading ship macro: {entry.Name}: {ex.Message}"
+            None
+    )
+    // 3. From the loaded macro file, pull out the reference to the component, and look up the component file in the component index.
+    |> Array.choose (fun (entry, macro) ->
+        let componentEntry = Array.Find (AllComponentMacros, (fun componentEntry -> componentEntry.Name =? macro.Macro.Component.Ref))
+        let componentFilename = X4UnpackedDataFolder + "/" + componentEntry.File.Replace("\\", "/")
 
-    // Ignore timelines ships, as they're mostly one off uniques and mission specific.
-    ContentDirectories
-        |> List.filter ( (<>) "timelines" )
-        |> List.collect getDLCShips
-        |> List.filter( fun ship -> ShipSizeClasses |> List.contains ship.Size ) // There are some things defined as ships, that aren't really ships. Ignore them by checking the size class.
+        // Lets load the compoenent file and parse it.
+        try
+            let parsed = X4Ships.Load(componentFilename)
+            let name   = parsed.Component.Name
+            let size   = parsed.Component.Class
+            let connections = parsed.Component.Connections
+
+            // Not all macro files include the 'type' property, so we need to check if it exists.
+            let shiptype =
+                try
+                    macro.Macro.Properties.Ship.Type
+                with
+                | _ex -> "unknown"
+            let thruster =
+                try
+                    macro.Macro.Properties.Thruster.Tags
+                with
+                | _ex -> "unknown"
+
+            printfn "Loaded ship: %-35s %-35s from %s" name macro.Macro.Component.Ref componentFilename
+
+            Some {
+                Name = name;
+                Size = size;
+                Type = shiptype;
+                Thruster = thruster;
+                DLC = entry.DLC;
+                MacroName = entry.Name;
+                Macro = macro.Macro;
+                ComponentRef = macro.Macro.Component.Ref;
+                ComponentFile = componentFilename;
+                Connections = connections
+                }
+        with
+        | ex ->
+            printfn $"Error loading ship:  {componentFilename}: {ex.Message}"
+            None
+    ) |> Array.toList
 
 
 let findShipByName (shipName:string) =
@@ -641,14 +704,14 @@ let printShipInfo (ship:ShipInfo) =
     ship.Connections
     |> Seq.iter (fun connection -> printfn "  Connection %-50s/%-20s / %s" connection.Name (Option.defaultValue "" connection.Group ) connection.Tags) 
 
+
 // Each DLC is in a separate directory; and the different types of files describing ships
 // and equipment are in a different set of subdirs off of that base of subtype.
 // Quick helper function with some common code to pull in all the files from these
 // subdirs from each DLC and merge in.
-let getDlcXmlFiles dlcs dataDir =
-    dlcs
-    |> List.map (fun dlc -> X4UnpackedDataFolder + "/" + dlc + dataDir)
-    |> List.toArray
+let getDlcXmlFiles dataDir =
+    getDlcDirectories dataDir
+   |> List.toArray
     |> Array.collect (
         fun dir ->
             try
@@ -666,7 +729,7 @@ let getDlcXmlFiles dlcs dataDir =
 // Get all the assets defined in the core game and the DLCs. This includes
 // equipment for ships, as well as miscellaneous assets like wares, adsigns, etc
 let allAssets =
-    getDlcXmlFiles ContentDirectories X4EquipmentDirectory
+    getDlcXmlFiles X4EquipmentDirectory
     |> Array.toList
     |> List.filter (fun x -> not (x.EndsWith("_macro.xml"))) // Ignore macro files, as they are not the definition we're looking for.
     |> List.map (fun x ->
@@ -712,6 +775,8 @@ let allShipEquipment =
     |> List.filter (fun asset -> ShipEquipmentClasses |> List.contains asset.Class)
     |> List.map (fun asset ->
         option {
+            // Find the connection in the assets list of connections that has 'compononent' in its tags.
+            // let! will early return if the result is None here.
             let! componentConnection =
                 asset.Connections
                 |> Array.tryFind (fun connection ->
@@ -720,17 +785,20 @@ let allShipEquipment =
                 )
 
             let tags = tagStringToList componentConnection.Tags |> List.filter (fun tag -> tag <> "component") // Remove the 'component' tag, as it's not needed in the final result.
+            let size =
+                // one of the tags is the size class, so we try find any of the valid size tags in the tag list.
+                tags
+                |> List.tryFind (
+                    fun tag -> ComponentSizeClasses |> List.exists (fun t -> t =? tag)
+                )
+                |> Option.defaultValue "none" // Default to size_s if not found
+
             return {
                 Name  = asset.Name
-                Macro = asset.Name + "_macro"
+                MacroName = asset.Name + "_macro"
                 Class = asset.Class
                 Tags  = tags
-                Size  =
-                    tags
-                    |> List.tryFind (
-                        fun tag -> ComponentSizeClasses |> List.exists (fun t -> t =? tag)
-                    )
-                    |> Option.defaultValue "none" // Default to size_s if not found
+                Size  = size
                 ComponentName = componentConnection.Name
                 ComponentConnection = componentConnection
                 Connections = asset.Connections
@@ -778,19 +846,19 @@ let dumpAllEquipment() =
 
 let dumpShips() =
     printfn "All Ship Macros:"
-    for ship in allShipMacros do printfn "macro.%s," (ship)
+    for ship in allShips do printfn "macro: %s," (ship.Name)
 
 let dump_sectors (sectors:X4Sector.Macro list) =
     for sector in sectors do
-        printfn "Macro.%s," (sector.Name.ToLower())
+        printfn "macro: %s," (sector.Name.ToLower())
 
 let dumpRegionDefinitions() =
     for region in allRegionDefinitions.Regions do
-        printfn "Region.%s," (region.Name.ToLower())
+        printfn "macro: %s," (region.Name.ToLower())
 
 let dumpRegionYields() =
     printfn "Discovered Region Yields:"
     for ware in regionYields.Resources do
-        printfn "\nResource.%s:" (ware.Ware.ToLower())
+        printfn "\nResource: %s:" (ware.Ware.ToLower())
         for ryield in ware.Yields do
             printfn "   %12s: yield: %6M over %6i minutes = %7.2f/h/km^2" ryield.Name ryield.Resourcedensity ryield.Replenishtime ((float(ryield.Resourcedensity) / float(ryield.Replenishtime) ) * 60.0)

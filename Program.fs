@@ -36,6 +36,7 @@ X4.Data.findShipByName "ship_atf_l_destroyer_01" |> Option.iter (fun s -> X4.Dat
 X4.Data.findShipByName "ship_atf_xl_battleship_01" |> Option.iter (fun s -> X4.Data.printShipInfo s)
 X4.Data.findShipByName "ship_arg_l_destroyer_01" |> Option.iter (fun s -> X4.Data.printShipInfo s)
 
+X4.Data.dumpShips()
 
 exit 0
 
