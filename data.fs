@@ -619,11 +619,6 @@ let selectRandomSector() = allSectors.[rand.Next(allSectors.Length)]
 let selectRandomSafeSector() = getSafeSectors.[rand.Next(getSafeSectors.Length)]
 let selectRandomUnsafeSector() = getUnsafeSectors.[rand.Next(getUnsafeSectors.Length)]
 
-let allShipMacros =
-    [for entry in AllIndexMacros do
-        if entry.Name.StartsWith "ship_" then entry.Name
-    ]
-
 
 // Pull all the information about all the ships in the game by filtering down to the ship macros in the index macros,
 // then loading those files; finding the name of relevant ship component reference, then using that reference to find
@@ -846,7 +841,7 @@ let dumpAllEquipment() =
 
 let dumpShips() =
     printfn "All Ship Macros:"
-    for ship in allShips do printfn "macro: %s," (ship.Name)
+    for ship in allShips do printfn "macro: %s," (ship.MacroName)
 
 let dump_sectors (sectors:X4Sector.Macro list) =
     for sector in sectors do

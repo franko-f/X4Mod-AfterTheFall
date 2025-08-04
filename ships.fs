@@ -22,7 +22,8 @@ let abandonedShipsList =
         "ship_atf_l_destroyer_01_a_macro"; "ship_atf_xl_battleship_01_a_macro"; "ship_ter_l_destroyer_01_a_macro"
     ]
 
-    X4.Data.allShipMacros
+    X4.Data.allShips
+    |> List.map (fun ship -> ship.MacroName)
     |> List.filter (
         fun shipName ->
             ( factions |> List.exists (fun tag -> shipName.Contains tag) )        // Must contain one of the factions we're interested in.
