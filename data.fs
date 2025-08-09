@@ -120,6 +120,14 @@ type X4IndexMacro = XmlProvider<X4IndexMacrosFile>
 type X4Ships      = XmlProvider<X4ShipsXMLProviderTemplateFile> // in the 'units' assets directory, but we only care about the ships.
 type X4ShipsMacro = XmlProvider<X4ShipMacroXMLProviderTemplateFile> // in the 'units' assets directory, but we only care about the ships.
 
+type ShipEquipmentSlot = {
+    Name: String
+    Class: String
+    Size: String
+    Group: Option<String>
+    Tags: String List
+}
+
 type ShipInfo = {
     Name: String
     MacroName: String
@@ -131,6 +139,7 @@ type ShipInfo = {
     ComponentFile: String
     Macro: X4ShipsMacro.Macro
     Connections: X4Ships.Connection array
+    EquipmentSlots: ShipEquipmentSlot list
 }
 
 
@@ -620,6 +629,72 @@ let selectRandomSafeSector() = getSafeSectors.[rand.Next(getSafeSectors.Length)]
 let selectRandomUnsafeSector() = getUnsafeSectors.[rand.Next(getUnsafeSectors.Length)]
 
 
+// Checks to see if the ship connection is an equipment slot connection,
+// and if so, parses it to return the relevant information about the equipment slot.
+let parseConnectionForEquipmentSlot (connection:X4Ships.Connection) =
+    // We determine whether the connection is an equipment slot by checking the tags.
+    // If the tags contains one of the special equipment slot tags defined in
+    // ShipEquipmentConnectionTag, then it's an equipment slot.
+
+    // split the tag string in to a list of tags, and trim excess whitespace
+    let tags = tagStringToList connection.Tags
+    // find the first tag that matches one of the equipment slot tags. ie, the element, if any,
+    // that appears both in the tags list and in the ShipEquipmentConnectionTag list.
+    let equipmentTag = tags |> List.tryFind (fun tag -> List.contains  tag ShipEquipmentConnectionTag)
+    match equipmentTag with
+    | None -> None // Not an equipment slot, so return None
+    | Some tag ->
+        Some {
+            Name = connection.Name.Trim();
+            Class = tag;
+            Size = tags |> List.tryFind (fun tag -> List.contains tag ComponentSizeClasses) |> Option.defaultValue "unknown";
+            Group = connection.Group |> Option.map (fun group -> group.Trim());
+            Tags = tags;
+        }
+
+let LoadShipComponents entry (macro:X4ShipsMacro.Macros) =
+    let componentEntry = Array.Find (AllComponentMacros, (fun componentEntry -> componentEntry.Name =? macro.Macro.Component.Ref))
+    let componentFilename = X4UnpackedDataFolder + "/" + componentEntry.File.Replace("\\", "/")
+
+    // Lets load the compoenent file and parse it.
+    try
+        let parsed = X4Ships.Load(componentFilename)
+        let name   = parsed.Component.Name
+        let size   = parsed.Component.Class
+        let connections = parsed.Component.Connections
+
+        // Not all macro files include the 'type' property, so we need to check if it exists.
+        let shiptype =
+            try
+                macro.Macro.Properties.Ship.Type
+            with
+            | _ex -> "unknown"
+        let thruster =
+            try
+                macro.Macro.Properties.Thruster.Tags
+            with
+            | _ex -> "unknown"
+
+        printfn "Loaded ship: %-35s %-35s from %s" name macro.Macro.Component.Ref componentFilename
+
+        Some {
+            Name = name;
+            Size = size;
+            Type = shiptype;
+            Thruster = thruster;
+            DLC = entry.DLC;
+            MacroName = entry.Name;
+            Macro = macro.Macro;
+            ComponentRef = macro.Macro.Component.Ref;
+            ComponentFile = componentFilename;
+            Connections = connections;
+            EquipmentSlots = connections |> Array.choose parseConnectionForEquipmentSlot |> Array.toList;
+            }
+    with
+    | ex ->
+        printfn $"Error loading ship:  {componentFilename}: {ex.Message}"
+        None
+
 // Pull all the information about all the ships in the game by filtering down to the ship macros in the index macros,
 // then loading those files; finding the name of relevant ship component reference, then using that reference to find
 // the component file from the component index to get the file that contains the actual ship definition we're interested in.
@@ -630,6 +705,8 @@ let allShips =
     |> Array.filter (fun entry -> entry.Name.StartsWith "ship_")
     |> Array.filter (fun entry -> not (entry.Name.Contains "_xs_")) // we don't wan't xs ships - plus they have no thruster entry, breaking our template file parser.
     // 2. For each ship macro, find the file it points to, and load it.
+    // Ships are actually defined in two files. the macro file, and the 'component' file.
+    // The macro file contains the ship definition, and the component file contains the ship component definition
     |> Array.choose (fun entry ->
         try
             // Get the file name from the entry, and load it.
@@ -644,49 +721,10 @@ let allShips =
             printfn $"Error loading ship macro: {entry.Name}: {ex.Message}"
             None
     )
-    // 3. From the loaded macro file, pull out the reference to the component, and look up the component file in the component index.
-    |> Array.choose (fun (entry, macro) ->
-        let componentEntry = Array.Find (AllComponentMacros, (fun componentEntry -> componentEntry.Name =? macro.Macro.Component.Ref))
-        let componentFilename = X4UnpackedDataFolder + "/" + componentEntry.File.Replace("\\", "/")
-
-        // Lets load the compoenent file and parse it.
-        try
-            let parsed = X4Ships.Load(componentFilename)
-            let name   = parsed.Component.Name
-            let size   = parsed.Component.Class
-            let connections = parsed.Component.Connections
-
-            // Not all macro files include the 'type' property, so we need to check if it exists.
-            let shiptype =
-                try
-                    macro.Macro.Properties.Ship.Type
-                with
-                | _ex -> "unknown"
-            let thruster =
-                try
-                    macro.Macro.Properties.Thruster.Tags
-                with
-                | _ex -> "unknown"
-
-            printfn "Loaded ship: %-35s %-35s from %s" name macro.Macro.Component.Ref componentFilename
-
-            Some {
-                Name = name;
-                Size = size;
-                Type = shiptype;
-                Thruster = thruster;
-                DLC = entry.DLC;
-                MacroName = entry.Name;
-                Macro = macro.Macro;
-                ComponentRef = macro.Macro.Component.Ref;
-                ComponentFile = componentFilename;
-                Connections = connections
-                }
-        with
-        | ex ->
-            printfn $"Error loading ship:  {componentFilename}: {ex.Message}"
-            None
-    ) |> Array.toList
+    // 3. From the loaded macro file, pull out the reference to the ship asset/component file,
+    // and look up the ship asset file in the component index.
+    |> Array.choose ( fun (entry, macro) -> LoadShipComponents entry macro)
+    |> Array.toList
 
 
 let findShipByName (shipName:string) =
@@ -698,6 +736,12 @@ let printShipInfo (ship:ShipInfo) =
     printfn "\n Ship: %s" ship.Name
     ship.Connections
     |> Seq.iter (fun connection -> printfn "  Connection %-50s/%-20s / %s" connection.Name (Option.defaultValue "" connection.Group ) connection.Tags) 
+    printfn " Discovered Equipment Slots:"
+    ship.EquipmentSlots
+    |> Seq.iter (fun slot ->
+        printfn "  %-30s %-10s %-10s %-25s | %s" slot.Name slot.Class slot.Size (Option.defaultValue "" slot.Group) 
+            (slot.Tags |> List.map (fun tag -> tag.Trim()) |> String.concat " ")
+    )
 
 
 // Each DLC is in a separate directory; and the different types of files describing ships
