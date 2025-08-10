@@ -629,6 +629,15 @@ let selectRandomSafeSector() = getSafeSectors.[rand.Next(getSafeSectors.Length)]
 let selectRandomUnsafeSector() = getUnsafeSectors.[rand.Next(getUnsafeSectors.Length)]
 
 
+// Extracts the groups from a list of ship equipment slots.
+let shipEquipmentGroups (allSlots: ShipEquipmentSlot list) =
+    allSlots
+    |> List.choose (fun slot -> slot.Group |> Option.map (fun group -> ( (group, slot.Class), slot)))  // Filter out anything without a group
+    |> List.groupBy fst     // New list grouped by group and class of item.
+    |> List.map (fun (groupBy, slots) -> (groupBy, List.map snd slots))    // At this point our 'slots' is actually (group,slots) list, due to our previous processing. Reduce down to slots again
+    |> List.sortBy fst
+
+
 // Checks to see if the ship connection is an equipment slot connection,
 // and if so, parses it to return the relevant information about the equipment slot.
 let parseConnectionForEquipmentSlot (connection:X4Ships.Connection) =
@@ -730,18 +739,6 @@ let allShips =
 let findShipByName (shipName:string) =
     // Find a ship by its name, case insensitive.
     allShips |> List.tryFind (fun ship -> ship.Name =? shipName)
-
-let printShipInfo (ship:ShipInfo) =
-    // Print the ship info in a nice format.
-    printfn "\n Ship: %s" ship.Name
-    ship.Connections
-    |> Seq.iter (fun connection -> printfn "  Connection %-50s/%-20s / %s" connection.Name (Option.defaultValue "" connection.Group ) connection.Tags) 
-    printfn " Discovered Equipment Slots:"
-    ship.EquipmentSlots
-    |> Seq.iter (fun slot ->
-        printfn "  %-30s %-10s %-10s %-25s | %s" slot.Name slot.Class slot.Size (Option.defaultValue "" slot.Group) 
-            (slot.Tags |> List.map (fun tag -> tag.Trim()) |> String.concat " ")
-    )
 
 
 // Each DLC is in a separate directory; and the different types of files describing ships
@@ -848,8 +845,8 @@ let allShipEquipment =
 
 
 // Tags in X4 are given as a single string with a list of space separated words.
-// If all the tahs in searchTags are present in targetTags, then we have a match,
-// regardless of order, and even if target?s has more tags than searchTags.
+// If all the tags in searchTags are present in targetTags, then we have a match,
+// regardless of order, and even if targetTags has more tags than searchTags.
 let compareTagStrings (searchTags:String) (targetTags:String) =
     // Split the tags by space, and then check if all searchTags are in targetTags.
     let searchTagList = tagStringToList searchTags
@@ -882,6 +879,27 @@ let dumpAllEquipment() =
     printfn "\nAll Equipment:"
     allShipEquipment
     |> List.iter dumpEquipment
+
+let printShipInfo (ship:ShipInfo) =
+    let formatShipSlot (slot: ShipEquipmentSlot) =
+        sprintf "  %-30s %-10s %-10s %-25s | %s" slot.Name slot.Class slot.Size (Option.defaultValue "" slot.Group) 
+            (slot.Tags |> List.map (fun tag -> tag.Trim()) |> String.concat " ")
+
+    // Print the ship info in a nice format.
+    printfn "\n Ship: %s" ship.Name
+    // ship.Connections
+    // |> Seq.iter (fun connection -> printfn "  Connection %-50s/%-20s / %s" connection.Name (Option.defaultValue "" connection.Group ) connection.Tags) 
+    // printfn " Discovered Equipment Slots:"
+    ship.EquipmentSlots
+    |> Seq.iter (fun slot ->
+        printfn "%s" (formatShipSlot slot)
+    )
+    printfn "  Equipmment Groups"
+    ship.EquipmentSlots
+    |> shipEquipmentGroups
+    |> Seq.iter (fun ((group, slotClass), slots) ->
+        printfn "  Group: %-25s x%d  %s " group slots.Length (formatShipSlot slots[0])
+    )
 
 let dumpShips() =
     printfn "All Ship Macros:"
