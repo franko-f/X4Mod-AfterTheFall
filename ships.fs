@@ -1,15 +1,167 @@
+/// <summary>
+/// Functions to handle processing and manipulation of ship data, and generation of ship related mod content.
+/// Builds on data loaded in X4.Data to convert to our internal 'shipInfo' and 'shipequipment' types.
+/// </summary>
+
 module X4.Ships
 
 open System
+open System.IO
 open System.Xml
 open System.Xml.Linq
+
+open X4.Data
+open X4.Utilities
+
+let rand = new Random(12345)    // Seed the random number generator so we get the same results each time, as long as we're not adding new regions or changing territory order.
 
 // Define a few types for ship location that we'll use when we place an abandoned ship
 type Position = int * int * int
 type Rotation = int * int * int
 type ShipLocation = string * string * Position * Rotation   // Ship name, sector name, position, rotation. Should probably use a record type here.
 
-let rand = new Random(12345)    // Seed the random number generator so we get the same results each time, as long as we're not adding new regions or changing territory order.
+type ShipEquipmentSlot = {
+    Name: String
+    Class: String
+    Size: String
+    Group: Option<String>
+    Tags: String List
+}
+
+type ShipInfo = {
+    Name: String
+    MacroName: String
+    Size: String
+    DLC: String
+    Type: String
+    Thruster: String
+    ComponentRef: String
+    ComponentFile: String
+    Macro: X4ShipsMacro.Macro
+    Connections: X4Ships.Connection array
+    EquipmentSlots: ShipEquipmentSlot list
+}
+
+// Extracts the groups from a list of ship equipment slots.
+let shipEquipmentGroups (allSlots: ShipEquipmentSlot list) =
+    allSlots
+    |> List.choose (fun slot -> slot.Group |> Option.map (fun group -> ( (group, slot.Class), slot)))  // Filter out anything without a group
+    |> List.groupBy fst     // New list grouped by group and class of item.
+    |> List.map (fun (groupBy, slots) -> (groupBy, List.map snd slots))    // At this point our 'slots' is actually (group,slots) list, due to our previous processing. Reduce down to slots again
+    |> List.sortBy fst
+
+// Some tags are not relevant for selection/slot match
+let tagsToIgnore = [ 
+    "hittable"; "unhittable"; "component"; "symmetry"; 
+    "symmetry_1"; "symmetry_2"; "symmetry_right"; "symmetry_left"; 
+    "platformcollision"; "mandatory"; "notupgradeable" 
+    ]
+
+// Checks to see if the ship connection is an equipment slot connection,
+// and if so, parses it to return the relevant information about the equipment slot.
+let parseConnectionForEquipmentSlot (connection:X4Ships.Connection) =
+    // We determine whether the connection is an equipment slot by checking the tags.
+    // If the tags contains one of the special equipment slot tags defined in
+    // ShipEquipmentConnectionTag, then it's an equipment slot.
+
+    // split the tag string in to a list of tags, and trim excess whitespace
+    let tags = tagStringToList connection.Tags |> List.filter (fun tag -> not (List.contains tag tagsToIgnore))
+
+    // find the first tag that matches one of the equipment slot tags. ie, the element, if any,
+    // that appears both in the tags list and in the ShipEquipmentConnectionTag list.
+    let equipmentTag = List.tryFind (fun tag -> List.contains tag ShipEquipmentConnectionTag) tags
+
+    match equipmentTag with
+    | None -> None // Not an equipment slot, so return None
+    | Some tag ->
+        Some {
+            Name = connection.Name.Trim();
+            Class = tag;
+            Size = tags |> List.tryFind (fun tag -> List.contains tag ComponentSizeClasses) |> Option.defaultValue "unknown";
+            Group = connection.Group |> Option.map (fun group -> group.Trim());
+            Tags = tags;
+        }
+
+
+let LoadShipComponents (entry:Index) (macro:X4ShipsMacro.Macros) =
+    let componentEntry = Array.Find (AllComponentMacros, (fun componentEntry -> componentEntry.Name =? macro.Macro.Component.Ref))
+    let componentFilename = X4UnpackedDataFolder + "/" + componentEntry.File.Replace("\\", "/")
+
+    // Lets load the compoenent file and parse it.
+    try
+        let parsed = X4Ships.Load(componentFilename)
+        let name   = parsed.Component.Name
+        let size   = parsed.Component.Class
+        let connections = parsed.Component.Connections
+
+        // Not all macro files include the 'type' property, so we need to check if it exists.
+        let shiptype =
+            try
+                macro.Macro.Properties.Ship.Type
+            with
+            | _ex -> "unknown"
+        let thruster =
+            try
+                macro.Macro.Properties.Thruster.Tags
+            with
+            | _ex -> "unknown"
+
+        printfn "Loaded ship: %-35s %-35s from %s" name macro.Macro.Component.Ref componentFilename
+
+        Some {
+            Name = name;
+            Size = size;
+            Type = shiptype;
+            Thruster = thruster;
+            DLC = entry.DLC;
+            MacroName = entry.Name;
+            Macro = macro.Macro;
+            ComponentRef = macro.Macro.Component.Ref;
+            ComponentFile = componentFilename;
+            Connections = connections;
+            EquipmentSlots = connections |> Array.choose parseConnectionForEquipmentSlot |> Array.toList;
+            }
+    with
+    | ex ->
+        printfn $"Error loading ship:  {componentFilename}: {ex.Message}"
+        None
+
+// Pull all the information about all the ships in the game by filtering down to the ship macros in the index macros,
+// then loading those files; finding the name of relevant ship component reference, then using that reference to find
+// the component file from the component index to get the file that contains the actual ship definition we're interested in.
+// This will replace the 'allShipMacros' function.
+let allShips =
+    // 1. Get all the ship macros from the index macros, and filter them to only those that start with "ship_"
+    AllIndexMacros
+    |> Array.filter (fun entry -> entry.Name.StartsWith "ship_")
+    |> Array.filter (fun entry -> not (entry.Name.Contains "_xs_")) // we don't wan't xs ships - plus they have no thruster entry, breaking our template file parser.
+    // 2. For each ship macro, find the file it points to, and load it.
+    // Ships are actually defined in two files. the macro file, and the 'component' file.
+    // The macro file contains the ship definition, and the component file contains the ship component definition
+    |> Array.choose (fun entry ->
+        try
+            // Get the file name from the entry, and load it.
+            let fileName = X4UnpackedDataFolder + "/" + entry.File
+            if File.Exists fileName then
+                Some (entry, X4ShipsMacro.Load fileName)
+            else
+                printfn "Warning: Ship macro file %s not found." fileName
+                None
+        with
+        | ex ->
+            printfn $"Error loading ship macro: {entry.Name}: {ex.Message}"
+            None
+    )
+    // 3. From the loaded macro file, pull out the reference to the ship asset/component file,
+    // and look up the ship asset file in the component index.
+    |> Array.choose ( fun (entry, macro) -> LoadShipComponents entry macro)
+    |> Array.toList
+
+
+let findShipByName (shipName:string) =
+    // Find a ship by its name, case insensitive.
+    allShips |> List.tryFind (fun ship -> ship.Name =? shipName)
+
 
 // List of all ships that are valid candidates for being generated as abandoned ships.
 let abandonedShipsList =
@@ -22,7 +174,7 @@ let abandonedShipsList =
         "ship_atf_l_destroyer_01_a_macro"; "ship_atf_xl_battleship_01_a_macro"; "ship_ter_l_destroyer_01_a_macro"
     ]
 
-    X4.Data.allShips
+    allShips
     |> List.map (fun ship -> ship.MacroName)
     |> List.filter (
         fun shipName ->
@@ -65,6 +217,86 @@ let economyShips =
         filterBy ["builder"]
         filterBy ["trans"]
     ]
+
+
+
+// Get all the assets, and filter them down to only the classes that are ship
+// equipment we need to generation ship loadouts.
+// Convert the xmln asset to a simplified ShipEquipment type, which gives us easy access
+//  to the name, macro, class, tags, size and component connection.
+let allShipEquipment =
+    // There are some assets that are not valid for loadouts, even if their tags match.
+    let assetsToIgnore = ["weapon_gen_lasertower_01_mk2"; "weapon_gen_lasertower_01_mk1"]
+
+    // Find out all the different unique classes of assests
+    X4.Data.allAssets
+    |> List.filter (fun asset -> ShipEquipmentClasses |> List.contains asset.Class)
+    |> List.filter (fun asset -> not (List.contains asset.Name assetsToIgnore))
+    |> List.map (fun asset ->
+        option {
+            // Find the connection in the assets list of connections that has 'compononent' in its tags.
+            // let! will early return if the result is None here.
+            let! componentConnection =
+                asset.Connections
+                |> Array.tryFind (fun connection ->
+                    tagStringToList connection.Tags
+                    |> List.exists (fun tag -> tag =? "component")
+                )
+
+            let tags = tagStringToList componentConnection.Tags
+                       |> List.filter (fun tag -> not (List.contains tag tagsToIgnore))
+            let size =
+                // one of the tags is the size class, so we try find any of the valid size tags in the tag list.
+                tags
+                |> List.tryFind (
+                    fun tag -> ComponentSizeClasses |> List.exists (fun t -> t =? tag)
+                )
+                |> Option.defaultValue "none" // Default to size_s if not found
+
+            return {
+                Name  = asset.Name
+                MacroName = asset.Name + "_macro"
+                Class = asset.Class
+                Tags  = tags
+                Size  = size
+                ComponentName = componentConnection.Name
+                ComponentConnection = componentConnection
+                Connections = asset.Connections
+            }
+        }
+    )
+    |> List.choose id
+
+let dumpAllShipEquipment() =
+    printfn "\nAll Equipment:"
+    allShipEquipment
+    |> List.iter X4.Data.dumpEquipment
+
+let printShipInfo (ship:ShipInfo) =
+    let formatShipSlot (slot: ShipEquipmentSlot) =
+        sprintf "  %-30s %-10s %-10s %-25s | %s" slot.Name slot.Class slot.Size (Option.defaultValue "" slot.Group) 
+            (slot.Tags |> List.map (fun tag -> tag.Trim()) |> String.concat " ")
+
+    // Print the ship info in a nice format.
+    printfn "\n Ship: %s" ship.Name
+    // ship.Connections
+    // |> Seq.iter (fun connection -> printfn "  Connection %-50s/%-20s / %s" connection.Name (Option.defaultValue "" connection.Group ) connection.Tags) 
+    // printfn " Discovered Equipment Slots:"
+    ship.EquipmentSlots
+    |> Seq.iter (fun slot ->
+        printfn "%s" (formatShipSlot slot)
+    )
+    printfn "  Equipmment Groups"
+    ship.EquipmentSlots
+    |> shipEquipmentGroups
+    |> Seq.iter (fun ((group, slotClass), slots) ->
+        printfn "  Group: %-25s x%d  %s " group slots.Length (formatShipSlot slots[0])
+    )
+
+let dumpShips() =
+    printfn "All Ship Macros:"
+    for ship in allShips do printfn "macro: %s," (ship.MacroName)
+
 
 // given a sector and a list of possible ships, select one of the ships,
 // and assign it coordinates in the given sector.
