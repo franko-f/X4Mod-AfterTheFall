@@ -57,8 +57,8 @@ let tagsToIgnore = set [
     "platformcollision"; "mandatory"; "notupgradeable" 
     ]
 
-let ComponentSizeClasses = set ["small"; "medium"; "large"; "extralarge"] // I really wish there was some kind of consistency when it comes to referring to sizes.
-let ShipEquipmentClasses = [
+let componentSizeClasses = set ["small"; "medium"; "large"; "extralarge"] // I really wish there was some kind of consistency when it comes to referring to sizes.
+let shipEquipmentClasses = [
     // Allow us to filter down all assets to the ship equipment we're interested in.
     // Ship mounted equipment
     "engine"; "shieldgenerator"; "weapon"; "missileturret"; "missilelauncher"; "turret"; 
@@ -66,7 +66,7 @@ let ShipEquipmentClasses = [
     "missile"; "resource_probe"; "satellite"
 ]
 
-let ShipEquipmentConnectionTags = set ["weapon"; "turret"; "shield"; "engine"; "thruster" ]
+let shipEquipmentConnectionTags = set ["weapon"; "turret"; "shield"; "engine"; "thruster" ]
 
 
 // Checks to see if the ship connection is an equipment slot connection,
@@ -81,7 +81,7 @@ let parseConnectionForEquipmentSlot (connection:X4Ships.Connection) =
 
     // find the first tag that matches one of the equipment slot tags. ie, the element, if any,
     // that appears both in the tags set and in the ShipEquipmentConnectionTag set.
-    let equipmentTag = Set.intersect tags ShipEquipmentConnectionTags |> Seq.tryHead
+    let equipmentTag = Set.intersect tags shipEquipmentConnectionTags |> Seq.tryHead
 
     match equipmentTag with
     | None -> None // Not an equipment slot, so return None
@@ -89,7 +89,7 @@ let parseConnectionForEquipmentSlot (connection:X4Ships.Connection) =
         Some {
             Name = connection.Name.Trim();
             Class = tag;
-            Size = Set.intersect tags ComponentSizeClasses |> Seq.tryHead |> Option.defaultValue "unknown"
+            Size = Set.intersect tags componentSizeClasses |> Seq.tryHead |> Option.defaultValue "unknown"
             Group = connection.Group |> Option.map (fun group -> group.Trim());
             Tags = tags;
         }
@@ -239,12 +239,17 @@ let economyShips =
 //  to the name, macro, class, tags, size and component connection.
 let allShipEquipment =
     // There are some assets that are not valid for loadouts, even if their tags match.
-    let assetsToIgnore = ["weapon_gen_lasertower_01_mk2"; "weapon_gen_lasertower_01_mk1"]
+    let assetsToIgnore = [
+        "weapon_gen_lasertower_01_mk2"; "weapon_gen_lasertower_01_mk1"
+        "_xen_"; "_kha_"; "generic_"
+    ]
 
     // Find out all the different unique classes of assests
     X4.Data.allAssets
-    |> List.filter (fun asset -> ShipEquipmentClasses |> List.contains asset.Class)
-    |> List.filter (fun asset -> not (List.contains asset.Name assetsToIgnore))
+    |> List.filter (fun asset -> shipEquipmentClasses |> List.contains asset.Class)
+    |> List.filter (fun asset -> 
+        not (assetsToIgnore 
+             |> List.exists (fun ignore -> asset.Name.Contains ignore) ))
     |> List.map (fun asset ->
         option {
             // Find the connection in the assets list of connections that has 'compononent' in its tags.
@@ -261,7 +266,7 @@ let allShipEquipment =
             let size =
                 // one of the tags is the size class, so we try find any of the valid size tags in the tag list.
                 tags
-                |> Set.intersect ComponentSizeClasses
+                |> Set.intersect componentSizeClasses
                 |> Seq.tryHead
                 |> Option.defaultValue "none"
 
@@ -297,23 +302,37 @@ let findMatchingEquipmentForTags (tags:Set<String>) =
     // Now filter through all of the ship equipment, finding those that have the oneOfTags,
     // and also match on all the rest of the tags.
     allShipEquipment
-    // Does this item have any of the valid 'one of' tags for this slot?
-    |> List.filter (fun equipment -> not (Set.isEmpty (Set.intersect equipment.Tags validOneOfTags)))
-    // Do the rest of the tags match exactly?
     |> List.filter (fun equipment ->
-        // First, strip out the 'one of' tags: We're done with those.
-        let equipmentTags = Set.difference equipment.Tags shipEquipmentOneOfTags
-        let slotTags = Set.difference tags shipEquipmentOneOfTags
+        // so, the match is complicated with a bunch of possilibites.
+        // First: the 'validOneOf' tags: If neither slot, nor item have any of these
+        // then it's fine.
+        // if EITHER of them have any, we need to check for matches.
+        let eAny = Set.intersect equipment.Tags validOneOfTags
+        let sAny = Set.intersect tags validOneOfTags
 
-        // Now just check if both sets of remaining tags are a one-to-one match.
-        equipmentTags = slotTags
+        if Set.isEmpty eAny && Set.isEmpty sAny then
+            // If neither have any of the 'one of' tags, then just check for exact matches
+            equipment.Tags = tags
+        elif not (Set.isEmpty eAny) && not (Set.isEmpty sAny) && (eAny.IsSubsetOf sAny) then
+            // If the equipment tags has a subset of the slot 'any of' tags 
+            // e.g, equipment is 'mining', slot is ['mining'; 'combat'],
+            // then we check to see if the remaining tags match.
+            let eRemainingTags = Set.difference equipment.Tags shipEquipmentOneOfTags
+            let sRemainingTags = Set.difference tags shipEquipmentOneOfTags
+            sRemainingTags = eRemainingTags
+        else
+            // If we reach here, it means one of them has 'one of' tags and the other doesn't.
+            //This means that it's not a match.
+            false
     )
 
+let findMatchingEquipmentForSlot (slot: ShipEquipmentSlot) =
+    findMatchingEquipmentForTags slot.Tags
 
 let dumpAllShipEquipment() =
     printfn "\nAll Equipment:"
     allShipEquipment
-    |> List.iter X4.Data.dumpEquipment
+    |> List.iter (X4.Data.dumpEquipment "")
 
 let printShipInfo (ship:ShipInfo) =
     let formatShipSlot (slot: ShipEquipmentSlot) =
@@ -328,6 +347,10 @@ let printShipInfo (ship:ShipInfo) =
     ship.EquipmentSlots
     |> Seq.iter (fun slot ->
         printfn "%s" (formatShipSlot slot)
+        // Now find, and print out valid equipment for this slot.
+        slot
+        |> findMatchingEquipmentForSlot
+        |> List.iter (X4.Data.dumpEquipment "    - ")
     )
     printfn "  Equipmment Groups"
     ship.EquipmentSlots

@@ -658,24 +658,21 @@ let allAssetClasses =
     |> List.sort
 
 
-// Find an asset by its class and tags. The tags are a space separated string of tags.
-// Every one of the tags in searchTags must be present in the asset's tags for a match.
-// An asset has multiple connections, each with a set of tags. We just need a match in one of them.
-let findMatchingAsset (assetClass:string) (searchTags:Set<String>) (assets:list<EquipmentInfo>) =
-    let TODO_how_do_we_make__sure_we_dont_use_mining_assets_on_combat_ships = true
+// Find any asset that includes the specified search tags.
+// Useful for debugging rather than assigning equipment, as it ignores
+// the subtleties relating to matching equipmenmt to slots.
+let findMatchingAsset (searchTags:Set<String>) (assets:list<EquipmentInfo>) =
     // Find an asset by its name, case insensitive.
     assets 
-        |> List.filter (fun asset -> asset.Class =? assetClass)
         // Filter down to only those that match the tags.
         |> List.filter (fun asset ->
             // Check if any of the connections have the tags we're looking for.
             searchTags.IsSubsetOf asset.Tags
         )   
 
-let dumpEquipment(asset: EquipmentInfo) =
+let dumpEquipment (prefix:string) (asset: EquipmentInfo) =
     let tags = asset.Tags |> Set.toList |> List.map (fun tag -> tag.Trim()) |> String.concat " "
-    printfn "%45s %-15s %-10s %-22s | %s" asset.Name asset.Class asset.Size asset.ComponentName tags
-
+    printfn "%s%45s %-15s %-10s %-22s | %s" prefix asset.Name asset.Class asset.Size asset.ComponentName tags
 
 let dump_sectors (sectors:X4Sector.Macro list) =
     for sector in sectors do

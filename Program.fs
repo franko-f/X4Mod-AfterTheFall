@@ -5,25 +5,19 @@ X4.Ships.dumpAllShipEquipment() |> ignore
 
 printfn "\nFind Asset Tests:"
 X4.Ships.allShipEquipment
-    |> X4.Data.findMatchingAsset "turret" (set ["boron"; "large"])
-    |> List.map (fun asset ->dumpEquipment asset)
+    |> X4.Data.findMatchingAsset (set ["turret" ; "boron"; "large"])
+    |> List.map (fun asset -> dumpEquipment "" asset)
     |> ignore
 
 X4.Ships.allShipEquipment
-    |> X4.Data.findMatchingAsset "turret" (set ["standard"; "large"])
-    |> List.map (fun asset ->dumpEquipment asset)
+    |> X4.Data.findMatchingAsset (set ["shield"; "boron";])
+    |> List.map (fun asset -> dumpEquipment "" asset)
     |> ignore
 
 X4.Ships.allShipEquipment
-    |> X4.Data.findMatchingAsset "weapon" (set ["small"])
-    |> List.map (fun asset ->dumpEquipment asset)
+    |> X4.Data.findMatchingAsset (set ["shield"; "engine";])
+    |> List.map (fun asset -> dumpEquipment "" asset)
     |> ignore
-
-X4.Ships.allShipEquipment
-    |> X4.Data.findMatchingAsset "missile" (set ["small"])
-    |> List.map (fun asset ->dumpEquipment asset)
-    |> ignore
-
 
 X4.Ships.findShipByName "ship_bor_l_destroyer_01"    |> Option.iter (fun s -> X4.Ships.printShipInfo s)
 X4.Ships.findShipByName "ship_bor_l_miner_solid_01"  |> Option.iter (fun s -> X4.Ships.printShipInfo s)
@@ -36,6 +30,7 @@ X4.Ships.findShipByName "ship_arg_l_destroyer_01"    |> Option.iter (fun s -> X4
 X4.Ships.findShipByName "ship_ter_s_fighter_01"      |> Option.iter (fun s -> X4.Ships.printShipInfo s)
 X4.Ships.findShipByName "ship_ter_s_fighter_03"      |> Option.iter (fun s -> X4.Ships.printShipInfo s)
 X4.Ships.findShipByName "ship_ter_s_heavyfighter_01" |> Option.iter (fun s -> X4.Ships.printShipInfo s)
+X4.Ships.findShipByName "ship_ter_s_fighter_04"      |> Option.iter (fun s -> X4.Ships.printShipInfo s)
 X4.Ships.findShipByName "ship_bor_s_heavyfighter_01" |> Option.iter (fun s -> X4.Ships.printShipInfo s)
 
 // X4.Data.dumpShips()
