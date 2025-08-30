@@ -5,22 +5,22 @@ X4.Ships.dumpAllShipEquipment() |> ignore
 
 printfn "\nFind Asset Tests:"
 X4.Ships.allShipEquipment
-    |> X4.Data.findMatchingAsset "turret" ["boron"; "large"]
+    |> X4.Data.findMatchingAsset "turret" (set ["boron"; "large"])
     |> List.map (fun asset ->dumpEquipment asset)
     |> ignore
 
 X4.Ships.allShipEquipment
-    |> X4.Data.findMatchingAsset "turret" ["standard"; "large"]
+    |> X4.Data.findMatchingAsset "turret" (set ["standard"; "large"])
     |> List.map (fun asset ->dumpEquipment asset)
     |> ignore
 
 X4.Ships.allShipEquipment
-    |> X4.Data.findMatchingAsset "weapon" ["small"]
+    |> X4.Data.findMatchingAsset "weapon" (set ["small"])
     |> List.map (fun asset ->dumpEquipment asset)
     |> ignore
 
 X4.Ships.allShipEquipment
-    |> X4.Data.findMatchingAsset "missile" ["small"]
+    |> X4.Data.findMatchingAsset "missile" (set ["small"])
     |> List.map (fun asset ->dumpEquipment asset)
     |> ignore
 

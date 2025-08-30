@@ -16,18 +16,6 @@ open System.Xml.Linq
 let rand = new Random(12345)    // Seed the random number generator so we get the same results each time as long as were not changing code.
 
 let ContentDirectories   = [""; "ego_dlc_split"; "ego_dlc_terran"; "ego_dlc_pirate"; "ego_dlc_boron"; "ego_dlc_timelines"]
-let ShipSizeClasses      = ["ship_s"; "ship_m"; "ship_l"; "ship_xl"]
-let ShipSizeDirectories  = ["size_s"; "size_m"; "size_l"; "size_xl"]  // Oddly, the ship size directory names are not the same as the ship size classes.
-let ComponentSizeClasses = ["small"; "medium"; "large"; "extralarge"] // I really wish there was some kind of consistency when it comes to referring to sizes.
-let ShipEquipmentClasses = [
-    // Allow us to filter down all assets to the ship equipment we're interested in.
-    // Ship mounted equipment
-    "engine"; "shieldgenerator"; "weapon"; "missileturret"; "missilelauncher"; "turret"; 
-    // Ship deployables.
-    "missile"; "resource_probe"; "satellite"
-]
-
-let ShipEquipmentConnectionTag  = ["weapon"; "turret"; "shield"; "engine"; "thruster" ]
 
 [<Literal>]
 let X4UnpackedDataFolder = __SOURCE_DIRECTORY__ + "/X4_unpacked_data"
@@ -133,7 +121,7 @@ type EquipmentInfo = {
     MacroName: String  // Same as name with _macro suffix
     Class: String
     Size: String
-    Tags: String List
+    Tags: String Set
     ComponentName: String
     ComponentConnection: X4Equipment.Connection
     Connections: X4Equipment.Connection array
@@ -670,25 +658,10 @@ let allAssetClasses =
     |> List.sort
 
 
-
-// Tags in X4 are given as a single string with a list of space separated words.
-// If all the tags in searchTags are present in targetTags, then we have a match,
-// regardless of order, and even if targetTags has more tags than searchTags.
-let compareTagStrings (searchTags:String) (targetTags:String) =
-    // Split the tags by space, and then check if all searchTags are in targetTags.
-    let searchTagList = tagStringToList searchTags
-    let targetTagList = tagStringToList targetTags
-    searchTagList |> List.forall (fun tag -> targetTagList |> List.exists (fun t -> t =? tag))
-
-let compareTags (searchTags:list<String>) (targetTags:list<String>) =
-    // Split the tags by space, and then check if all searchTags are in targetTags.
-    searchTags |> List.forall (fun tag -> targetTags |> List.exists (fun t -> t =? tag))
-
-
 // Find an asset by its class and tags. The tags are a space separated string of tags.
 // Every one of the tags in searchTags must be present in the asset's tags for a match.
 // An asset has multiple connections, each with a set of tags. We just need a match in one of them.
-let findMatchingAsset (assetClass:string) searchTags (assets:list<EquipmentInfo>) =
+let findMatchingAsset (assetClass:string) (searchTags:Set<String>) (assets:list<EquipmentInfo>) =
     let TODO_how_do_we_make__sure_we_dont_use_mining_assets_on_combat_ships = true
     // Find an asset by its name, case insensitive.
     assets 
@@ -696,11 +669,12 @@ let findMatchingAsset (assetClass:string) searchTags (assets:list<EquipmentInfo>
         // Filter down to only those that match the tags.
         |> List.filter (fun asset ->
             // Check if any of the connections have the tags we're looking for.
-            compareTags searchTags asset.Tags
-        )
+            searchTags.IsSubsetOf asset.Tags
+        )   
 
 let dumpEquipment(asset: EquipmentInfo) =
-    printfn "%45s %-15s %-10s %-20s %A" asset.Name asset.Class asset.Size asset.ComponentName asset.Tags
+    let tags = asset.Tags |> Set.toList |> List.map (fun tag -> tag.Trim()) |> String.concat " "
+    printfn "%45s %-15s %-10s %-22s | %s" asset.Name asset.Class asset.Size asset.ComponentName tags
 
 
 let dump_sectors (sectors:X4Sector.Macro list) =

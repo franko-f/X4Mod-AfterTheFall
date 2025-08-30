@@ -61,9 +61,13 @@ let parseStringList (input: string) : string list =
 let either a b check = match check with true -> a | false -> b
 
 
+// Convert a space separated string of tags into a list of tags.
 let tagStringToList (tags:String) =
-    // Convert a space separated string of tags into a list of tags.
     System.Text.RegularExpressions.Regex.Split(tags.Trim(), @"\s+") |> List.ofArray
+
+// Convert a space separated string of tags into a set of tags.
+let tagStringToSet (tags:String) =
+    tags |> tagStringToList |> Set.ofList
 
 // Really useful computation expression build for options (credit somewhere online.)
 // allows us to write cleaner and easier to understand code filled with option types
