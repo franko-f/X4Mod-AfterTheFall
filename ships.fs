@@ -118,7 +118,7 @@ let LoadShipComponents (entry:Index) (macro:X4ShipsMacro.Macros) =
             with
             | _ex -> "unknown"
 
-        printfn "Loaded ship: %-35s %-35s from %s" name macro.Macro.Component.Ref componentFilename
+        // printfn "Loaded ship: %-35s %-35s from %s" name macro.Macro.Component.Ref componentFilename
 
         Some {
             Name = name;
@@ -173,64 +173,6 @@ let allShips =
 let findShipByName (shipName:string) =
     // Find a ship by its name, case insensitive.
     allShips |> List.tryFind (fun ship -> ship.Name =? shipName)
-
-
-
-// List of all ships that are valid candidates for being generated as abandoned ships.
-let abandonedShipsList =
-    // Our filters. Factions we'll look for, and tags we'll omit. Both must be true.
-    let factions = [ "_arg_"; "_par_"; "_tel_"; "_spl_"; "_ter_"; "_atf_"; "_yak_"; "_pir_"; ]  // Removed boron '_bor_', as they're spawning without engins
-    let omit = [
-        "_xs_"; "_plot_"; "_landmark_"; "_story"; "_highcapacity_";
-        "ship_spl_xl_battleship_01_a_macro"; "ship_pir_xl_battleship_01_a_macro"; // specific ships that seems unsupported or don't exist in game
-        // Some terran destroyers that are spawning without main guns.
-        "ship_atf_l_destroyer_01_a_macro"; "ship_atf_xl_battleship_01_a_macro"; "ship_ter_l_destroyer_01_a_macro"
-    ]
-
-    allShips
-    |> List.map (fun ship -> ship.MacroName)
-    |> List.filter (
-        fun shipName ->
-            ( factions |> List.exists (fun tag -> shipName.Contains tag) )        // Must contain one of the factions we're interested in.
-            && (not ( omit |> List.exists (fun tag -> shipName.Contains tag) )))  // Must not contain any of the tags we're not interested in from the omit list.
-
-
-// Quickly filter by a search string substring. eg, 'bor' will return all the Boron ships by filtering for '_bor_'.
-let rec filterListBy (searchTags:string list) (ships:string list) =
-    match searchTags with
-    | [] -> ships
-    | H::T ->
-        ships
-        |> List.filter (fun x -> x.Contains("_" + H.ToLower() + "_"))
-        |> filterListBy T
-
-// Filter the abandoned ships list by a list of search tags. eg, ['bor', 's'] will return all Boron small ships.
-// ['tel', 'xl', 'carrier'] will return all Teladi extra large carriers.
-let filterBy (search:string list) =
-    filterListBy search abandonedShipsList
-
-let militaryShips =
-    List.concat [
-        filterBy ["corvette"]
-        filterBy ["gunboat"]
-        filterBy ["frigate"]
-        filterBy ["destroyer"]
-        filterBy ["battleship"]
-        filterBy ["carrier"]
-        filterBy ["resupplier"]
-        filterBy ["fighter"]
-        filterBy ["heavyfighter"]
-        filterBy ["bomber"]
-        filterBy ["scout"]
-    ]
-
-let economyShips =
-    List.concat [
-        filterBy ["miner"]
-        filterBy ["builder"]
-        filterBy ["trans"]
-    ]
-
 
 
 // Get all the assets, and filter them down to only the classes that are ship
@@ -362,6 +304,62 @@ let printShipInfo (ship:ShipInfo) =
 let dumpShips() =
     printfn "All Ship Macros:"
     for ship in allShips do printfn "macro: %s," (ship.MacroName)
+
+
+// List of all ships that are valid candidates for being generated as abandoned ships.
+let abandonedShipsList =
+    // Our filters. Factions we'll look for, and tags we'll omit. Both must be true.
+    let factions = [ "_arg_"; "_par_"; "_tel_"; "_spl_"; "_ter_"; "_atf_"; "_yak_"; "_pir_"; ]  // Removed boron '_bor_', as they're spawning without engins
+    let omit = [
+        "_xs_"; "_plot_"; "_landmark_"; "_story"; "_highcapacity_";
+        "ship_spl_xl_battleship_01_a_macro"; "ship_pir_xl_battleship_01_a_macro"; // specific ships that seems unsupported or don't exist in game
+        // Some terran destroyers that are spawning without main guns.
+        "ship_atf_l_destroyer_01_a_macro"; "ship_atf_xl_battleship_01_a_macro"; "ship_ter_l_destroyer_01_a_macro"
+    ]
+
+    allShips
+    |> List.map (fun ship -> ship.MacroName)
+    |> List.filter (
+        fun shipName ->
+            ( factions |> List.exists (fun tag -> shipName.Contains tag) )        // Must contain one of the factions we're interested in.
+            && (not ( omit |> List.exists (fun tag -> shipName.Contains tag) )))  // Must not contain any of the tags we're not interested in from the omit list.
+
+
+// Quickly filter by a search string substring. eg, 'bor' will return all the Boron ships by filtering for '_bor_'.
+let rec filterListBy (searchTags:string list) (ships:string list) =
+    match searchTags with
+    | [] -> ships
+    | H::T ->
+        ships
+        |> List.filter (fun x -> x.Contains("_" + H.ToLower() + "_"))
+        |> filterListBy T
+
+// Filter the abandoned ships list by a list of search tags. eg, ['bor', 's'] will return all Boron small ships.
+// ['tel', 'xl', 'carrier'] will return all Teladi extra large carriers.
+let filterBy (search:string list) =
+    filterListBy search abandonedShipsList
+
+let militaryShips =
+    List.concat [
+        filterBy ["corvette"]
+        filterBy ["gunboat"]
+        filterBy ["frigate"]
+        filterBy ["destroyer"]
+        filterBy ["battleship"]
+        filterBy ["carrier"]
+        filterBy ["resupplier"]
+        filterBy ["fighter"]
+        filterBy ["heavyfighter"]
+        filterBy ["bomber"]
+        filterBy ["scout"]
+    ]
+
+let economyShips =
+    List.concat [
+        filterBy ["miner"]
+        filterBy ["builder"]
+        filterBy ["trans"]
+    ]
 
 
 // given a sector and a list of possible ships, select one of the ships,

@@ -621,28 +621,65 @@ let getDlcXmlFiles dataDir =
 // Get all the assets defined in the core game and the DLCs. This includes
 // equipment for ships, as well as miscellaneous assets like wares, adsigns, etc
 let allAssets =
-    getDlcXmlFiles X4EquipmentDirectory
+
+    // For ship equipment, it's not enough to look at the AllComponentMacros.
+    // This is because the component file doesn't contain all items. Instead, the index macro
+    // defines all items, and them points to a reference in the component file that might be shared.
+    // eg: Boron small shields. Index contains all shield entries, but each points to the same shared
+    // component entry of
+    // <entry name="shield_bor_s_standard_01" value="extensions\ego_dlc_boron\assets\props\surfaceelements\shield_bor_s_standard_01" />
+
+    // So, for each entry in the index file, filter down to just those that refer
+    // to files in the X4EquipmentDirectory. These entries point to a specific component
+    // file, which we need to load and parse.
+    // In the macro file, we'll need to find the reference to the component
+    // We use this component reference to look up the actual component file in the component index.
+    AllIndexMacros
+    |> Array.filter( fun index -> index.File.ToLower().Contains("/assets/") )
+    |> Array.map ( fun index ->
+        printfn "Loading equipment: %s" index.File
+        // Load the referenced file.
+        let fileName = X4UnpackedDataFolder + "/" + index.File.Replace("\\", "/")
+        if File.Exists fileName then
+            Some (index, X4ShipsMacro.Load fileName)
+        else
+            printfn "Warning: Component file %s not found." fileName
+            None
+    )
+    |> Array.choose id
     |> Array.toList
-    |> List.filter (fun x -> not (x.EndsWith("_macro.xml"))) // Ignore macro files, as they are not the definition we're looking for.
-    |> List.map (fun x ->
+    |> List.map ( fun (index, macro) ->
+        option {
+            // We have the macro loaded, so now find the component the macro references,
+            // and look it up in the components index, and THEN finally load that component.
+            let! componentEntry = AllComponentMacros |> Array.tryFind (fun componentEntry -> componentEntry.Name =? macro.Macro.Component.Ref) 
+            let componentFilename = X4UnpackedDataFolder + "/" + componentEntry.File.Replace("\\", "/")
+            printfn "Found component %s -> %s" componentEntry.Name componentFilename
+            return componentEntry.Name, componentFilename
+        }
+
+    )
+    |> List.choose id
+    |> List.map (fun (name, componentFilename) ->
         try
             // Now parse the file using the X4Equipment type.
-            let parsed = X4Equipment.Load(x)
-            // Sometimes the Component.Class may have an extra space at the end, so trim it.
-            parsed.Component.XElement.SetAttributeValue("name", parsed.Component.Name.Trim()) // Ensure the name is set correctly in the XElement.
+            let parsed = X4Equipment.Load(componentFilename)
+            // Ensure the name is set correctly in the XElement. Should be index, not component name
+            parsed.Component.XElement.SetAttributeValue("name", name)
             // printfn "Loaded equipment: %-35s %-20s from %s" parsed.Component.Name parsed.Component.Class x
-            [parsed.Component]
+            Some parsed.Component
         with
         | ex ->
-            printfn $"\nError loading equipment: {x}: {ex.Message}"
+            printfn $"\nError loading equipment: {componentFilename}: {ex.Message}"
             // try find root of parse error:
-            let raw = System.Xml.Linq.XDocument.Load(x)
+            let raw = System.Xml.Linq.XDocument.Load(componentFilename)
             printfn "Children of <components>:"
             raw.Root.Elements() |> Seq.iter (fun e -> printfn "- %s" e.Name.LocalName)
             printfn "End of children.\n"
-            []
+            None
     )
-    |> List.collect ( fun x -> x) // Flatten the array of options to a single list, ignoring None values.
+    |> List.choose id
+
 
 let allAssetsByClass =
     // Group all the assets by their class, so we can easily find them later.

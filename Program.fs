@@ -32,6 +32,8 @@ X4.Ships.findShipByName "ship_ter_s_fighter_03"      |> Option.iter (fun s -> X4
 X4.Ships.findShipByName "ship_ter_s_heavyfighter_01" |> Option.iter (fun s -> X4.Ships.printShipInfo s)
 X4.Ships.findShipByName "ship_ter_s_fighter_04"      |> Option.iter (fun s -> X4.Ships.printShipInfo s)
 X4.Ships.findShipByName "ship_bor_s_heavyfighter_01" |> Option.iter (fun s -> X4.Ships.printShipInfo s)
+X4.Ships.findShipByName "ship_bor_m_corvette_01"     |> Option.iter (fun s -> X4.Ships.printShipInfo s)
+
 
 // X4.Data.dumpShips()
 
