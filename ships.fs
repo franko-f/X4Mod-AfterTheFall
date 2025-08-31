@@ -185,6 +185,7 @@ let allShipEquipment =
     // There are some assets that are not valid for loadouts, even if their tags match.
     let assetsToIgnore = [
         "weapon_gen_lasertower_01_mk2"; "weapon_gen_lasertower_01_mk1"
+        "shield_arg_s_combattutorial_01_mk1";
         "_xen_"; "_kha_"; "generic_"
     ]
 

@@ -635,7 +635,7 @@ let allAssets =
     // In the macro file, we'll need to find the reference to the component
     // We use this component reference to look up the actual component file in the component index.
     AllIndexMacros
-    |> Array.filter( fun index -> index.File.ToLower().Contains("/assets/") )
+    |> Array.filter( fun index -> index.File.ToLower().Contains("assets/") )
     |> Array.map ( fun index ->
         printfn "Loading equipment: %s" index.File
         // Load the referenced file.
