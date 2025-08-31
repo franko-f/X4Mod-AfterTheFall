@@ -52,9 +52,11 @@ let shipEquipmentGroups (allSlots: ShipEquipmentSlot list) =
 
 // Some tags are not relevant for selection/slot match
 let tagsToIgnore = set [ 
-    "hittable"; "unhittable"; "component"; "symmetry"; 
+    "component"; "symmetry"; 
     "symmetry_1"; "symmetry_2"; "symmetry_right"; "symmetry_left"; 
-    "platformcollision"; "mandatory"; "notupgradeable" 
+    "platformcollision"; "mandatory"; "notupgradeable"
+    // the following are important after all
+    // "hittable"; "unhittable"; 
     ]
 
 let componentSizeClasses = set ["small"; "medium"; "large"; "extralarge"] // I really wish there was some kind of consistency when it comes to referring to sizes.

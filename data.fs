@@ -655,7 +655,7 @@ let allAssets =
             let! componentEntry = AllComponentMacros |> Array.tryFind (fun componentEntry -> componentEntry.Name =? macro.Macro.Component.Ref) 
             let componentFilename = X4UnpackedDataFolder + "/" + componentEntry.File.Replace("\\", "/")
             printfn "Found component %s -> %s" componentEntry.Name componentFilename
-            return componentEntry.Name, componentFilename
+            return macro.Macro.Name, componentFilename
         }
 
     )
@@ -665,7 +665,7 @@ let allAssets =
             // Now parse the file using the X4Equipment type.
             let parsed = X4Equipment.Load(componentFilename)
             // Ensure the name is set correctly in the XElement. Should be index, not component name
-            parsed.Component.XElement.SetAttributeValue("name", name)
+            parsed.Component.XElement.SetAttributeValue("name", name.Trim())
             // printfn "Loaded equipment: %-35s %-20s from %s" parsed.Component.Name parsed.Component.Class x
             Some parsed.Component
         with

@@ -24,6 +24,7 @@ X4.Ships.findShipByName "ship_bor_l_miner_solid_01"  |> Option.iter (fun s -> X4
 X4.Ships.findShipByName "ship_bor_m_miner_solid_01"  |> Option.iter (fun s -> X4.Ships.printShipInfo s)
 X4.Ships.findShipByName "ship_tel_l_miner_solid_01"  |> Option.iter (fun s -> X4.Ships.printShipInfo s)
 X4.Ships.findShipByName "ship_tel_m_miner_solid_01"  |> Option.iter (fun s -> X4.Ships.printShipInfo s)
+X4.Ships.findShipByName "ship_ter_m_corvette_01"     |> Option.iter (fun s -> X4.Ships.printShipInfo s)
 X4.Ships.findShipByName "ship_atf_l_destroyer_01"    |> Option.iter (fun s -> X4.Ships.printShipInfo s)
 X4.Ships.findShipByName "ship_atf_xl_battleship_01"  |> Option.iter (fun s -> X4.Ships.printShipInfo s)
 X4.Ships.findShipByName "ship_arg_l_destroyer_01"    |> Option.iter (fun s -> X4.Ships.printShipInfo s)
