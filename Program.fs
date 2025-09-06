@@ -38,8 +38,6 @@ X4.Ships.findShipByName "ship_bor_m_corvette_01"     |> Option.iter (fun s -> X4
 
 // X4.Data.dumpShips()
 
-exit 0
-
 // Now actually generate the files in the mod directory by spitting out XML or copying
 // our templates.
 X4.WriteModfiles.copy_templates_to_mod()

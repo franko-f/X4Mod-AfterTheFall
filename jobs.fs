@@ -15,7 +15,7 @@ open X4.Data
 open X4.Utilities
 
 
-let X4JobFileCore = X4UnpackedDataFolder + "/core/libraries/jobs.xml"
+let X4JobFileCore = X4UnpackedDataFolder + "/libraries/jobs.xml"
 let X4JobFileTerran = X4UnpackedDataFolder + "/extensions/ego_dlc_terran/libraries/jobs.xml"
 let X4JobFilePirate = X4UnpackedDataFolder + "/extensions/ego_dlc_pirate/libraries/jobs.xml"
 [<Literal>] // split will be the template for normal job files, as the core game file doesn't use some tags (eg, 'preferbuilding')
