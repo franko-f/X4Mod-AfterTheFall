@@ -79,3 +79,17 @@ type OptionBuilder() =
     member _.Return(value) = Some value
 
 let option = OptionBuilder()
+
+
+// Quick function to return a generator that produces unique IDs.
+// Use like this:
+// let getId = makeIdGenerator()
+// let id1 = getId()
+// let id2 = getId()
+// Useful for things like ship loadout creation where some ships need to
+// have a unique loadout generate for it, and needs a unique reference.
+let makeIdGenerator () =
+    let counter = ref 0
+    fun () ->
+        counter.Value <- counter.Value + 1
+        counter.Value

@@ -395,7 +395,7 @@ let generateRandomEconomyAbandonedShips (count:int) (size:string) =
 // This function generates a bunch of abandoned ships near each other, as if a major battle occurred.
 // The parameters determine how many of each class are in the field. Ships are clustered within 5km of a point
 // in a random unsafe sector.
-let generateBattlefield (countXL:int) countL countM countS =
+let generateBattlefield (countXL:int) (countL:int) (countM:int) (countS:int) =
     printfn "GENERATING BATTLEFIELD: XL: %i, L: %i, M: %i, S: %i" countXL countL countM countS
     // First generate the ships for each class.
     let xl, l, m, s =
@@ -416,12 +416,24 @@ let generateBattlefield (countXL:int) countL countM countS =
         [ for (ship, _sector, _, rotation) in s  -> (ship, sector, (x + rand.Next(-5, 5), y + rand.Next(-5, 5), z + rand.Next(-5, 5)) , rotation) ]
    ]
 
+
+// Some ships have custom loadouts, so we need a unique ID for them. Used by ProcessShip.
+let loadoutUniqueId = makeIdGenerator()
+
+let MaybeCustomLoadout ship = None, ""
+    // TODO: ProcessShip needs more data as to ship size/faction, so that we can
+    // check if it's a boron ship, or a terran military L or XL to generate a
+    // unique loadout.
+    // let id = loadoutUniqueId()
+    // sprintf "<loadout id=\"%i\">...</loadout>" id
+
 // Generate the XML diff for placing an abandoned ship in the game based
 // on the ship, sector, position and rotation given as parameters.
 let ProcessShip ((ship, sector, (x, y, z), (yaw, pitch, roll)):ShipLocation) =
     // Interestingly, the units of KM and deg are specified in the XML attribute fields for abandoned ships.
     // I've not seen this elsewhere, and don't know if it's necessary, but for safety I'll duplicate it.
     printfn "GENERATING ABANDONED SHIP: %s, Sector: %s, Position: %A, Rotation: %A" ship sector (x, y, z) (yaw, pitch, roll)
+    let loadout, loadoutReference = MaybeCustomLoadout ship
     let xml = $"""
     <add sel="/mdscript[@name='PlacedObjects']/cues/cue[@name='Place_Claimable_Ships']/actions">
         <find_sector name="$sector" macro="macro.{sector}"/>
@@ -430,13 +442,14 @@ let ProcessShip ((ship, sector, (x, y, z), (yaw, pitch, roll)):ShipLocation) =
             <owner exact="faction.ownerless"/>
             <position x="{x}km" y="{y}km" z="{z}km"/>
             <rotation yaw="{yaw}deg" pitch="{pitch}deg" roll="{roll}deg"/>
+            {loadoutReference}
           </create_ship>
         </do_if>
     </add>
     """
     // Using the textreader instead of XElement.Parse preserves whitespace and carriage returns in our output.
     let xtr = new XmlTextReader(new System.IO.StringReader(xml));
-    XElement.Load(xtr);
+    loadout, XElement.Load xtr;
 
 // Create a list of random ships, assign them to random sectors, then generate XML that will place
 // them as abandoned ships in the game.
@@ -444,47 +457,50 @@ let ProcessShip ((ship, sector, (x, y, z), (yaw, pitch, roll)):ShipLocation) =
 // We lean slighly towards generated economy ships vs military, though there's plenty of both.
 // there should be, on average, one or two ships per sector.
 let generate_abandoned_ships_file (filename:string) =
-    let shipDiff =  List.concat [
-        // A bunch of ships in unsafe space to being
-        generateRandomMilitaryAbandonedShips 4 "xl" |> List.map ProcessShip
-        generateRandomMilitaryAbandonedShips 6 "l"  |> List.map ProcessShip
-        generateRandomMilitaryAbandonedShips 6 "m"  |> List.map ProcessShip
-        generateRandomMilitaryAbandonedShips 6 "s"  |> List.map ProcessShip
-        generateRandomEconomyAbandonedShips 3  "xl" |> List.map ProcessShip
-        generateRandomEconomyAbandonedShips 12 "l"  |> List.map ProcessShip
-        generateRandomEconomyAbandonedShips 8 "m"   |> List.map ProcessShip
-        generateRandomEconomyAbandonedShips 6 "s"   |> List.map ProcessShip
-        [filterBy ["spl"; "xl"; "carrier"]    |> generateRandomAbandonedShipFromList |> ProcessShip]      // Make sure there's at least one Raptor!
-        // Until we figure out how to generate these with faction specific equipment, we'll leave them out. Currently, they're spawning without main batteries.
-        //[filterBy ["atf"; "xl"; "battleship"] |> generateRandomAbandonedShipFromList |> ProcessShip]   // And Asgard!
-        //[filterBy ["atf"; "l"; "destroyer"]   |> generateRandomAbandonedShipFromList |> ProcessShip]     // And Syn.
-
-        // Lets generate a few battlefields of varying sizes
-        generateBattlefield 1 3 2 2 |> List.map ProcessShip
-        generateBattlefield 0 3 4 0 |> List.map ProcessShip
-        generateBattlefield 0 1 4 5 |> List.map ProcessShip
-        generateBattlefield 0 0 4 8 |> List.map ProcessShip
-        generateBattlefield 0 0 8 2 |> List.map ProcessShip
-
-
-        // followed by a bunch of M & S in safe space.
+    let loadouts, shipDiff = 
         [
-            for i in 1..6 ->
-                militaryShips |> filterListBy ["m"] |> (generateRandomAbandonedShipFromListInSector (X4.Data.selectRandomSafeSector().Name)) |> ProcessShip
-            for i in 1..8 ->
-                economyShips  |> filterListBy ["m"] |> (generateRandomAbandonedShipFromListInSector (X4.Data.selectRandomSafeSector().Name)) |> ProcessShip
-            for i in 1..8 ->
-                militaryShips |> filterListBy ["s"] |> (generateRandomAbandonedShipFromListInSector (X4.Data.selectRandomSafeSector().Name)) |> ProcessShip
-            for i in 1..10 ->
-                economyShips  |> filterListBy ["s"] |> (generateRandomAbandonedShipFromListInSector (X4.Data.selectRandomSafeSector().Name)) |> ProcessShip
+            // A bunch of ships in unsafe space to being
+            generateRandomMilitaryAbandonedShips 4 "xl" |> List.map ProcessShip
+            generateRandomMilitaryAbandonedShips 6 "l"  |> List.map ProcessShip
+            generateRandomMilitaryAbandonedShips 6 "m"  |> List.map ProcessShip
+            generateRandomMilitaryAbandonedShips 6 "s"  |> List.map ProcessShip
+            generateRandomEconomyAbandonedShips 3  "xl" |> List.map ProcessShip
+            generateRandomEconomyAbandonedShips 12 "l"  |> List.map ProcessShip
+            generateRandomEconomyAbandonedShips 8 "m"   |> List.map ProcessShip
+            generateRandomEconomyAbandonedShips 6 "s"   |> List.map ProcessShip
+            [filterBy ["spl"; "xl"; "carrier"]    |> generateRandomAbandonedShipFromList |> ProcessShip]      // Make sure there's at least one Raptor!
+            // Until we figure out how to generate these with faction specific equipment, we'll leave them out. Currently, they're spawning without main batteries.
+            //[filterBy ["atf"; "xl"; "battleship"] |> generateRandomAbandonedShipFromList |> ProcessShip]   // And Asgard!
+            //[filterBy ["atf"; "l"; "destroyer"]   |> generateRandomAbandonedShipFromList |> ProcessShip]     // And Syn.
 
-            // ok, a couple large l economy ship.
-            for i in 1..2 ->
-                economyShips  |> filterListBy ["l"] |> (generateRandomAbandonedShipFromListInSector (X4.Data.selectRandomSafeSector().Name)) |> ProcessShip
+            // Lets generate a few battlefields of varying sizes
+            generateBattlefield 1 3 2 2 |> List.map ProcessShip
+            generateBattlefield 0 3 4 0 |> List.map ProcessShip
+            generateBattlefield 0 1 4 5 |> List.map ProcessShip
+            generateBattlefield 0 0 4 8 |> List.map ProcessShip
+            generateBattlefield 0 0 8 2 |> List.map ProcessShip
 
-        ]
 
-    ]
+            // followed by a bunch of M & S in safe space.
+            [
+                for i in 1..6 ->
+                    militaryShips |> filterListBy ["m"] |> (generateRandomAbandonedShipFromListInSector (X4.Data.selectRandomSafeSector().Name)) |> ProcessShip
+                for i in 1..8 ->
+                    economyShips  |> filterListBy ["m"] |> (generateRandomAbandonedShipFromListInSector (X4.Data.selectRandomSafeSector().Name)) |> ProcessShip
+                for i in 1..8 ->
+                    militaryShips |> filterListBy ["s"] |> (generateRandomAbandonedShipFromListInSector (X4.Data.selectRandomSafeSector().Name)) |> ProcessShip
+                for i in 1..10 ->
+                    economyShips  |> filterListBy ["s"] |> (generateRandomAbandonedShipFromListInSector (X4.Data.selectRandomSafeSector().Name)) |> ProcessShip
+
+                // ok, a couple large l economy ship.
+                for i in 1..2 ->
+                    economyShips  |> filterListBy ["l"] |> (generateRandomAbandonedShipFromListInSector (X4.Data.selectRandomSafeSector().Name)) |> ProcessShip
+
+            ]
+
+        ] 
+        |> List.concat
+        |> List.unzip
 
     // Create the new XML Diff document to contain our region additions
     let diff = XElement.Parse(
@@ -498,5 +514,10 @@ let generate_abandoned_ships_file (filename:string) =
         diff.Add(element)
         diff.Add( new XText("\n")) // Add a newline after each element so the output is readible
     |] |> ignore
+
+    // TODO: Write out any loadouts.
+    loadouts
+    |> List.choose id
+    |> ignore
 
     WriteModfiles.write_xml_file "core" filename diff
