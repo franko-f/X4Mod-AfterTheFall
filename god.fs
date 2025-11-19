@@ -11,7 +11,7 @@
 // and the maximum that can exist for the faction in the galaxy. Then the game randomly creates
 // and scatters these stations around the galaxy.
 //
-// For the purpose of this mod, we're going to REMOVE almost all the faction defence stations, 
+// For the purpose of this mod, we're going to REMOVE almost all the faction defence stations,
 // and REPLACE them with Xenon ones instead. Kh'aak will remain unaffected.
 //
 // We'll manually assign a sector or two to each faction by adding a defence stations, shipyard, wharf
@@ -29,45 +29,97 @@
 module X4.God
 
 open System.Xml.Linq
-open FSharp.Data
 open X4.Utilities
 open X4.Data
 
 
 // the 'log' functions just extract a bit of data about a station, and log it
 // to the terminal for debugging and tracking purposes.
-let logStation (action:string) (station:X4WorldStart.Station) =
-    let tags         = match station.Station.Select with | Some tag -> tag.Tags | _ -> "[none]"
-    printfn "%s STATION %s race: %A, owner: %A, type: %A, location: %A:%A, id: %A, station: %A   " action tags station.Race station.Owner station.Type station.Location.Class station.Location.Macro station.Id station.Station.Macro
+let logStation (action: string) (station: X4WorldStart.Station) =
+    let tags =
+        match station.Station.Select with
+        | Some tag -> tag.Tags
+        | _ -> "[none]"
 
-let logAddStation (action:string) (station:X4GodMod.Station) =
-    let tags         = match station.Station.Select with | Some tag -> tag.Tags | _ -> "[none]"
-    printfn "   %s STATION %s race: %s, owner: %s, type: %s, location: %s:%s, id: %s, station: \"none\"   " action tags station.Race station.Owner station.Type station.Location.Class station.Location.Macro station.Id
+    printfn
+        "%s STATION %s race: %A, owner: %A, type: %A, location: %A:%A, id: %A, station: %A   "
+        action
+        tags
+        station.Race
+        station.Owner
+        station.Type
+        station.Location.Class
+        station.Location.Macro
+        station.Id
+        station.Station.Macro
 
-let logProduct (product:X4WorldStart.Product) =
-    printfn "PROCESSING PRODUCT [%s:%s] %s/%s with quotas %i/%i" product.Owner (product.Location.Faction |> Option.defaultValue "UNKNOWN") product.Type product.Ware product.Quota.Galaxy (product.Quota.Sector |> Option.defaultValue -1)
+let logAddStation (action: string) (station: X4GodMod.Station) =
+    let tags =
+        match station.Station.Select with
+        | Some tag -> tag.Tags
+        | _ -> "[none]"
+
+    printfn
+        "   %s STATION %s race: %s, owner: %s, type: %s, location: %s:%s, id: %s, station: \"none\"   "
+        action
+        tags
+        station.Race
+        station.Owner
+        station.Type
+        station.Location.Class
+        station.Location.Macro
+        station.Id
+
+let logProduct (product: X4WorldStart.Product) =
+    printfn
+        "PROCESSING PRODUCT [%s:%s] %s/%s with quotas %i/%i"
+        product.Owner
+        (product.Location.Faction |> Option.defaultValue "UNKNOWN")
+        product.Type
+        product.Ware
+        product.Quota.Galaxy
+        (product.Quota.Sector |> Option.defaultValue -1)
 
 
 // Given a selector ID, search an instance of a GodMod xml file for the 'ADD' section
 // with that 'sel' value. This will be the XElement we will manipulate.
 let find_add_selector sel xml =
-   Array.find (fun (elem:X4GodMod.Add) -> elem.Sel = sel) xml
+    Array.find (fun (elem: X4GodMod.Add) -> elem.Sel = sel) xml
 
 
-let stationSectorName (station:X4WorldStart.Station) =
+let stationSectorName (station: X4WorldStart.Station) =
     match station.Location.Class with
-    | Some "zone" -> X4.Data.findSectorFromZone (station.Location.Macro |> Option.defaultValue "") |> Option.defaultValue "none"
+    | Some "zone" ->
+        X4.Data.findSectorFromZone (station.Location.Macro |> Option.defaultValue "")
+        |> Option.defaultValue "none"
     | Some "sector" -> station.Location.Macro |> Option.defaultValue "none"
     | _ -> "none"
 
 // Is this station in a sector we're going to leave alone? ie, in the territory of the owning faction
 // or a faction we're ignoring and not changing?
-let ignoreStation (station:X4WorldStart.Station) =
+let ignoreStation (station: X4WorldStart.Station) =
     let sector = stationSectorName station
-    let inTerritory = isFactionInSector station.Owner sector   // Station already in the territory of the owning faction
-    let inFriendlyTerritory = List.exists (fun faction -> isFactionInSector faction sector) ["teladi"; "paranid"; "holyorder"; "split"; "freesplit"; "argon"; "antigone"; "hatikvah"; "ministry"] // Station is in the territory of a fr
-    let isIgnored = List.contains station.Owner ["khaak"; "xenon"; "yaki"; "scaleplate"; "buccaneers"; "player"]
-    let isPirateBase = station.Station.Select |> Option.exists (fun s -> s.Tags = "[piratebase]")
+    let inTerritory = isFactionInSector station.Owner sector // Station already in the territory of the owning faction
+
+    let inFriendlyTerritory =
+        List.exists (fun faction -> isFactionInSector faction sector) [
+            "teladi"
+            "paranid"
+            "holyorder"
+            "split"
+            "freesplit"
+            "argon"
+            "antigone"
+            "hatikvah"
+            "ministry"
+        ] // Station is in the territory of a fr
+
+    let isIgnored =
+        List.contains station.Owner [ "khaak"; "xenon"; "yaki"; "scaleplate"; "buccaneers"; "player" ]
+
+    let isPirateBase =
+        station.Station.Select |> Option.exists (fun s -> s.Tags = "[piratebase]")
+
     inTerritory || isIgnored || isPirateBase || inFriendlyTerritory
 
 
@@ -77,28 +129,39 @@ let ignoreStation (station:X4WorldStart.Station) =
 // Sometimes the station type is determined by the value of 'station.type', but other times,
 // station.type is set to 'factory', and you must look to the 'tags' field to determine the
 // type of station.
-let findStation (faction:string) (stationType:string) (stations:X4WorldStart.Station list) =
-    match List.tryFind (fun (station:X4WorldStart.Station) -> station.Owner = faction && station.Type = Some stationType) stations with
+let findStation (faction: string) (stationType: string) (stations: X4WorldStart.Station list) =
+    match
+        List.tryFind
+            (fun (station: X4WorldStart.Station) -> station.Owner = faction && station.Type = Some stationType)
+            stations
+    with
     | Some station -> Some station
     | None ->
         // Ok, this might be a case where station type is 'factory', and we need to look at station.station.select.tags
-        match List.tryFind (fun (station:X4WorldStart.Station) ->
-            // if the station is owned by the correct faction, then attempt to extract the tags by working through
-            // the list of option types stored in station.station.select.tags to get to the actual tags (if they exist)
-            // then finally check if the tags (a comma separated string) contain the stationType we're looking for.
-            station.Owner = faction && station.Station.Select
-            |> Option.map (fun x -> x.Tags)
-            |> (Option.defaultValue "")
-            |> fun tags -> tags.Contains stationType ) stations
+        match
+            List.tryFind
+                (fun (station: X4WorldStart.Station) ->
+                    // if the station is owned by the correct faction, then attempt to extract the tags by working through
+                    // the list of option types stored in station.station.select.tags to get to the actual tags (if they exist)
+                    // then finally check if the tags (a comma separated string) contain the stationType we're looking for.
+                    station.Owner = faction
+                    && station.Station.Select
+                       |> Option.map (fun x -> x.Tags)
+                       |> (Option.defaultValue "")
+                       |> fun tags -> tags.Contains stationType)
+                stations
         with
         | Some station -> Some station
         | None ->
             // And some terran/PIO defence stations don't have trags either. They use station.constructionplan
-            List.tryFind (fun (station:X4WorldStart.Station) ->
-                station.Owner = faction && station.Station.Constructionplan
-                |> Option.map (fun x -> x)
-                |> (Option.defaultValue "")
-                |> fun tags -> tags.Contains stationType ) stations
+            List.tryFind
+                (fun (station: X4WorldStart.Station) ->
+                    station.Owner = faction
+                    && station.Station.Constructionplan
+                       |> Option.map (fun x -> x)
+                       |> (Option.defaultValue "")
+                       |> fun tags -> tags.Contains stationType)
+                stations
 
 
 // MAIN PROCESSING FUNCTIONS
@@ -107,7 +170,13 @@ let findStation (faction:string) (stationType:string) (stations:X4WorldStart.Sta
 // with a Xenon one, remove it, etc. This function is call once per station
 // stationsToMove are the IDs of stations that we're going to move to a safe sector, rather than
 // completely replace by a Xenon one. We'll still put a xenon station where they used to be
-let processStation (station:X4WorldStart.Station) (stationsToMove:string list) (xenonShipyard:XElement) (xenonWharf:XElement) (xenonDefence:XElement)  =
+let processStation
+    (station: X4WorldStart.Station)
+    (stationsToMove: string list)
+    (xenonShipyard: XElement)
+    (xenonWharf: XElement)
+    (xenonDefence: XElement)
+    =
     logStation "PROCESSING" station
 
     // So, turns out XmlProvider is more focused around reads. Writes are not... great.
@@ -127,15 +196,15 @@ let processStation (station:X4WorldStart.Station) (stationsToMove:string list) (
             match station.Station.Select, station.Type with
             | (None, Some "tradingstation") ->
                 // These seem to be teladi tranding stations. Replace with something more... interesting
-                Some (new XElement(xenonWharf))
+                Some(new XElement(xenonWharf))
             | (None, Some "factory") ->
                 // MOST examples in the logs without a tag all seem to be scenarios we weren't going to replace. Khaak, xenon, etc.
                 // But TERRAN/SEG has a few defence stations without tags. We'll check their construction plan instead.
                 match station.Station.Constructionplan with
-                | Some "'ter_defence'" -> Some (new XElement(xenonDefence))
-                | Some "'ter_defenceplatform'" -> Some (new XElement(xenonDefence))
-                | Some "'pio_defence'" -> Some (new XElement(xenonDefence))
-                | _              -> None
+                | Some "'ter_defence'" -> Some(new XElement(xenonDefence))
+                | Some "'ter_defenceplatform'" -> Some(new XElement(xenonDefence))
+                | Some "'pio_defence'" -> Some(new XElement(xenonDefence))
+                | _ -> None
 
             | (None, _) ->
                 // the other examples in the logs without a tag all seem to be scenarios we weren't going to replace. Khaak, xenon, etc.
@@ -144,15 +213,15 @@ let processStation (station:X4WorldStart.Station) (stationsToMove:string list) (
                 // create the new xelement clone so we can edit it later as part of the replacement station.
                 // We're going to replace different types of NPC buildings with different Xenon stations.
                 match select.Tags with
-                | "[shipyard]" ->
-                    Some (new XElement(xenonShipyard))
-                | "[wharf]" | "[equipmentdock]" -> 
-                    Some (new XElement(xenonWharf))
-                | "[defence]" | "[tradestation]" | "[piratebase]" ->
-                    Some (new XElement(xenonDefence)) // For now, replace HAT piratebase with xenon defense.
+                | "[shipyard]" -> Some(new XElement(xenonShipyard))
+                | "[wharf]"
+                | "[equipmentdock]" -> Some(new XElement(xenonWharf))
+                | "[defence]"
+                | "[tradestation]"
+                | "[piratebase]" -> Some(new XElement(xenonDefence)) // For now, replace HAT piratebase with xenon defense.
                 | x ->
                     printfn "UNHANDLED STATION TYPE: %s - DEFAULTING TO XENON DEFENCE" x
-                    Some (new XElement(xenonDefence))
+                    Some(new XElement(xenonDefence))
 
         match stationClone with
         | None ->
@@ -165,12 +234,15 @@ let processStation (station:X4WorldStart.Station) (stationsToMove:string list) (
             // 2. Create some XML that will remove the old station from the game. Later, we're toing to check the list of
             //   remove stations and actually move a few of them to a new location instead.
             let id = station.Id
-            let locationClass= Option.defaultValue "none" station.Location.Class
-            let locationMacro= Option.defaultValue "none" station.Location.Macro
-            let cluster = X4.Data.findClusterFromLocation locationClass locationMacro   |> Option.defaultValue "none"    // Find out which cluster this location is in.
+            let locationClass = Option.defaultValue "none" station.Location.Class
+            let locationMacro = Option.defaultValue "none" station.Location.Macro
+
+            let cluster =
+                X4.Data.findClusterFromLocation locationClass locationMacro
+                |> Option.defaultValue "none" // Find out which cluster this location is in.
 
             let replacement =
-                match X4.Data.neutralClusters |> List.contains cluster with
+                match X4.Territories.neutralClusters |> List.contains cluster with
                 | true ->
                     // If this is a neutral cluster, then we're going to clear all stations out of it.
                     // ie; we're not going to replace this station with a xenon whatever.
@@ -178,7 +250,7 @@ let processStation (station:X4WorldStart.Station) (stationsToMove:string list) (
                 | false ->
                     // create a new Xenon station to replace it
                     let replacement = new X4GodMod.Station(stationClone)
-                    replacement.XElement.SetAttributeValue(XName.Get("id"), replacement.Id + "_x_" + id)   // Give it a new unique ID
+                    replacement.XElement.SetAttributeValue(XName.Get("id"), replacement.Id + "_x_" + id) // Give it a new unique ID
                     // update location. As they're different types (as far as the type provider is concerned), we have to manually set
                     // the important zone and macro fields.
                     replacement.Location.XElement.SetAttributeValue(XName.Get("class"), locationClass)
@@ -194,41 +266,57 @@ let processStation (station:X4WorldStart.Station) (stationsToMove:string list) (
                 let sectors = X4.Data.getFactionSectors station.Owner
                 let random = System.Random()
                 let randomSector = sectors.[random.Next(sectors.Length)]
-                printfn "  MOVING [%s]:%s :: %A  from  %A:%A to sector:%A" station.Owner (stationSectorName station) station.Id locationClass locationMacro randomSector
+
+                printfn
+                    "  MOVING [%s]:%s :: %A  from  %A:%A to sector:%A"
+                    station.Owner
+                    (stationSectorName station)
+                    station.Id
+                    locationClass
+                    locationMacro
+                    randomSector
                 // build the XML that will update the old stations location.
                 let replaceXml = [
-                    new XElement( "replace",
+                    new XElement(
+                        "replace",
                         new XAttribute("sel", $"//god/stations/station[@id='{id}']/location/@class"),
                         "sector"
                     )
-                    new XElement( "replace",
+                    new XElement(
+                        "replace",
                         new XAttribute("sel", $"//god/stations/station[@id='{id}']/location/@macro"),
                         randomSector
                     )
                 ]
+
                 (replacement, None, Some replaceXml)
             else
                 // create XML tag that will remove the old station
-                let remove = new XElement( "remove",
-                    new XAttribute("sel", $"//god/stations/station[@id='{id}']") // XML remove tag for the station we're replacing with Xenon.
-                )
-                (replacement, Some remove, None)  // return an add/remove options,
+                let remove =
+                    new XElement(
+                        "remove",
+                        new XAttribute("sel", $"//god/stations/station[@id='{id}']") // XML remove tag for the station we're replacing with Xenon.
+                    )
+
+                (replacement, Some remove, None) // return an add/remove options,
 
 
 // with the shifting around of valid territory, the various races have lost some of their critical wharfs and shipyards.
 // We need to re-add some, but not all. Just make sure each faction has at least one of each type.
-let findStationsThatNeedMoving (stations:X4WorldStart.Station list) =
+let findStationsThatNeedMoving (stations: X4WorldStart.Station list) =
     stations
     // We're looking for the station we did NOT ignore earlier: ie, the ones that may have been replaced.
-    |> List.filter (fun (station:X4WorldStart.Station) -> ignoreStation station = false)
+    |> List.filter (fun (station: X4WorldStart.Station) -> ignoreStation station = false)
     // But they may have been ignored because they belong to a faction we're not touching
-    |> List.filter (fun station -> not (List.contains station.Owner ["khaak"; "xenon"; "yaki"; "scaleplate"; "buccaneers"; "player"]))
+    |> List.filter (fun station ->
+        not (List.contains station.Owner [ "khaak"; "xenon"; "yaki"; "scaleplate"; "buccaneers"; "player" ]))
     // And we're only interested in the ones that are shipyards, wharfs, trading stations, etc.
-    |> List.filter (
-        fun station ->
-            // most special stations are identified by tags in the optional 'select' field.
-            station.Station.Select |> Option.exists (fun s -> List.contains (s.Tags) ["[shipyard]"; "[wharf]"; "[equipmentdock]"; "[tradestation]"] )
-            || station.Type = Some "tradingstation" // Teladi trading stations are identified differently, by using type.
+    |> List.filter (fun station ->
+        // most special stations are identified by tags in the optional 'select' field.
+        station.Station.Select
+        |> Option.exists (fun s ->
+            List.contains (s.Tags) [ "[shipyard]"; "[wharf]"; "[equipmentdock]"; "[tradestation]" ])
+        || station.Type = Some "tradingstation" // Teladi trading stations are identified differently, by using type.
     )
     // BUT, we only want to move the first instance of each type of station per fection, so lets drop duplicates.
     |> List.distinctBy (fun station -> (station.Owner, station.Type, station.Station.Select))
@@ -238,29 +326,37 @@ let findStationsThatNeedMoving (stations:X4WorldStart.Station list) =
 // Construct an XML element representing a 'replace' tag that will replace a specific quota for a given product.
 // example replace line:
 // <replace sel="/god/products/product[@id='arg_graphene']/quotas/quota/@galaxy">18</replace>
-let product_replace_xml (id:string) (quota_type:string) (quota:int) =
-    let xml = new XElement("replace",
-        new XAttribute("sel", $"//god/products/product[@id='{id}']/quotas/quota/@{quota_type}"),
-        quota
-    )
+let product_replace_xml (id: string) (quota_type: string) (quota: int) =
+    let xml =
+        new XElement(
+            "replace",
+            new XAttribute("sel", $"//god/products/product[@id='{id}']/quotas/quota/@{quota_type}"),
+            quota
+        )
+
     printfn "  REPLACING PRODUCT %s with quota %s:%i using:\n %s" id quota_type quota (xml.ToString())
     xml
 
 // "products" define the number of production modules that will be created for a faction, scattered
 // between their factories. We're going tp increase it for Xenon, and reduce it for other major factions.
-let processProduct (product:X4WorldStart.Product) =
+let processProduct (product: X4WorldStart.Product) =
     logProduct product
+
     match product.Owner, product.Ware with
-    | "xenon", _ -> Some (product_replace_xml product.Id "galaxy" (product.Quota.Galaxy * 4) )// Xenon get a 4x quota
-    | "khaak", _ | "yaki", _ | "scaleplate", _ | "buccaneers", _| "player",_ -> None // These are all fine as is.
+    | "xenon", _ -> Some(product_replace_xml product.Id "galaxy" (product.Quota.Galaxy * 4)) // Xenon get a 4x quota
+    | "khaak", _
+    | "yaki", _
+    | "scaleplate", _
+    | "buccaneers", _
+    | "player", _ -> None // These are all fine as is.
     //| "terran", "energycells" -> Since we're moving TER back to earth, they no longer need this boost.
-        // The sectors we've assigned Terra have low solar output, so they're already crippled.
-        // We won't reduce production, but we will increase the limit per sector so that they
-        // can spawn all their factories in the slightly less bad .4 sunlight sector.
+    // The sectors we've assigned Terra have low solar output, so they're already crippled.
+    // We won't reduce production, but we will increase the limit per sector so that they
+    // can spawn all their factories in the slightly less bad .4 sunlight sector.
     //    Some (product_replace_xml product.Id "sector" ( Option.defaultValue 32 product.Quota.Sector * 2) )
     | _ ->
-        let divideAndRoundUp dividend divisor = ((dividend-1)/divisor) + 1 // We want to round UP the result to ensure we don't ever get a 0 quota.
-        Some (product_replace_xml product.Id "galaxy" (divideAndRoundUp product.Quota.Galaxy 2) ) // Everyone else gets half the quota.
+        let divideAndRoundUp dividend divisor = ((dividend - 1) / divisor) + 1 // We want to round UP the result to ensure we don't ever get a 0 quota.
+        Some(product_replace_xml product.Id "galaxy" (divideAndRoundUp product.Quota.Galaxy 2)) // Everyone else gets half the quota.
 
 
 // Ok, now to generate the new defense stations that we need around each unsage gate.
@@ -271,90 +367,115 @@ let processProduct (product:X4WorldStart.Product) =
 // then copy it, placing it in to the same zone as the gate (which we have stored in the gate object)
 // and then updating the location to the new coordinates, and finally renaming the station to be
 // '(gate.name).defense_[id]' so that it's unique.
-let generateGateDefenseStations() =
+let generateGateDefenseStations () =
     let gateStations = X4.Gates.getRequiredDefenseStationLocations 6 15000 // 5 stations per gate, 10000m from the gate. Give them almost overlapping fields of fire for long range plasma
 
-    [ for gate, n, location  in gateStations do
-        printfn "GENERATING DEFENSE STATION FOR %s GATE %s" gate.Faction gate.ConnectionName
-        // find the first defence station for the faction. We want to fail if we find nothing, as that would break the mod.
-        let station =
-            match findStation gate.Faction "defence" allStations with
-            | Some station -> station
-            | None -> failwithf "No defense station found for faction %s" gate.Faction
-        printfn "  FOUND DEFENSE STATION %s owner:%s" station.Id station.Owner
+    [
+        for gate, n, location in gateStations do
+            printfn "GENERATING DEFENSE STATION FOR %s GATE %s" gate.Faction gate.ConnectionName
+            // find the first defence station for the faction. We want to fail if we find nothing, as that would break the mod.
+            let station =
+                match findStation gate.Faction "defence" allStations with
+                | Some station -> station
+                | None -> failwithf "No defense station found for faction %s" gate.Faction
 
-        let stationClone = new XElement(station.XElement)
-        let defenseStation = new X4GodMod.Station(stationClone)
-        defenseStation.XElement.SetAttributeValue(XName.Get("id"), gate.ConnectionName + "_bastion_" + n.ToString())   // Give it a new unique ID
-        
-        // update location and set the location of the station copy to be the zone of the gate,
-        let zone = gate.X4Zone
-        defenseStation.Location.XElement.SetAttributeValue(XName.Get("class"), zone.Class)
-        defenseStation.Location.XElement.SetAttributeValue(XName.Get("macro"), zone.Name)
-        defenseStation.Location.XElement.SetAttributeValue(XName.Get("matchextension"), "false")   // without this, game ignores mods touching things outside their scope
-        defenseStation.Location.XElement.SetAttributeValue("solitary", null)    // VIG faction has this attribute set that may cause station placement to fail
+            printfn "  FOUND DEFENSE STATION %s owner:%s" station.Id station.Owner
 
-        // Now update the precise position within the zone to the caculated spot in a circle near the gate.
-        let position =
-            match defenseStation.Position with
-            | Some position -> position.XElement
-            | None ->
-                printfn "   No position found for station %s" defenseStation.Id
-                let posXml = new XElement("position")
-                defenseStation.XElement.Add(posXml)
-                defenseStation.XElement.Add( new XText("\n")) // Add a newline after each element so the output is readible
-                posXml
+            let stationClone = new XElement(station.XElement)
+            let defenseStation = new X4GodMod.Station(stationClone)
+            defenseStation.XElement.SetAttributeValue(XName.Get("id"), gate.ConnectionName + "_bastion_" + n.ToString()) // Give it a new unique ID
 
-        position.SetAttributeValue(XName.Get("x"), location.X)
-        position.SetAttributeValue(XName.Get("y"), location.Y)
-        position.SetAttributeValue(XName.Get("z"), location.Z)
+            // update location and set the location of the station copy to be the zone of the gate,
+            let zone = gate.X4Zone
+            defenseStation.Location.XElement.SetAttributeValue(XName.Get("class"), zone.Class)
+            defenseStation.Location.XElement.SetAttributeValue(XName.Get("macro"), zone.Name)
+            defenseStation.Location.XElement.SetAttributeValue(XName.Get("matchextension"), "false") // without this, game ignores mods touching things outside their scope
+            defenseStation.Location.XElement.SetAttributeValue("solitary", null) // VIG faction has this attribute set that may cause station placement to fail
 
-        logAddStation "ADDING" defenseStation
-        defenseStation.XElement  // return an add/remove options,
+            // Now update the precise position within the zone to the caculated spot in a circle near the gate.
+            let position =
+                match defenseStation.Position with
+                | Some position -> position.XElement
+                | None ->
+                    printfn "   No position found for station %s" defenseStation.Id
+                    let posXml = new XElement("position")
+                    defenseStation.XElement.Add(posXml)
+                    defenseStation.XElement.Add(new XText("\n")) // Add a newline after each element so the output is readible
+                    posXml
+
+            position.SetAttributeValue(XName.Get("x"), location.X)
+            position.SetAttributeValue(XName.Get("y"), location.Y)
+            position.SetAttributeValue(XName.Get("z"), location.Z)
+
+            logAddStation "ADDING" defenseStation
+            defenseStation.XElement // return an add/remove options,
     ]
 
 
 // There are several new xenon stations we want to add to specific sectors defined in 'Data.newXenonStations'.
 // Here we create the XML oibjects that represent these in the approriate location.
-let addNewXenonStations (xenonShipyard:XElement) (xenonWharf:XElement) =
-    [ for xenonStation in Data.newXenonStations do
+let addNewXenonStations (xenonShipyard: XElement) (xenonWharf: XElement) = [
+    for xenonStation in Data.newXenonStations do
         // Extract the type of station, and it's location information. Create the apporpriate station XElement
         let (station, locClass, location) =
             match xenonStation with
-            | XenonShipyard (locClass, location) -> (new X4GodMod.Station(new XElement(xenonShipyard)), locClass, location)
-            | XenonWharf    (locClass, location) -> (new X4GodMod.Station(new XElement(xenonWharf)),    locClass, location)
+            | XenonShipyard(locClass, location) ->
+                (new X4GodMod.Station(new XElement(xenonShipyard)), locClass, location)
+            | XenonWharf(locClass, location) -> (new X4GodMod.Station(new XElement(xenonWharf)), locClass, location)
 
         // Update the location and ID of our new station.
         station.Location.XElement.SetAttributeValue(XName.Get("class"), locClass)
         station.Location.XElement.SetAttributeValue(XName.Get("macro"), location)
-        station.XElement.SetAttributeValue(XName.Get("id"), station.Id + location)   // Give it a new unique ID
+        station.XElement.SetAttributeValue(XName.Get("id"), station.Id + location) // Give it a new unique ID
         logAddStation "ADDING" station
         station.XElement
-    ]
+]
 
-// Process the GOD file from the core game, and the DLCs. 
+// Process the GOD file from the core game, and the DLCs.
 // extract the stations and products, tweak some values, then write out a new GOD file.
-let generate_god_file (filename:string) =
+let generate_god_file (filename: string) =
     // Extract the Xenon stations from the GodModTemplate. We'll use these as templates when we add new xenon stations
     let X4ObjectTemplatesData = X4ObjectTemplates.Load(X4ObjectTemplatesFile)
-    let xenonShipyard = (Array.find (fun (elem:X4ObjectTemplates.Station) -> elem.Id = "shipyard_xenon_cluster") X4ObjectTemplatesData.Stations).XElement
-    let xenonWharf    = (Array.find (fun (elem:X4ObjectTemplates.Station) -> elem.Id = "wharf_xenon_cluster") X4ObjectTemplatesData.Stations).XElement
-    let xenonDefence  = (Array.find (fun (elem:X4ObjectTemplates.Station) -> elem.Id = "xen_defence_cluster") X4ObjectTemplatesData.Stations).XElement
 
-    let stationsToMove = findStationsThatNeedMoving allStations |> List.map(fun s -> s.Id) // find the IDs of the stations we're going to move to a safe sector
-    let (addStations, removeStations, moveStations)  = 
-        [ for station in allStations do yield processStation station stationsToMove xenonShipyard xenonWharf xenonDefence ]
+    let xenonShipyard =
+        (Array.find
+            (fun (elem: X4ObjectTemplates.Station) -> elem.Id = "shipyard_xenon_cluster")
+            X4ObjectTemplatesData.Stations)
+            .XElement
+
+    let xenonWharf =
+        (Array.find
+            (fun (elem: X4ObjectTemplates.Station) -> elem.Id = "wharf_xenon_cluster")
+            X4ObjectTemplatesData.Stations)
+            .XElement
+
+    let xenonDefence =
+        (Array.find
+            (fun (elem: X4ObjectTemplates.Station) -> elem.Id = "xen_defence_cluster")
+            X4ObjectTemplatesData.Stations)
+            .XElement
+
+    let stationsToMove =
+        findStationsThatNeedMoving allStations |> List.map (fun s -> s.Id) // find the IDs of the stations we're going to move to a safe sector
+
+    let (addStations, removeStations, moveStations) =
+        [
+            for station in allStations do
+                yield processStation station stationsToMove xenonShipyard xenonWharf xenonDefence
+        ]
         |> splitTuples
 
     let replaceProducts = [
         for product in allProducts do
-            match processProduct product with Some product -> yield product | _ -> ()
+            match processProduct product with
+            | Some product -> yield product
+            | _ -> ()
     ]
 
-    let newDefenseStations = generateGateDefenseStations()
+    let newDefenseStations = generateGateDefenseStations ()
     let newXenonStations = addNewXenonStations xenonShipyard xenonWharf
 
-    // Now that everything has been processed, and we've got new stations and products, 
+    // Now that everything has been processed, and we've got new stations and products,
     // we generate the modded XML, and write it out.
 
     // This is our template output file structure, with the broad sections already created.
@@ -362,40 +483,53 @@ let generate_god_file (filename:string) =
     // extract each Add section by the selector element value, and populate it's underlying
     // XElement in place. eg, search for "//god/stations" to find the 'add' XElement for
     // stations.
-    let outGodFile = X4GodMod.Parse("<?xml version=\"1.0\" encoding=\"utf-8\"?>
+    let outGodFile =
+        X4GodMod.Parse(
+            "<?xml version=\"1.0\" encoding=\"utf-8\"?>
         <diff>
             <add sel=\"//god/stations\">
             </add>
         </diff>
     "
-    )
+        )
 
     let stationsAddElem = find_add_selector "//god/stations" outGodFile.Adds
     // The stations we're replacing with Xenon.
-    [ for element in addStations  do
-        stationsAddElem.XElement.Add(element)
-        stationsAddElem.XElement.Add( new XText("\n")) // Add a newline after each element so the output is readible
-    ] |> ignore
+    [
+        for element in addStations do
+            stationsAddElem.XElement.Add(element)
+            stationsAddElem.XElement.Add(new XText("\n")) // Add a newline after each element so the output is readible
+    ]
+    |> ignore
 
     // The new defense stations we're adding near gates.
-    [ for element in newDefenseStations do
-        stationsAddElem.XElement.Add(element)
-        stationsAddElem.XElement.Add( new XText("\n")) // Add a newline after each element so the output is readible
-    ] |> ignore
+    [
+        for element in newDefenseStations do
+            stationsAddElem.XElement.Add(element)
+            stationsAddElem.XElement.Add(new XText("\n")) // Add a newline after each element so the output is readible
+    ]
+    |> ignore
 
     // The handful of specific new extra Xenon worfsa/shipyards we're adding to apply preassure in specific sectors.
-    [ for element in newXenonStations  do
-        stationsAddElem.XElement.Add(element)
-        stationsAddElem.XElement.Add( new XText("\n")) // Add a newline after each element so the output is readible
-    ] |> ignore
+    [
+        for element in newXenonStations do
+            stationsAddElem.XElement.Add(element)
+            stationsAddElem.XElement.Add(new XText("\n")) // Add a newline after each element so the output is readible
+    ]
+    |> ignore
 
 
     // Add out 'remove' tags to the end of the diff block.
     let diff = outGodFile.XElement // the root element is actually the 'diff' tag.
-    let changes = List.concat [removeStations; replaceProducts; (List.concat moveStations) ]
-    [ for element in changes do
-        diff.Add(element)
-        diff.Add( new XText("\n")) // Add a newline after each element so the output is readible
-    ] |> ignore
+
+    let changes =
+        List.concat [ removeStations; replaceProducts; (List.concat moveStations) ]
+
+    [
+        for element in changes do
+            diff.Add(element)
+            diff.Add(new XText("\n")) // Add a newline after each element so the output is readible
+    ]
+    |> ignore
 
     WriteModfiles.write_xml_file "core" filename outGodFile.XElement

@@ -10,16 +10,19 @@ open System.Xml.Linq
 
 // Neat case insensitive string comparison function from https://stackoverflow.com/questions/1936767/f-case-insensitive-string-compare
 // It's important as the X4 data files often mix the case of identifiers like zone and sector names.
-let (=?) s1 s2 = System.String.Equals(s1, s2, System.StringComparison.CurrentCultureIgnoreCase)
+let (=?) s1 s2 =
+    System.String.Equals(s1, s2, System.StringComparison.CurrentCultureIgnoreCase)
 // Similar to =?, but it takes in an option string as s1; returning False if s1 is None.
-let (=??) (s1:Option<string>) s2 = Option.exists (fun s1 -> s1 =? s2) s1
+let (=??) (s1: Option<string>) s2 = Option.exists (fun s1 -> s1 =? s2) s1
 
 // Borrowed from. Promise to give it back
 // https://www.fssnip.net/gO/title/Copy-a-directory-of-files
 let rec directoryCopy srcPath dstPath copySubDirs =
 
     if not <| System.IO.Directory.Exists(srcPath) then
-        let msg = System.String.Format("Source directory does not exist or could not be found: {0}", srcPath)
+        let msg =
+            System.String.Format("Source directory does not exist or could not be found: {0}", srcPath)
+
         raise (System.IO.DirectoryNotFoundException(msg))
 
     if not <| System.IO.Directory.Exists(dstPath) then
@@ -38,36 +41,43 @@ let rec directoryCopy srcPath dstPath copySubDirs =
 
 
 // Given a filename with full path, create all the parent directories recursively if they don't exist.
-let check_and_create_dir (filename:string) =
+let check_and_create_dir (filename: string) =
     let dir = System.IO.Path.GetDirectoryName(filename)
+
     if not (System.IO.Directory.Exists(dir)) then
-        System.IO.Directory.CreateDirectory(dir) |> ignore   // Should really catch the failure here. TODO
+        System.IO.Directory.CreateDirectory(dir) |> ignore // Should really catch the failure here. TODO
 
 // Given a list of 2 element tuples, split them in to two lists.
 // The first list contains all the first elements, the second list contains all the second elements.
 // It will strip out any 'None' values.
-let splitTuples (tuples:('a option * 'b option * 'c option) list) =
+let splitTuples (tuples: ('a option * 'b option * 'c option) list) =
     let x, y, z = List.unzip3 tuples
     (List.choose id x, List.choose id y, List.choose id z)
 
 let parseStringList (input: string) : string list =
     let trimmedInput = input.Trim('[', ']')
-    let elements = trimmedInput.Split([|','|], StringSplitOptions.RemoveEmptyEntries) |> Array.toList
-    List.map (fun (element:string) -> element.Trim('"', ' ')) elements
+
+    let elements =
+        trimmedInput.Split([| ',' |], StringSplitOptions.RemoveEmptyEntries)
+        |> Array.toList
+
+    List.map (fun (element: string) -> element.Trim('"', ' ')) elements
 
 // return either A or B, depending on the value of check. basically a simple ternary operator.
 // so I don't need to do full if then else. Unlike C-style '?', The check value is the last parameter,
 // so I can chain via |>
-let either a b check = match check with true -> a | false -> b
+let either a b check =
+    match check with
+    | true -> a
+    | false -> b
 
 
 // Convert a space separated string of tags into a list of tags.
-let tagStringToList (tags:String) =
+let tagStringToList (tags: String) =
     System.Text.RegularExpressions.Regex.Split(tags.Trim(), @"\s+") |> List.ofArray
 
 // Convert a space separated string of tags into a set of tags.
-let tagStringToSet (tags:String) =
-    tags |> tagStringToList |> Set.ofList
+let tagStringToSet (tags: String) = tags |> tagStringToList |> Set.ofList
 
 // Really useful computation expression build for options (credit somewhere online.)
 // allows us to write cleaner and easier to understand code filled with option types
@@ -76,6 +86,7 @@ type OptionBuilder() =
         match value with
         | Some x -> binder x
         | None -> None
+
     member _.Return(value) = Some value
 
 let option = OptionBuilder()
@@ -90,6 +101,7 @@ let option = OptionBuilder()
 // have a unique loadout generate for it, and needs a unique reference.
 let makeIdGenerator () =
     let counter = ref 0
+
     fun () ->
         counter.Value <- counter.Value + 1
         counter.Value

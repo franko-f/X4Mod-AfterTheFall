@@ -13,12 +13,12 @@ open System.Xml.Linq
 open X4.Data
 open X4.Utilities
 
-let rand = new Random(12345)    // Seed the random number generator so we get the same results each time, as long as we're not adding new regions or changing territory order.
+let rand = new Random(12345) // Seed the random number generator so we get the same results each time, as long as we're not adding new regions or changing territory order.
 
 // Define a few types for ship location that we'll use when we place an abandoned ship
 type Position = int * int * int
 type Rotation = int * int * int
-type ShipLocation = string * string * Position * Rotation   // Ship name, sector name, position, rotation. Should probably use a record type here.
+type ShipLocation = string * string * Position * Rotation // Ship name, sector name, position, rotation. Should probably use a record type here.
 
 type ShipEquipmentSlot = {
     Name: String
@@ -45,35 +45,51 @@ type ShipInfo = {
 // Extracts the groups from a list of ship equipment slots.
 let shipEquipmentGroups (allSlots: ShipEquipmentSlot list) =
     allSlots
-    |> List.choose (fun slot -> slot.Group |> Option.map (fun group -> ( (group, slot.Class), slot)))  // Filter out anything without a group
-    |> List.groupBy fst     // New list grouped by group and class of item.
-    |> List.map (fun (groupBy, slots) -> (groupBy, List.map snd slots))    // At this point our 'slots' is actually (group,slots) list, due to our previous processing. Reduce down to slots again
+    |> List.choose (fun slot -> slot.Group |> Option.map (fun group -> ((group, slot.Class), slot))) // Filter out anything without a group
+    |> List.groupBy fst // New list grouped by group and class of item.
+    |> List.map (fun (groupBy, slots) -> (groupBy, List.map snd slots)) // At this point our 'slots' is actually (group,slots) list, due to our previous processing. Reduce down to slots again
     |> List.sortBy fst
 
 // Some tags are not relevant for selection/slot match
-let tagsToIgnore = set [ 
-    "component"; "symmetry"; 
-    "symmetry_1"; "symmetry_2"; "symmetry_right"; "symmetry_left"; 
-    "platformcollision"; "mandatory"; "notupgradeable"
+let tagsToIgnore =
+    set [
+        "component"
+        "symmetry"
+        "symmetry_1"
+        "symmetry_2"
+        "symmetry_right"
+        "symmetry_left"
+        "platformcollision"
+        "mandatory"
+        "notupgradeable"
     // the following are important after all
-    // "hittable"; "unhittable"; 
+    // "hittable"; "unhittable";
     ]
 
-let componentSizeClasses = set ["small"; "medium"; "large"; "extralarge"] // I really wish there was some kind of consistency when it comes to referring to sizes.
+let componentSizeClasses = set [ "small"; "medium"; "large"; "extralarge" ] // I really wish there was some kind of consistency when it comes to referring to sizes.
+
 let shipEquipmentClasses = [
     // Allow us to filter down all assets to the ship equipment we're interested in.
     // Ship mounted equipment
-    "engine"; "shieldgenerator"; "weapon"; "missileturret"; "missilelauncher"; "turret"; 
+    "engine"
+    "shieldgenerator"
+    "weapon"
+    "missileturret"
+    "missilelauncher"
+    "turret"
     // Ship deployables.
-    "missile"; "resource_probe"; "satellite"
+    "missile"
+    "resource_probe"
+    "satellite"
 ]
 
-let shipEquipmentConnectionTags = set ["weapon"; "turret"; "shield"; "engine"; "thruster" ]
+let shipEquipmentConnectionTags =
+    set [ "weapon"; "turret"; "shield"; "engine"; "thruster" ]
 
 
 // Checks to see if the ship connection is an equipment slot connection,
 // and if so, parses it to return the relevant information about the equipment slot.
-let parseConnectionForEquipmentSlot (connection:X4Ships.Connection) =
+let parseConnectionForEquipmentSlot (connection: X4Ships.Connection) =
     // We determine whether the connection is an equipment slot by checking the tags.
     // If the tags contains one of the special equipment slot tags defined in
     // ShipEquipmentConnectionTag, then it's an equipment slot.
@@ -89,54 +105,64 @@ let parseConnectionForEquipmentSlot (connection:X4Ships.Connection) =
     | None -> None // Not an equipment slot, so return None
     | Some tag ->
         Some {
-            Name = connection.Name.Trim();
-            Class = tag;
-            Size = Set.intersect tags componentSizeClasses |> Seq.tryHead |> Option.defaultValue "unknown"
-            Group = connection.Group |> Option.map (fun group -> group.Trim());
-            Tags = tags;
+            Name = connection.Name.Trim()
+            Class = tag
+            Size =
+                Set.intersect tags componentSizeClasses
+                |> Seq.tryHead
+                |> Option.defaultValue "unknown"
+            Group = connection.Group |> Option.map (fun group -> group.Trim())
+            Tags = tags
         }
 
 
-let LoadShipComponents (entry:Index) (macro:X4ShipsMacro.Macros) =
-    let componentEntry = Array.Find (AllComponentMacros, (fun componentEntry -> componentEntry.Name =? macro.Macro.Component.Ref))
-    let componentFilename = X4UnpackedDataFolder + "/" + componentEntry.File.Replace("\\", "/")
+// Given a ship identified by 'index', and it's data in 'macro', this function will look up which
+// file contains it's component information, then load and process the data contained therein.
+// Returns a 'ShipInfo' record containing the detailed information on tghe ship, along with what
+// constitutes a valid loadout.
+let LoadShipComponents (entry: Index) (macro: X4ShipsMacro.Macros) =
+    let componentEntry =
+        Array.Find(AllComponentMacros, (fun componentEntry -> componentEntry.Name =? macro.Macro.Component.Ref))
+
+    let componentFilename =
+        X4UnpackedDataFolder + "/" + componentEntry.File.Replace("\\", "/")
 
     // Lets load the compoenent file and parse it.
     try
         let parsed = X4Ships.Load(componentFilename)
-        let name   = parsed.Component.Name
-        let size   = parsed.Component.Class
+        let name = parsed.Component.Name
+        let size = parsed.Component.Class
         let connections = parsed.Component.Connections
 
         // Not all macro files include the 'type' property, so we need to check if it exists.
         let shiptype =
             try
                 macro.Macro.Properties.Ship.Type
-            with
-            | _ex -> "unknown"
+            with _ex ->
+                "unknown"
+
         let thruster =
             try
                 macro.Macro.Properties.Thruster.Tags
-            with
-            | _ex -> "unknown"
+            with _ex ->
+                "unknown"
 
         // printfn "Loaded ship: %-35s %-35s from %s" name macro.Macro.Component.Ref componentFilename
 
         Some {
-            Name = name;
-            Size = size;
-            Type = shiptype;
-            Thruster = thruster;
-            DLC = entry.DLC;
-            MacroName = entry.Name;
-            Macro = macro.Macro;
-            ComponentRef = macro.Macro.Component.Ref;
-            ComponentFile = componentFilename;
-            Connections = connections;
-            EquipmentSlots = connections |> Array.choose parseConnectionForEquipmentSlot |> Array.toList;
-            }
-    with
-    | ex ->
+            Name = name
+            Size = size
+            Type = shiptype
+            Thruster = thruster
+            DLC = entry.DLC
+            MacroName = entry.Name
+            Macro = macro.Macro
+            ComponentRef = macro.Macro.Component.Ref
+            ComponentFile = componentFilename
+            Connections = connections
+            EquipmentSlots = connections |> Array.choose parseConnectionForEquipmentSlot |> Array.toList
+        }
+    with ex ->
         printfn $"Error loading ship:  {componentFilename}: {ex.Message}"
         None
 
@@ -156,23 +182,22 @@ let allShips =
         try
             // Get the file name from the entry, and load it.
             let fileName = X4UnpackedDataFolder + "/" + entry.File
+
             if File.Exists fileName then
-                Some (entry, X4ShipsMacro.Load fileName)
+                Some(entry, X4ShipsMacro.Load fileName)
             else
                 printfn "Warning: Ship macro file %s not found." fileName
                 None
-        with
-        | ex ->
+        with ex ->
             printfn $"Error loading ship macro: {entry.Name}: {ex.Message}"
-            None
-    )
+            None)
     // 3. From the loaded macro file, pull out the reference to the ship asset/component file,
     // and look up the ship asset file in the component index.
-    |> Array.choose ( fun (entry, macro) -> LoadShipComponents entry macro)
+    |> Array.choose (fun (entry, macro) -> LoadShipComponents entry macro)
     |> Array.toList
 
 
-let findShipByName (shipName:string) =
+let findShipByName (shipName: string) =
     // Find a ship by its name, case insensitive.
     allShips |> List.tryFind (fun ship -> ship.Name =? shipName)
 
@@ -184,30 +209,29 @@ let findShipByName (shipName:string) =
 let allShipEquipment =
     // There are some assets that are not valid for loadouts, even if their tags match.
     let assetsToIgnore = [
-        "weapon_gen_lasertower_01_mk2"; "weapon_gen_lasertower_01_mk1"
-        "shield_arg_s_combattutorial_01_mk1";
-        "_xen_"; "_kha_"; "generic_"
+        "weapon_gen_lasertower_01_mk2"
+        "weapon_gen_lasertower_01_mk1"
+        "shield_arg_s_combattutorial_01_mk1"
+        "_xen_"
+        "_kha_"
+        "generic_"
     ]
 
     // Find out all the different unique classes of assests
     X4.Data.allAssets
     |> List.filter (fun asset -> shipEquipmentClasses |> List.contains asset.Class)
-    |> List.filter (fun asset -> 
-        not (assetsToIgnore 
-             |> List.exists (fun ignore -> asset.Name.Contains ignore) ))
+    |> List.filter (fun asset -> not (assetsToIgnore |> List.exists (fun ignore -> asset.Name.Contains ignore)))
     |> List.map (fun asset ->
         option {
             // Find the connection in the assets list of connections that has 'compononent' in its tags.
             // let! will early return if the result is None here. ie, the asset has no component connections.
             let! componentConnection =
                 asset.Connections
-                |> Array.tryFind (fun connection ->
-                    tagStringToList connection.Tags
-                    |> List.contains "component"
-                )
+                |> Array.tryFind (fun connection -> tagStringToList connection.Tags |> List.contains "component")
 
             // Parse the tags string, stripping out  the tags we want to ignore.
             let tags = Set.difference (tagStringToSet componentConnection.Tags) tagsToIgnore
+
             let size =
                 // one of the tags is the size class, so we try find any of the valid size tags in the tag list.
                 tags
@@ -216,17 +240,16 @@ let allShipEquipment =
                 |> Option.defaultValue "none"
 
             return {
-                Name  = asset.Name
+                Name = asset.Name
                 MacroName = asset.Name + "_macro"
                 Class = asset.Class
-                Tags  = tags
-                Size  = size
+                Tags = tags
+                Size = size
                 ComponentName = componentConnection.Name
                 ComponentConnection = componentConnection
                 Connections = asset.Connections
             }
-        }
-    )
+        })
     |> List.choose id
 
 
@@ -234,11 +257,12 @@ let allShipEquipment =
 // In most cases, the all tags on the equpment MUST also match the slot's tags.
 // The exception to this rule is the 'one of' tags, which can be used to permit
 // a range of different 'use cases', like 'mining' or 'combat'.
-let findMatchingEquipmentForTags (tags:Set<String>) =
+let findMatchingEquipmentForTags (tags: Set<String>) =
     // This subset of tags basically give a 'class' to the components. And some slots can handle
     // more than one class of component. eg, some miners can mount both mining and combat turrets.
     // Some ships can mount both 'missile' or 'combat' weapons, and so on.
-    let shipEquipmentOneOfTags = set [ "standard"; "highpower"; "missile"; "mining"; "combat" ]
+    let shipEquipmentOneOfTags =
+        set [ "standard"; "highpower"; "missile"; "mining"; "combat" ]
 
     // Find the 'oneOfTags' that are present in the slot's tags.
     // let validOneOfTags = tags |> List.filter (fun tag -> List.contains tag shipEquipmentOneOfTags)
@@ -259,7 +283,7 @@ let findMatchingEquipmentForTags (tags:Set<String>) =
             // If neither have any of the 'one of' tags, then just check for exact matches
             equipment.Tags = tags
         elif not (Set.isEmpty eAny) && not (Set.isEmpty sAny) && (eAny.IsSubsetOf sAny) then
-            // If the equipment tags has a subset of the slot 'any of' tags 
+            // If the equipment tags has a subset of the slot 'any of' tags
             // e.g, equipment is 'mining', slot is ['mining'; 'combat'],
             // then we check to see if the remaining tags match.
             let eRemainingTags = Set.difference equipment.Tags shipEquipmentOneOfTags
@@ -268,26 +292,28 @@ let findMatchingEquipmentForTags (tags:Set<String>) =
         else
             // If we reach here, it means one of them has 'one of' tags and the other doesn't.
             //This means that it's not a match.
-            false
-    )
+            false)
 
-let findMatchingEquipmentForSlot (slot: ShipEquipmentSlot) =
-    findMatchingEquipmentForTags slot.Tags
+let findMatchingEquipmentForSlot (slot: ShipEquipmentSlot) = findMatchingEquipmentForTags slot.Tags
 
-let dumpAllShipEquipment() =
+let dumpAllShipEquipment () =
     printfn "\nAll Equipment:"
-    allShipEquipment
-    |> List.iter (X4.Data.dumpEquipment "")
+    allShipEquipment |> List.iter (X4.Data.dumpEquipment "")
 
-let printShipInfo (ship:ShipInfo) =
+let printShipInfo (ship: ShipInfo) =
     let formatShipSlot (slot: ShipEquipmentSlot) =
-        sprintf "  %-30s %-10s %-10s %-25s | %s" slot.Name slot.Class slot.Size (Option.defaultValue "" slot.Group) 
+        sprintf
+            "  %-30s %-10s %-10s %-25s | %s"
+            slot.Name
+            slot.Class
+            slot.Size
+            (Option.defaultValue "" slot.Group)
             (slot.Tags |> Seq.map (fun tag -> tag.Trim()) |> String.concat " ")
 
     // Print the ship info in a nice format.
     printfn "\n Ship: %s" ship.Name
     // ship.Connections
-    // |> Seq.iter (fun connection -> printfn "  Connection %-50s/%-20s / %s" connection.Name (Option.defaultValue "" connection.Group ) connection.Tags) 
+    // |> Seq.iter (fun connection -> printfn "  Connection %-50s/%-20s / %s" connection.Name (Option.defaultValue "" connection.Group ) connection.Tags)
     // printfn " Discovered Equipment Slots:"
     ship.EquipmentSlots
     |> Seq.iter (fun slot ->
@@ -295,107 +321,113 @@ let printShipInfo (ship:ShipInfo) =
         // Now find, and print out valid equipment for this slot.
         slot
         |> findMatchingEquipmentForSlot
-        |> List.iter (X4.Data.dumpEquipment "    - ")
-    )
+        |> List.iter (X4.Data.dumpEquipment "    - "))
+
     printfn "  Equipmment Groups"
+
     ship.EquipmentSlots
     |> shipEquipmentGroups
     |> Seq.iter (fun ((group, slotClass), slots) ->
-        printfn "  Group: %-25s x%d  %s " group slots.Length (formatShipSlot slots[0])
-    )
+        printfn "  Group: %-25s x%d  %s " group slots.Length (formatShipSlot slots[0]))
 
-let dumpShips() =
+let dumpShips () =
     printfn "All Ship Macros:"
-    for ship in allShips do printfn "macro: %s," (ship.MacroName)
+
+    for ship in allShips do
+        printfn "macro: %s," (ship.MacroName)
 
 
 // List of all ships that are valid candidates for being generated as abandoned ships.
 let abandonedShipsList =
     // Our filters. Factions we'll look for, and tags we'll omit. Both must be true.
-    let factions = [ "_arg_"; "_par_"; "_tel_"; "_spl_"; "_ter_"; "_atf_"; "_yak_"; "_pir_"; ]  // Removed boron '_bor_', as they're spawning without engins
+    let factions = [ "_arg_"; "_par_"; "_tel_"; "_spl_"; "_ter_"; "_atf_"; "_yak_"; "_pir_" ] // Removed boron '_bor_', as they're spawning without engins
+
     let omit = [
-        "_xs_"; "_plot_"; "_landmark_"; "_story"; "_highcapacity_";
-        "ship_spl_xl_battleship_01_a_macro"; "ship_pir_xl_battleship_01_a_macro"; // specific ships that seems unsupported or don't exist in game
+        "_xs_"
+        "_plot_"
+        "_landmark_"
+        "_story"
+        "_highcapacity_"
+        "ship_spl_xl_battleship_01_a_macro"
+        "ship_pir_xl_battleship_01_a_macro" // specific ships that seems unsupported or don't exist in game
         // Some terran destroyers that are spawning without main guns.
-        "ship_atf_l_destroyer_01_a_macro"; "ship_atf_xl_battleship_01_a_macro"; "ship_ter_l_destroyer_01_a_macro"
+        "ship_atf_l_destroyer_01_a_macro"
+        "ship_atf_xl_battleship_01_a_macro"
+        "ship_ter_l_destroyer_01_a_macro"
     ]
 
     allShips
     |> List.map (fun ship -> ship.MacroName)
-    |> List.filter (
-        fun shipName ->
-            ( factions |> List.exists (fun tag -> shipName.Contains tag) )        // Must contain one of the factions we're interested in.
-            && (not ( omit |> List.exists (fun tag -> shipName.Contains tag) )))  // Must not contain any of the tags we're not interested in from the omit list.
+    |> List.filter (fun shipName ->
+        (factions |> List.exists (fun tag -> shipName.Contains tag)) // Must contain one of the factions we're interested in.
+        && (not (omit |> List.exists (fun tag -> shipName.Contains tag)))) // Must not contain any of the tags we're not interested in from the omit list.
 
 
 // Quickly filter by a search string substring. eg, 'bor' will return all the Boron ships by filtering for '_bor_'.
-let rec filterListBy (searchTags:string list) (ships:string list) =
+let rec filterListBy (searchTags: string list) (ships: string list) =
     match searchTags with
     | [] -> ships
-    | H::T ->
+    | H :: T ->
         ships
         |> List.filter (fun x -> x.Contains("_" + H.ToLower() + "_"))
         |> filterListBy T
 
 // Filter the abandoned ships list by a list of search tags. eg, ['bor', 's'] will return all Boron small ships.
 // ['tel', 'xl', 'carrier'] will return all Teladi extra large carriers.
-let filterBy (search:string list) =
-    filterListBy search abandonedShipsList
+let filterBy (search: string list) = filterListBy search abandonedShipsList
 
 let militaryShips =
     List.concat [
-        filterBy ["corvette"]
-        filterBy ["gunboat"]
-        filterBy ["frigate"]
-        filterBy ["destroyer"]
-        filterBy ["battleship"]
-        filterBy ["carrier"]
-        filterBy ["resupplier"]
-        filterBy ["fighter"]
-        filterBy ["heavyfighter"]
-        filterBy ["bomber"]
-        filterBy ["scout"]
+        filterBy [ "corvette" ]
+        filterBy [ "gunboat" ]
+        filterBy [ "frigate" ]
+        filterBy [ "destroyer" ]
+        filterBy [ "battleship" ]
+        filterBy [ "carrier" ]
+        filterBy [ "resupplier" ]
+        filterBy [ "fighter" ]
+        filterBy [ "heavyfighter" ]
+        filterBy [ "bomber" ]
+        filterBy [ "scout" ]
     ]
 
 let economyShips =
-    List.concat [
-        filterBy ["miner"]
-        filterBy ["builder"]
-        filterBy ["trans"]
-    ]
+    List.concat [ filterBy [ "miner" ]; filterBy [ "builder" ]; filterBy [ "trans" ] ]
 
 
 // given a sector and a list of possible ships, select one of the ships,
 // and assign it coordinates in the given sector.
-let generateRandomAbandonedShipFromListInSector (sector:string) (shipList:string list) :ShipLocation =
+let generateRandomAbandonedShipFromListInSector (sector: string) (shipList: string list) : ShipLocation =
     let ship = shipList.[rand.Next(shipList.Length)]
     // generate random coordinates within the sector, in KM offset from sector center (different from other coordinates)
     let x, y, z = rand.Next(-160, 160), rand.Next(-10, 10), rand.Next(-180, 180)
     // generate random yaw and pitch
-    let yaw, pitch, roll = rand.Next(-180, 180), rand.Next(-180, 180), rand.Next(-180, 180)
+    let yaw, pitch, roll =
+        rand.Next(-180, 180), rand.Next(-180, 180), rand.Next(-180, 180)
+
     (ship, sector, (x, y, z), (yaw, pitch, roll))
 
 // given a list of possible ships, select one, and place it randomly in any of the
 // unsafe sectors in the game.
-let generateRandomAbandonedShipFromList (shipList:string list) =
-    let sector = X4.Data.selectRandomUnsafeSector() // We don't want these wrecks to be in the faction sectors.
+let generateRandomAbandonedShipFromList (shipList: string list) =
+    let sector = X4.Data.selectRandomUnsafeSector () // We don't want these wrecks to be in the faction sectors.
     generateRandomAbandonedShipFromListInSector sector.Name shipList
 
 // Generate COUNT random abandoned military ships of the given size in a random unsafe sector.
 // 'size' is one of 'XL', 'L', 'm', 's'. - the standard X4 ship size classes.
-let generateRandomMilitaryAbandonedShips (count:int) (size:string) =
-    let ships = filterListBy [size] militaryShips
+let generateRandomMilitaryAbandonedShips (count: int) (size: string) =
+    let ships = filterListBy [ size ] militaryShips
     [ for i in 1..count -> generateRandomAbandonedShipFromList ships ]
 
 // As above, but for economy ships.
-let generateRandomEconomyAbandonedShips (count:int) (size:string) =
-    let ships = filterListBy [size] economyShips
+let generateRandomEconomyAbandonedShips (count: int) (size: string) =
+    let ships = filterListBy [ size ] economyShips
     [ for i in 1..count -> generateRandomAbandonedShipFromList ships ]
 
 // This function generates a bunch of abandoned ships near each other, as if a major battle occurred.
 // The parameters determine how many of each class are in the field. Ships are clustered within 5km of a point
 // in a random unsafe sector.
-let generateBattlefield (countXL:int) (countL:int) (countM:int) (countS:int) =
+let generateBattlefield (countXL: int) (countL: int) (countM: int) (countS: int) =
     printfn "GENERATING BATTLEFIELD: XL: %i, L: %i, M: %i, S: %i" countXL countL countM countS
     // First generate the ships for each class.
     let xl, l, m, s =
@@ -407,34 +439,54 @@ let generateBattlefield (countXL:int) (countL:int) (countM:int) (countS:int) =
     // Then we update the location of each ship to be within 5km of the location of the first ship.
     // First find the location of the first ship. We concat all the size classes, as we don't if any
     // size classes were empty for this battlefield.
-    let _ship, sector, (x, y, z), _rotation  = (List.concat [xl;l;m;s]).[0]
+    let _ship, sector, (x, y, z), _rotation = (List.concat [ xl; l; m; s ]).[0]
     // Now update every ships sector and location to be near the first ship, keeping other data the same.
     List.concat [
-        [ for (ship, _sector, _, rotation) in xl -> (ship, sector, (x + rand.Next(-5, 5), y + rand.Next(-5, 5), z + rand.Next(-5, 5)) , rotation) ]
-        [ for (ship, _sector, _, rotation) in l  -> (ship, sector, (x + rand.Next(-5, 5), y + rand.Next(-5, 5), z + rand.Next(-5, 5)) , rotation) ]
-        [ for (ship, _sector, _, rotation) in m  -> (ship, sector, (x + rand.Next(-5, 5), y + rand.Next(-5, 5), z + rand.Next(-5, 5)) , rotation) ]
-        [ for (ship, _sector, _, rotation) in s  -> (ship, sector, (x + rand.Next(-5, 5), y + rand.Next(-5, 5), z + rand.Next(-5, 5)) , rotation) ]
-   ]
+        [
+            for (ship, _sector, _, rotation) in xl ->
+                (ship, sector, (x + rand.Next(-5, 5), y + rand.Next(-5, 5), z + rand.Next(-5, 5)), rotation)
+        ]
+        [
+            for (ship, _sector, _, rotation) in l ->
+                (ship, sector, (x + rand.Next(-5, 5), y + rand.Next(-5, 5), z + rand.Next(-5, 5)), rotation)
+        ]
+        [
+            for (ship, _sector, _, rotation) in m ->
+                (ship, sector, (x + rand.Next(-5, 5), y + rand.Next(-5, 5), z + rand.Next(-5, 5)), rotation)
+        ]
+        [
+            for (ship, _sector, _, rotation) in s ->
+                (ship, sector, (x + rand.Next(-5, 5), y + rand.Next(-5, 5), z + rand.Next(-5, 5)), rotation)
+        ]
+    ]
 
 
 // Some ships have custom loadouts, so we need a unique ID for them. Used by ProcessShip.
-let loadoutUniqueId = makeIdGenerator()
+let loadoutUniqueId = makeIdGenerator ()
 
 let MaybeCustomLoadout ship = None, ""
-    // TODO: ProcessShip needs more data as to ship size/faction, so that we can
-    // check if it's a boron ship, or a terran military L or XL to generate a
-    // unique loadout.
-    // let id = loadoutUniqueId()
-    // sprintf "<loadout id=\"%i\">...</loadout>" id
+// TODO: ProcessShip needs more data as to ship size/faction, so that we can
+// check if it's a boron ship, or a terran military L or XL to generate a
+// unique loadout.
+// let id = loadoutUniqueId()
+// sprintf "<loadout id=\"%i\">...</loadout>" id
 
 // Generate the XML diff for placing an abandoned ship in the game based
 // on the ship, sector, position and rotation given as parameters.
-let ProcessShip ((ship, sector, (x, y, z), (yaw, pitch, roll)):ShipLocation) =
+let ProcessShip ((ship, sector, (x, y, z), (yaw, pitch, roll)): ShipLocation) =
     // Interestingly, the units of KM and deg are specified in the XML attribute fields for abandoned ships.
     // I've not seen this elsewhere, and don't know if it's necessary, but for safety I'll duplicate it.
-    printfn "GENERATING ABANDONED SHIP: %s, Sector: %s, Position: %A, Rotation: %A" ship sector (x, y, z) (yaw, pitch, roll)
+    printfn
+        "GENERATING ABANDONED SHIP: %s, Sector: %s, Position: %A, Rotation: %A"
+        ship
+        sector
+        (x, y, z)
+        (yaw, pitch, roll)
+
     let loadout, loadoutReference = MaybeCustomLoadout ship
-    let xml = $"""
+
+    let xml =
+        $"""
     <add sel="/mdscript[@name='PlacedObjects']/cues/cue[@name='Place_Claimable_Ships']/actions">
         <find_sector name="$sector" macro="macro.{sector}"/>
         <do_if value="$sector.exists">
@@ -448,27 +500,31 @@ let ProcessShip ((ship, sector, (x, y, z), (yaw, pitch, roll)):ShipLocation) =
     </add>
     """
     // Using the textreader instead of XElement.Parse preserves whitespace and carriage returns in our output.
-    let xtr = new XmlTextReader(new System.IO.StringReader(xml));
-    loadout, XElement.Load xtr;
+    let xtr = new XmlTextReader(new System.IO.StringReader(xml))
+    loadout, XElement.Load xtr
 
 // Create a list of random ships, assign them to random sectors, then generate XML that will place
 // them as abandoned ships in the game.
 // We don't want it completely random, as we want to make sure there's a good mix of ships in the game.
 // We lean slighly towards generated economy ships vs military, though there's plenty of both.
 // there should be, on average, one or two ships per sector.
-let generate_abandoned_ships_file (filename:string) =
-    let loadouts, shipDiff = 
+let generate_abandoned_ships_file (filename: string) =
+    let loadouts, shipDiff =
         [
             // A bunch of ships in unsafe space to being
             generateRandomMilitaryAbandonedShips 4 "xl" |> List.map ProcessShip
-            generateRandomMilitaryAbandonedShips 6 "l"  |> List.map ProcessShip
-            generateRandomMilitaryAbandonedShips 6 "m"  |> List.map ProcessShip
-            generateRandomMilitaryAbandonedShips 6 "s"  |> List.map ProcessShip
-            generateRandomEconomyAbandonedShips 3  "xl" |> List.map ProcessShip
-            generateRandomEconomyAbandonedShips 12 "l"  |> List.map ProcessShip
-            generateRandomEconomyAbandonedShips 8 "m"   |> List.map ProcessShip
-            generateRandomEconomyAbandonedShips 6 "s"   |> List.map ProcessShip
-            [filterBy ["spl"; "xl"; "carrier"]    |> generateRandomAbandonedShipFromList |> ProcessShip]      // Make sure there's at least one Raptor!
+            generateRandomMilitaryAbandonedShips 6 "l" |> List.map ProcessShip
+            generateRandomMilitaryAbandonedShips 6 "m" |> List.map ProcessShip
+            generateRandomMilitaryAbandonedShips 6 "s" |> List.map ProcessShip
+            generateRandomEconomyAbandonedShips 3 "xl" |> List.map ProcessShip
+            generateRandomEconomyAbandonedShips 12 "l" |> List.map ProcessShip
+            generateRandomEconomyAbandonedShips 8 "m" |> List.map ProcessShip
+            generateRandomEconomyAbandonedShips 6 "s" |> List.map ProcessShip
+            [
+                filterBy [ "spl"; "xl"; "carrier" ]
+                |> generateRandomAbandonedShipFromList
+                |> ProcessShip
+            ] // Make sure there's at least one Raptor!
             // Until we figure out how to generate these with faction specific equipment, we'll leave them out. Currently, they're spawning without main batteries.
             //[filterBy ["atf"; "xl"; "battleship"] |> generateRandomAbandonedShipFromList |> ProcessShip]   // And Asgard!
             //[filterBy ["atf"; "l"; "destroyer"]   |> generateRandomAbandonedShipFromList |> ProcessShip]     // And Syn.
@@ -484,40 +540,57 @@ let generate_abandoned_ships_file (filename:string) =
             // followed by a bunch of M & S in safe space.
             [
                 for i in 1..6 ->
-                    militaryShips |> filterListBy ["m"] |> (generateRandomAbandonedShipFromListInSector (X4.Data.selectRandomSafeSector().Name)) |> ProcessShip
+                    militaryShips
+                    |> filterListBy [ "m" ]
+                    |> (generateRandomAbandonedShipFromListInSector (X4.Data.selectRandomSafeSector().Name))
+                    |> ProcessShip
                 for i in 1..8 ->
-                    economyShips  |> filterListBy ["m"] |> (generateRandomAbandonedShipFromListInSector (X4.Data.selectRandomSafeSector().Name)) |> ProcessShip
+                    economyShips
+                    |> filterListBy [ "m" ]
+                    |> (generateRandomAbandonedShipFromListInSector (X4.Data.selectRandomSafeSector().Name))
+                    |> ProcessShip
                 for i in 1..8 ->
-                    militaryShips |> filterListBy ["s"] |> (generateRandomAbandonedShipFromListInSector (X4.Data.selectRandomSafeSector().Name)) |> ProcessShip
+                    militaryShips
+                    |> filterListBy [ "s" ]
+                    |> (generateRandomAbandonedShipFromListInSector (X4.Data.selectRandomSafeSector().Name))
+                    |> ProcessShip
                 for i in 1..10 ->
-                    economyShips  |> filterListBy ["s"] |> (generateRandomAbandonedShipFromListInSector (X4.Data.selectRandomSafeSector().Name)) |> ProcessShip
+                    economyShips
+                    |> filterListBy [ "s" ]
+                    |> (generateRandomAbandonedShipFromListInSector (X4.Data.selectRandomSafeSector().Name))
+                    |> ProcessShip
 
                 // ok, a couple large l economy ship.
                 for i in 1..2 ->
-                    economyShips  |> filterListBy ["l"] |> (generateRandomAbandonedShipFromListInSector (X4.Data.selectRandomSafeSector().Name)) |> ProcessShip
+                    economyShips
+                    |> filterListBy [ "l" ]
+                    |> (generateRandomAbandonedShipFromListInSector (X4.Data.selectRandomSafeSector().Name))
+                    |> ProcessShip
 
             ]
 
-        ] 
+        ]
         |> List.concat
         |> List.unzip
 
     // Create the new XML Diff document to contain our region additions
-    let diff = XElement.Parse(
-        "<?xml version=\"1.0\" encoding=\"utf-8\"?>
+    let diff =
+        XElement.Parse(
+            "<?xml version=\"1.0\" encoding=\"utf-8\"?>
         <diff>
         </diff>
-        ")
+        "
+        )
 
     // Now add the region changes, one by one, to the the xml diff.
-    [| for element in shipDiff do
-        diff.Add(element)
-        diff.Add( new XText("\n")) // Add a newline after each element so the output is readible
-    |] |> ignore
+    [|
+        for element in shipDiff do
+            diff.Add(element)
+            diff.Add(new XText("\n"))
+    |] // Add a newline after each element so the output is readible
+    |> ignore
 
     // TODO: Write out any loadouts.
-    loadouts
-    |> List.choose id
-    |> ignore
+    loadouts |> List.choose id |> ignore
 
     WriteModfiles.write_xml_file "core" filename diff
