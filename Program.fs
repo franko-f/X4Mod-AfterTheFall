@@ -67,7 +67,7 @@ X4.Ships.findShipByName "ship_bor_m_corvette_01"
 
 X4.Ships.generate_abandoned_ships_file "/md/placedobjects.xml"
 
-// exit 0
+exit 0
 
 // Now actually generate the files in the mod directory by spitting out XML or copying
 // our templates.

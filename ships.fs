@@ -367,10 +367,10 @@ let abandonedShipsList =
 let rec filterListBy (searchTags: string list) (ships: string list) =
     match searchTags with
     | [] -> ships
-    | H :: T ->
+    | h :: t ->
         ships
-        |> List.filter (fun x -> x.Contains("_" + H.ToLower() + "_"))
-        |> filterListBy T
+        |> List.filter (fun x -> x.Contains("_" + h.ToLower() + "_"))
+        |> filterListBy t
 
 // Filter the abandoned ships list by a list of search tags. eg, ['bor', 's'] will return all Boron small ships.
 // ['tel', 'xl', 'carrier'] will return all Teladi extra large carriers.
