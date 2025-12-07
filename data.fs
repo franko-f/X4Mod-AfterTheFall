@@ -193,16 +193,6 @@ let X4EquipmentXMLProviderTemplateFile =
 
 type X4Equipment = XmlProvider<X4EquipmentXMLProviderTemplateFile>
 
-type EquipmentInfo = {
-    Name: String
-    MacroName: String // Same as name with _macro suffix
-    Class: String
-    Size: String
-    Tags: String Set
-    ComponentName: String
-    ComponentConnection: X4Equipment.Connection
-    Connections: X4Equipment.Connection array
-}
 
 // Encapsulates information on an  entry in an index file:
 // Name of the entity being referred to; the file the entity is defined in, along with the DLC it belongs to.
@@ -210,6 +200,26 @@ type Index = {
     Name: String
     File: String
     DLC: String
+}
+
+type Asset = {
+    Name: String
+    File: String
+    DLC: String
+    Class: String
+    Asset: X4Equipment.Component // In the future, this might be a more generic type if we become interested in more assets than just equipment.
+}
+
+type EquipmentInfo = {
+    Name: String
+    MacroName: String // Same as name with _macro suffix
+    Class: String
+    Size: String
+    //    DLC: String
+    Tags: String Set
+    ComponentName: String
+    ComponentConnection: X4Equipment.Connection
+    Connections: X4Equipment.Connection array
 }
 
 // ====== LOAD DATA FROM XML FILES ======
@@ -630,8 +640,7 @@ let getDlcXmlFiles dataDir =
 
 // Get all the assets defined in the core game and the DLCs. This includes
 // equipment for ships, as well as miscellaneous assets like wares, adsigns, etc
-let allAssets =
-
+let (allAssets: Asset list) =
     // For ship equipment, it's not enough to look at the AllComponentMacros.
     // This is because the component file doesn't contain all items. Instead, the index macro
     // defines all items, and them points to a reference in the component file that might be shared.
@@ -670,19 +679,25 @@ let allAssets =
                 X4UnpackedDataFolder + "/" + componentEntry.File.Replace("\\", "/")
 
             printfn "Found component %s -> %s" componentEntry.Name componentFilename
-            return macro.Macro.Name, componentFilename
+            return index, macro.Macro.Name, componentFilename
         }
 
     )
     |> List.choose id
-    |> List.map (fun (name, componentFilename) ->
+    |> List.map (fun (index, name, componentFilename) ->
         try
             // Now parse the file using the X4Equipment type.
             let parsed = X4Equipment.Load(componentFilename)
             // Ensure the name is set correctly in the XElement. Should be index, not component name
-            parsed.Component.XElement.SetAttributeValue("name", name.Trim())
+            // parsed.Component.XElement.SetAttributeValue("name", name.Trim())
             // printfn "Loaded equipment: %-35s %-20s from %s" parsed.Component.Name parsed.Component.Class x
-            Some parsed.Component
+            Some {
+                Name = name.Trim() // Ensure the name is set correctly. Should be index, not component name
+                File = componentFilename
+                DLC = index.DLC
+                Class = parsed.Component.Class.Trim()
+                Asset = parsed.Component
+            }
         with ex ->
             printfn $"\nError loading equipment: {componentFilename}: {ex.Message}"
             // try find root of parse error:
@@ -705,26 +720,6 @@ let allAssetClasses =
     |> List.map (fun asset -> asset.Class)
     |> List.sort
 
-
-// Find any asset that includes the specified search tags.
-// Useful for debugging rather than assigning equipment, as it ignores
-// the subtleties relating to matching equipmenmt to slots.
-let findMatchingAsset (searchTags: Set<String>) (assets: list<EquipmentInfo>) =
-    // Find an asset by its name, case insensitive.
-    assets
-    // Filter down to only those that match the tags.
-    |> List.filter (fun asset ->
-        // Check if any of the connections have the tags we're looking for.
-        searchTags.IsSubsetOf asset.Tags)
-
-let dumpEquipment (prefix: string) (asset: EquipmentInfo) =
-    let tags =
-        asset.Tags
-        |> Set.toList
-        |> List.map (fun tag -> tag.Trim())
-        |> String.concat " "
-
-    printfn "%s%45s %-15s %-10s %-22s | %s" prefix asset.Name asset.Class asset.Size asset.ComponentName tags
 
 let dump_sectors (sectors: X4Sector.Macro list) =
     for sector in sectors do

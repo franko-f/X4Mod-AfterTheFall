@@ -89,6 +89,10 @@ type OptionBuilder() =
 
     member _.Return(value) = Some value
 
+    member _.ReturnFrom(value) = value
+
+    member _.Zero() = None
+
 let option = OptionBuilder()
 
 

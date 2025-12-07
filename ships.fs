@@ -62,8 +62,13 @@ let tagsToIgnore =
         "platformcollision"
         "mandatory"
         "notupgradeable"
+        "envmap_cockpit"
     // the following are important after all
-    // "hittable"; "unhittable";
+    // Seem to be used to identify things line internal shield generators vs external.
+    // eg: medium shields can be external for components, or internal for M ships
+
+    //"hittable"
+    //"unhittable"
     ]
 
 let componentSizeClasses = set [ "small"; "medium"; "large"; "extralarge" ] // I really wish there was some kind of consistency when it comes to referring to sizes.
@@ -195,12 +200,30 @@ let allShips =
     // and look up the ship asset file in the component index.
     |> Array.choose (fun (entry, macro) -> LoadShipComponents entry macro)
     |> Array.toList
+    |> List.map (fun ship ->
+        // Boron ships are only allowed to equip boron components in their equipment slots.
+        // So, for any ship with the boron DLC, add a unique 'boron' tag to it's equipment slot tags.
+        // we do the same for the boron ship slots when loading those.
+        match ship.DLC with
+        | "ego_dlc_boron" ->
+            let slots =
+                ship.EquipmentSlots
+                |> List.map (fun slot -> {
+                    slot with
+                        Tags = slot.Tags |> Set.add "boron"
+                })
+
+            { ship with EquipmentSlots = slots }
+        | _ -> ship)
 
 
 let findShipByName (shipName: string) =
     // Find a ship by its name, case insensitive.
     allShips |> List.tryFind (fun ship -> ship.Name =? shipName)
 
+let findShipByMacroName (macroName: string) =
+    // Find a ship by its macro name, case insensitive.
+    allShips |> List.tryFind (fun ship -> ship.MacroName =? macroName)
 
 // Get all the assets, and filter them down to only the classes that are ship
 // equipment we need to generation ship loadouts.
@@ -212,6 +235,8 @@ let allShipEquipment =
         "weapon_gen_lasertower_01_mk2"
         "weapon_gen_lasertower_01_mk1"
         "shield_arg_s_combattutorial_01_mk1"
+        "_virtual_"
+        "_story_" // some equipment showing up as 'story'. I assume it's special, so avoid using it.
         "_xen_"
         "_kha_"
         "generic_"
@@ -226,7 +251,7 @@ let allShipEquipment =
             // Find the connection in the assets list of connections that has 'compononent' in its tags.
             // let! will early return if the result is None here. ie, the asset has no component connections.
             let! componentConnection =
-                asset.Connections
+                asset.Asset.Connections
                 |> Array.tryFind (fun connection -> tagStringToList connection.Tags |> List.contains "component")
 
             // Parse the tags string, stripping out  the tags we want to ignore.
@@ -239,15 +264,22 @@ let allShipEquipment =
                 |> Seq.tryHead
                 |> Option.defaultValue "none"
 
+            // If it's a boron ship, add the 'boron' tag to it's tags.
+            let tags =
+                if asset.DLC = "ego_dlc_boron" then
+                    tags.Add "boron"
+                else
+                    tags
+
             return {
                 Name = asset.Name
-                MacroName = asset.Name + "_macro"
+                MacroName = asset.Name // Asset name is the macro. Need to clean up name field later.
                 Class = asset.Class
                 Tags = tags
                 Size = size
                 ComponentName = componentConnection.Name
                 ComponentConnection = componentConnection
-                Connections = asset.Connections
+                Connections = asset.Asset.Connections
             }
         })
     |> List.choose id
@@ -262,7 +294,7 @@ let findMatchingEquipmentForTags (tags: Set<String>) =
     // more than one class of component. eg, some miners can mount both mining and combat turrets.
     // Some ships can mount both 'missile' or 'combat' weapons, and so on.
     let shipEquipmentOneOfTags =
-        set [ "standard"; "highpower"; "missile"; "mining"; "combat" ]
+        set [ "standard"; "highpower"; "missile"; "mining"; "combat"; "advanced" ] // Advanced is used by Boron and Terran
 
     // Find the 'oneOfTags' that are present in the slot's tags.
     // let validOneOfTags = tags |> List.filter (fun tag -> List.contains tag shipEquipmentOneOfTags)
@@ -296,9 +328,28 @@ let findMatchingEquipmentForTags (tags: Set<String>) =
 
 let findMatchingEquipmentForSlot (slot: ShipEquipmentSlot) = findMatchingEquipmentForTags slot.Tags
 
+// Find any asset that includes the specified search tags.
+// Useful for debugging rather than assigning equipment, as it ignores
+// the subtleties relating to matching equipmenmt to slots.
+let findMatchingEquipment (searchTags: Set<String>) (equipment: list<EquipmentInfo>) =
+    // Find an asset by its name, case insensitive.
+    equipment
+    // Filter down to only those that match the tags.
+    |> List.filter (fun equipment ->
+        // Check if any of the connections have the tags we're looking for.
+        searchTags.IsSubsetOf equipment.Tags)
+
+
+let dumpEquipmentInfo (prefix: string) (info: EquipmentInfo) =
+    let tags =
+        info.Tags |> Set.toList |> List.map (fun tag -> tag.Trim()) |> String.concat " "
+
+    printfn "%s%45s %-15s %-10s %-22s | %s" prefix info.Name info.Class info.Size info.ComponentName tags
+
 let dumpAllShipEquipment () =
     printfn "\nAll Equipment:"
-    allShipEquipment |> List.iter (X4.Data.dumpEquipment "")
+    allShipEquipment |> List.iter (dumpEquipmentInfo "")
+
 
 let printShipInfo (ship: ShipInfo) =
     let formatShipSlot (slot: ShipEquipmentSlot) =
@@ -319,9 +370,7 @@ let printShipInfo (ship: ShipInfo) =
     |> Seq.iter (fun slot ->
         printfn "%s" (formatShipSlot slot)
         // Now find, and print out valid equipment for this slot.
-        slot
-        |> findMatchingEquipmentForSlot
-        |> List.iter (X4.Data.dumpEquipment "    - "))
+        slot |> findMatchingEquipmentForSlot |> List.iter (dumpEquipmentInfo "    - "))
 
     printfn "  Equipmment Groups"
 
@@ -330,6 +379,7 @@ let printShipInfo (ship: ShipInfo) =
     |> Seq.iter (fun ((group, slotClass), slots) ->
         printfn "  Group: %-25s x%d  %s " group slots.Length (formatShipSlot slots[0]))
 
+
 let dumpShips () =
     printfn "All Ship Macros:"
 
@@ -337,10 +387,22 @@ let dumpShips () =
         printfn "macro: %s," (ship.MacroName)
 
 
+
+
 // List of all ships that are valid candidates for being generated as abandoned ships.
 let abandonedShipsList =
     // Our filters. Factions we'll look for, and tags we'll omit. Both must be true.
-    let factions = [ "_arg_"; "_par_"; "_tel_"; "_spl_"; "_ter_"; "_atf_"; "_yak_"; "_pir_" ] // Removed boron '_bor_', as they're spawning without engins
+    let factions = [
+        "_arg_"
+        "_par_"
+        "_tel_"
+        "_spl_"
+        "_ter_"
+        "_atf_"
+        "_yak_"
+        "_pir_"
+        "_bor_"
+    ]
 
     let omit = [
         "_xs_"
@@ -350,10 +412,10 @@ let abandonedShipsList =
         "_highcapacity_"
         "ship_spl_xl_battleship_01_a_macro"
         "ship_pir_xl_battleship_01_a_macro" // specific ships that seems unsupported or don't exist in game
-        // Some terran destroyers that are spawning without main guns.
-        "ship_atf_l_destroyer_01_a_macro"
-        "ship_atf_xl_battleship_01_a_macro"
-        "ship_ter_l_destroyer_01_a_macro"
+    // Some terran destroyers that are spawning without main guns. <<should be fixed now with custom loadouts>>
+    //"ship_atf_l_destroyer_01_a_macro"
+    //"ship_atf_xl_battleship_01_a_macro"
+    //"ship_ter_l_destroyer_01_a_macro"
     ]
 
     allShips
@@ -464,12 +526,135 @@ let generateBattlefield (countXL: int) (countL: int) (countM: int) (countS: int)
 // Some ships have custom loadouts, so we need a unique ID for them. Used by ProcessShip.
 let loadoutUniqueId = makeIdGenerator ()
 
-let MaybeCustomLoadout ship = None, ""
-// TODO: ProcessShip needs more data as to ship size/faction, so that we can
-// check if it's a boron ship, or a terran military L or XL to generate a
-// unique loadout.
-// let id = loadoutUniqueId()
-// sprintf "<loadout id=\"%i\">...</loadout>" id
+// Helper to pick a random item from a list. Assumes list is not empty.
+let pickRandom (items: 'a list) =
+    printfn "pickRandom: items.Length = %d" items.Length
+    items.[rand.Next(items.Length)]
+
+// Helper to find matching equipment for a set of tags and pick a random one.
+let pickEquipment tags : EquipmentInfo =
+    printfn "pickEquipment: tags = %A" tags
+    // Terran L turrets are flagged with 'hittable', but there are no L turrets with 'hittable'.
+    // So if there are no matching tags, remove 'hittable' from tags and try again.
+    match findMatchingEquipmentForTags tags with
+    | [] when tags.Contains "hittable" -> findMatchingEquipmentForTags (Set.remove "hittable" tags)
+    | matches -> matches
+    |> pickRandom
+
+
+// Generate a section of XML with a wrapper tag. used for groups and macros.
+// Could use XML classes, but loadouts are so simple that string manipulation is just easier.
+let generateLoadoutSection sectionTag (lines: string list) =
+    $"""
+            <{sectionTag}>
+                {lines |> String.concat "\n                "}
+            </{sectionTag}>"""
+
+let generateSoftwareXml () =
+    $"""
+            <software>
+                <software ware="software_dockmk2"/>
+                <software ware="software_flightassistmk1"/>
+                <software ware="software_scannerlongrangemk2"/>
+                <software ware="software_scannerobjectmk1"/>
+                <software ware="software_targetmk1"/>
+            </software>"""
+
+// Selects a random thruster compatible with the ship's size and thruster tags.
+let generateThrusterXml (ship: ShipInfo) =
+    let thruster = pickEquipment (Set.ofList [ "thruster"; ship.Thruster ])
+
+    $"""
+            <virtualmacros>
+                <thruster macro="{thruster.MacroName}"/>
+            </virtualmacros>"""
+
+let generateGroupLine groupName className count (equipment: EquipmentInfo) =
+    let tagName =
+        if className = "shieldgenerator" then
+            "shields"
+        else
+            className + "s"
+
+    let exactAttr = if count > 1 then $" exact=\"{count}\"" else ""
+    $"""<{tagName} macro="{equipment.MacroName}" path=".." group="{groupName}"{exactAttr}/>"""
+
+// Generates XML for grouped equipment (turrets, shields).
+// Assumes all slots in a group have identical tags, so picks equipment based on the first slot.
+let generateGroupsXml (ship: ShipInfo) =
+    ship.EquipmentSlots
+    |> shipEquipmentGroups
+    |> List.map (fun ((groupName, className), slots) ->
+        printfn "GROUP for %s: %s, %s, %A" ship.Name groupName className slots[0].Tags
+
+        slots[0].Tags
+        |> pickEquipment
+        |> generateGroupLine groupName className slots.Length)
+    |> generateLoadoutSection "groups"
+
+let generateMacroLine className name (equipment: EquipmentInfo) =
+    $"""<{className} macro="{equipment.MacroName}" path="../{name}"/>"""
+
+let generateSynchronizedMacroLines (slots: ShipEquipmentSlot list) =
+    match slots with
+    | [] -> []
+    | first :: _ ->
+        let equipment = pickEquipment first.Tags
+        slots |> List.map (fun slot -> generateMacroLine slot.Class slot.Name equipment)
+
+// Generates XML for ungrouped equipment (main guns, etc.). Picks equipment for each slot independently.
+// EXCEPT for engines and shields - there's more than one slot of them, ensure they're the same.
+let generateMacrosXml (ship: ShipInfo) =
+    let ungroupedSlots =
+        ship.EquipmentSlots |> List.filter (fun slot -> slot.Group.IsNone)
+
+    let engineSlots = ungroupedSlots |> List.filter (fun s -> s.Class = "engine")
+
+    let shieldSlots =
+        ungroupedSlots |> List.filter (fun s -> s.Class = "shieldgenerator")
+
+    let otherSlots =
+        ungroupedSlots
+        |> List.filter (fun s -> s.Class <> "engine" && s.Class <> "shieldgenerator")
+
+    let engineXmlLines = generateSynchronizedMacroLines engineSlots
+    let shieldXmlLines = generateSynchronizedMacroLines shieldSlots
+
+    let otherXmlLines =
+        otherSlots
+        |> List.map (fun slot -> pickEquipment slot.Tags |> generateMacroLine slot.Class slot.Name)
+
+    List.concat [ engineXmlLines; shieldXmlLines; otherXmlLines ]
+    |> generateLoadoutSection "macros"
+
+// Determines if a ship needs a custom loadout (Boron or Terran L/XL Military) and generates it.
+// Loadouts have ammunition and crew sections too (and wares?). We're not setting those currently.
+// see loadouts.xml in various DLC for examples
+let MaybeCustomLoadout (shipName: string) =
+    option {
+        printfn "Starting MaybeCustomLoadout for %s" shipName
+        let! ship = findShipByMacroName shipName
+
+        let isBoron = ship.MacroName.Contains "_bor_"
+        let isTerran = ship.MacroName.Contains "_ter_" || ship.MacroName.Contains "_atf_"
+        let isLargeOrXL = ship.Size = "ship_l" || ship.Size = "ship_xl"
+        let isMilitary = militaryShips |> List.contains ship.MacroName
+
+        printfn "Ship: %s %s %b %b %b %b" shipName ship.Size isBoron isTerran isLargeOrXL isMilitary
+
+        if isBoron || (isTerran && isLargeOrXL && isMilitary) then
+            let id = $"eod_abandoned_ship_loadout_{loadoutUniqueId ()}"
+
+            return
+                (id,
+                 $"""
+        <loadout id="{id}" macro="{ship.MacroName}">
+            {generateMacrosXml ship}
+            {generateGroupsXml ship}
+            {generateThrusterXml ship}
+            {generateSoftwareXml ()}
+        </loadout>""")
+    }
 
 // Generate the XML diff for placing an abandoned ship in the game based
 // on the ship, sector, position and rotation given as parameters.
@@ -483,7 +668,13 @@ let ProcessShip ((ship, sector, (x, y, z), (yaw, pitch, roll)): ShipLocation) =
         (x, y, z)
         (yaw, pitch, roll)
 
-    let loadout, loadoutReference = MaybeCustomLoadout ship
+    // If a custom loadout is needed for this ship, 'MaybeCustomLoadout' returns it's ID, and
+    // the loadout XML itself. We refer to the loadout in the placedObject XML, and return the
+    // loadout XML as a separate element to write out to the loadouts file.
+    let loadoutReference, loadout =
+        match MaybeCustomLoadout ship with
+        | Some(id, xml) -> $"""<loadout ref="{id}" />""", Some xml
+        | None -> "", None
 
     let xml =
         $"""
@@ -499,9 +690,13 @@ let ProcessShip ((ship, sector, (x, y, z), (yaw, pitch, roll)): ShipLocation) =
         </do_if>
     </add>
     """
+
+    if loadout <> None then
+        printfn $"\n==============\nSHIP {ship}\n XML: {xml}\n==============\n, LOADOUT:\n {loadout.Value}"
+
     // Using the textreader instead of XElement.Parse preserves whitespace and carriage returns in our output.
     let xtr = new XmlTextReader(new System.IO.StringReader(xml))
-    loadout, XElement.Load xtr
+    XElement.Load xtr, loadout
 
 // Create a list of random ships, assign them to random sectors, then generate XML that will place
 // them as abandoned ships in the game.
@@ -509,7 +704,7 @@ let ProcessShip ((ship, sector, (x, y, z), (yaw, pitch, roll)): ShipLocation) =
 // We lean slighly towards generated economy ships vs military, though there's plenty of both.
 // there should be, on average, one or two ships per sector.
 let generate_abandoned_ships_file (filename: string) =
-    let loadouts, shipDiff =
+    let shipDiff, loadouts =
         [
             // A bunch of ships in unsafe space to being
             generateRandomMilitaryAbandonedShips 4 "xl" |> List.map ProcessShip
@@ -569,6 +764,18 @@ let generate_abandoned_ships_file (filename: string) =
 
             ]
 
+            // And a terran XL or two
+            [
+                filterBy [ "atf"; "xl"; "battleship" ]
+                |> generateRandomAbandonedShipFromList
+                |> ProcessShip
+            ] // And Asgard!
+            [
+                filterBy [ "atf"; "l"; "destroyer" ]
+                |> generateRandomAbandonedShipFromList
+                |> ProcessShip
+            ] // And Syn.
+
         ]
         |> List.concat
         |> List.unzip
@@ -582,15 +789,17 @@ let generate_abandoned_ships_file (filename: string) =
         "
         )
 
-    // Now add the region changes, one by one, to the the xml diff.
+    // Now add the abandoned ships, one by one, to the the xml diff.
     [|
         for element in shipDiff do
             diff.Add(element)
-            diff.Add(new XText("\n"))
-    |] // Add a newline after each element so the output is readible
-    |> ignore
+            diff.Add(new XText("\n")) // Add a newline after each element so the output is readible
+    |]
+    |> ignore // ignoring because the list comprehension is modifying 'diff' directly, as a csharp object.
+
+    // printfn "%A" (diff.ToString())
 
     // TODO: Write out any loadouts.
-    loadouts |> List.choose id |> ignore
+    loadouts |> List.choose id |> ignore //printfn "%A"
 
     WriteModfiles.write_xml_file "core" filename diff
