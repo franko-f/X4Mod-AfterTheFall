@@ -48,6 +48,7 @@ let shipEquipmentGroups (allSlots: ShipEquipmentSlot list) =
     |> List.choose (fun slot -> slot.Group |> Option.map (fun group -> ((group, slot.Class), slot))) // Filter out anything without a group
     |> List.groupBy fst // New list grouped by group and class of item.
     |> List.map (fun (groupBy, slots) -> (groupBy, List.map snd slots)) // At this point our 'slots' is actually (group,slots) list, due to our previous processing. Reduce down to slots again
+    |> List.filter (fun ((_, className), _) -> className <> "engine") // While engines are listed with a group for L ships, they should always be specified in the macros section.
     |> List.sortBy fst
 
 // Some tags are not relevant for selection/slot match
@@ -57,6 +58,7 @@ let tagsToIgnore =
         "symmetry"
         "symmetry_1"
         "symmetry_2"
+        "symmetry_3"
         "symmetry_right"
         "symmetry_left"
         "platformcollision"
@@ -116,7 +118,10 @@ let parseConnectionForEquipmentSlot (connection: X4Ships.Connection) =
                 Set.intersect tags componentSizeClasses
                 |> Seq.tryHead
                 |> Option.defaultValue "unknown"
-            Group = connection.Group |> Option.map (fun group -> group.Trim())
+            Group =
+                connection.Group
+                |> Option.map (fun group -> group.Trim())
+                |> Option.filter (fun group -> group.Length > 0)
             Tags = tags
         }
 
@@ -289,42 +294,55 @@ let allShipEquipment =
 // In most cases, the all tags on the equpment MUST also match the slot's tags.
 // The exception to this rule is the 'one of' tags, which can be used to permit
 // a range of different 'use cases', like 'mining' or 'combat'.
-let findMatchingEquipmentForTags (tags: Set<String>) =
+let findMatchingEquipmentForTagsImpl (slotTags: Set<String>) =
     // This subset of tags basically give a 'class' to the components. And some slots can handle
     // more than one class of component. eg, some miners can mount both mining and combat turrets.
     // Some ships can mount both 'missile' or 'combat' weapons, and so on.
-    let shipEquipmentOneOfTags =
+    // If the equipment item has one of these tags, then the *slot* must have them too.
+    let OneOfTags =
         set [ "standard"; "highpower"; "missile"; "mining"; "combat"; "advanced" ] // Advanced is used by Boron and Terran
 
-    // Find the 'oneOfTags' that are present in the slot's tags.
-    // let validOneOfTags = tags |> List.filter (fun tag -> List.contains tag shipEquipmentOneOfTags)
-    let validOneOfTags = Set.intersect tags shipEquipmentOneOfTags
 
     // Now filter through all of the ship equipment, finding those that have the oneOfTags,
     // and also match on all the rest of the tags.
+    // This logic really needs to be cleaned up further, though at least it now works.
     allShipEquipment
     |> List.filter (fun equipment ->
-        // so, the match is complicated with a bunch of possilibites.
-        // First: the 'validOneOf' tags: If neither slot, nor item have any of these
-        // then it's fine.
-        // if EITHER of them have any, we need to check for matches.
-        let eAny = Set.intersect equipment.Tags validOneOfTags
-        let sAny = Set.intersect tags validOneOfTags
+        // First check: does the equipment have any 'special' tags that match the valid ones for this slot?
+        let equipmentOneOfTags = Set.intersect equipment.Tags OneOfTags
+        // Find the 'oneOfTags' that are present in the slot's tags.
+        let slotOneOfTags = Set.intersect slotTags OneOfTags
+        // And the equipment tags that match any 'one of' tags in the slot.
+        let eAny = Set.intersect equipment.Tags slotOneOfTags
 
-        if Set.isEmpty eAny && Set.isEmpty sAny then
+        if Set.isEmpty equipmentOneOfTags && Set.isEmpty slotOneOfTags then
             // If neither have any of the 'one of' tags, then just check for exact matches
-            equipment.Tags = tags
-        elif not (Set.isEmpty eAny) && not (Set.isEmpty sAny) && (eAny.IsSubsetOf sAny) then
+            equipment.Tags = slotTags
+        elif not (equipmentOneOfTags.IsSubsetOf slotOneOfTags) then
+            // If the equipment item has one of these tags, then the *slot* must have them too.
+            // e.g. If slot allows ['standard', 'combat'], and equipment has ['standard', 'mining'], it should fail because 'mining' is not allowed.
+            false
+        elif not (Set.isEmpty eAny) then
             // If the equipment tags has a subset of the slot 'any of' tags
             // e.g, equipment is 'mining', slot is ['mining'; 'combat'],
             // then we check to see if the remaining tags match.
-            let eRemainingTags = Set.difference equipment.Tags shipEquipmentOneOfTags
-            let sRemainingTags = Set.difference tags shipEquipmentOneOfTags
+            let eRemainingTags = Set.difference equipment.Tags OneOfTags
+            let sRemainingTags = Set.difference slotTags OneOfTags
             sRemainingTags = eRemainingTags
         else
             // If we reach here, it means one of them has 'one of' tags and the other doesn't.
             //This means that it's not a match.
             false)
+
+let findMatchingEquipmentForTags (tags: Set<String>) =
+    // Terran L turrets are flagged with 'hittable', but there are no L turrets with 'hittable'.
+    // So if there are no matching tags, remove 'hittable' from tags and try again.
+    // In other cases, 'hittable' is important, as there might be two versions of M turrets, for example.
+    // One for M ships, where they are not hittable, and one for L ships.
+    match findMatchingEquipmentForTagsImpl tags with
+    | [] when tags.Contains "hittable" -> findMatchingEquipmentForTagsImpl (Set.remove "hittable" tags)
+    | matches -> matches
+
 
 let findMatchingEquipmentForSlot (slot: ShipEquipmentSlot) = findMatchingEquipmentForTags slot.Tags
 
@@ -339,6 +357,16 @@ let findMatchingEquipment (searchTags: Set<String>) (equipment: list<EquipmentIn
         // Check if any of the connections have the tags we're looking for.
         searchTags.IsSubsetOf equipment.Tags)
 
+
+// Helper to find matching equipment for a set of tags and pick a random one.
+let pickEquipment tags : EquipmentInfo =
+    // Helper to pick a random item from a list. Assumes list is not empty.
+    let pickRandom (items: 'a list) =
+        printfn "pickRandom: items.Length = %d" items.Length
+        items.[rand.Next(items.Length)]
+
+    printfn "pickEquipment: tags = %A" tags
+    findMatchingEquipmentForTags tags |> pickRandom
 
 let dumpEquipmentInfo (prefix: string) (info: EquipmentInfo) =
     let tags =
@@ -358,7 +386,7 @@ let printShipInfo (ship: ShipInfo) =
             slot.Name
             slot.Class
             slot.Size
-            (Option.defaultValue "" slot.Group)
+            (Option.defaultValue "---" slot.Group)
             (slot.Tags |> Seq.map (fun tag -> tag.Trim()) |> String.concat " ")
 
     // Print the ship info in a nice format.
@@ -526,22 +554,6 @@ let generateBattlefield (countXL: int) (countL: int) (countM: int) (countS: int)
 // Some ships have custom loadouts, so we need a unique ID for them. Used by ProcessShip.
 let loadoutUniqueId = makeIdGenerator ()
 
-// Helper to pick a random item from a list. Assumes list is not empty.
-let pickRandom (items: 'a list) =
-    printfn "pickRandom: items.Length = %d" items.Length
-    items.[rand.Next(items.Length)]
-
-// Helper to find matching equipment for a set of tags and pick a random one.
-let pickEquipment tags : EquipmentInfo =
-    printfn "pickEquipment: tags = %A" tags
-    // Terran L turrets are flagged with 'hittable', but there are no L turrets with 'hittable'.
-    // So if there are no matching tags, remove 'hittable' from tags and try again.
-    match findMatchingEquipmentForTags tags with
-    | [] when tags.Contains "hittable" -> findMatchingEquipmentForTags (Set.remove "hittable" tags)
-    | matches -> matches
-    |> pickRandom
-
-
 // Generate a section of XML with a wrapper tag. used for groups and macros.
 // Could use XML classes, but loadouts are so simple that string manipulation is just easier.
 let generateLoadoutSection sectionTag (lines: string list) =
@@ -603,10 +615,11 @@ let generateSynchronizedMacroLines (slots: ShipEquipmentSlot list) =
         slots |> List.map (fun slot -> generateMacroLine slot.Class slot.Name equipment)
 
 // Generates XML for ungrouped equipment (main guns, etc.). Picks equipment for each slot independently.
-// EXCEPT for engines and shields - there's more than one slot of them, ensure they're the same.
+// EXCEPT for engines and shields - if there's more than one slot of them, ensure they're the same.
 let generateMacrosXml (ship: ShipInfo) =
     let ungroupedSlots =
-        ship.EquipmentSlots |> List.filter (fun slot -> slot.Group.IsNone)
+        ship.EquipmentSlots
+        |> List.filter (fun slot -> slot.Group.IsNone || slot.Class = "engine")
 
     let engineSlots = ungroupedSlots |> List.filter (fun s -> s.Class = "engine")
 
