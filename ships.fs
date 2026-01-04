@@ -362,10 +362,10 @@ let findMatchingEquipment (searchTags: Set<String>) (equipment: list<EquipmentIn
 let pickEquipment tags : EquipmentInfo =
     // Helper to pick a random item from a list. Assumes list is not empty.
     let pickRandom (items: 'a list) =
-        printfn "pickRandom: items.Length = %d" items.Length
+        // printfn "pickRandom: items.Length = %d" items.Length
         items.[rand.Next(items.Length)]
 
-    printfn "pickEquipment: tags = %A" tags
+    // printfn "pickEquipment: tags = %A" tags
     findMatchingEquipmentForTags tags |> pickRandom
 
 let dumpEquipmentInfo (prefix: string) (info: EquipmentInfo) =
@@ -597,7 +597,7 @@ let generateGroupsXml (ship: ShipInfo) =
     ship.EquipmentSlots
     |> shipEquipmentGroups
     |> List.map (fun ((groupName, className), slots) ->
-        printfn "GROUP for %s: %s, %s, %A" ship.Name groupName className slots[0].Tags
+        // printfn "GROUP for %s: %s, %s, %A" ship.Name groupName className slots[0].Tags
 
         slots[0].Tags
         |> pickEquipment
@@ -645,7 +645,6 @@ let generateMacrosXml (ship: ShipInfo) =
 // see loadouts.xml in various DLC for examples
 let MaybeCustomLoadout (shipName: string) =
     option {
-        printfn "Starting MaybeCustomLoadout for %s" shipName
         let! ship = findShipByMacroName shipName
 
         let isBoron = ship.MacroName.Contains "_bor_"
@@ -653,20 +652,24 @@ let MaybeCustomLoadout (shipName: string) =
         let isLargeOrXL = ship.Size = "ship_l" || ship.Size = "ship_xl"
         let isMilitary = militaryShips |> List.contains ship.MacroName
 
-        printfn "Ship: %s %s %b %b %b %b" shipName ship.Size isBoron isTerran isLargeOrXL isMilitary
+        // printfn "Ship: %s %s %b %b %b %b" shipName ship.Size isBoron isTerran isLargeOrXL isMilitary
 
         if isBoron || (isTerran && isLargeOrXL && isMilitary) then
+            printfn "    Generating CustomLoadout for %s" shipName
             let id = $"eod_abandoned_ship_loadout_{loadoutUniqueId ()}"
 
             return
                 (id,
                  $"""
-        <loadout id="{id}" macro="{ship.MacroName}">
-            {generateMacrosXml ship}
-            {generateGroupsXml ship}
-            {generateThrusterXml ship}
-            {generateSoftwareXml ()}
-        </loadout>""")
+        <add sel="/loadouts">
+            <loadout id="{id}" macro="{ship.MacroName}">
+                {generateMacrosXml ship}
+                {generateGroupsXml ship}
+                {generateThrusterXml ship}
+                {generateSoftwareXml ()}
+            </loadout>
+        </add>
+        """)
     }
 
 // Generate the XML diff for placing an abandoned ship in the game based
@@ -704,20 +707,22 @@ let ProcessShip ((ship, sector, (x, y, z), (yaw, pitch, roll)): ShipLocation) =
     </add>
     """
 
-    if loadout <> None then
-        printfn $"\n==============\nSHIP {ship}\n XML: {xml}\n==============\n, LOADOUT:\n {loadout.Value}"
-
     // Using the textreader instead of XElement.Parse preserves whitespace and carriage returns in our output.
-    let xtr = new XmlTextReader(new System.IO.StringReader(xml))
-    XElement.Load xtr, loadout
+    let shipXML = XElement.Load(new XmlTextReader(new System.IO.StringReader(xml)))
+
+    let loadoutXML =
+        loadout
+        |> Option.map (fun x -> XElement.Load(new XmlTextReader(new System.IO.StringReader(x))))
+
+    shipXML, loadoutXML
 
 // Create a list of random ships, assign them to random sectors, then generate XML that will place
 // them as abandoned ships in the game.
 // We don't want it completely random, as we want to make sure there's a good mix of ships in the game.
 // We lean slighly towards generated economy ships vs military, though there's plenty of both.
 // there should be, on average, one or two ships per sector.
-let generate_abandoned_ships_file (filename: string) =
-    let shipDiff, loadouts =
+let generate_abandoned_ships_file (placedObjectsFilename: string) (loadoutFilename: string) =
+    let ships, loadouts =
         [
             // A bunch of ships in unsafe space to being
             generateRandomMilitaryAbandonedShips 4 "xl" |> List.map ProcessShip
@@ -793,26 +798,27 @@ let generate_abandoned_ships_file (filename: string) =
         |> List.concat
         |> List.unzip
 
-    // Create the new XML Diff document to contain our region additions
-    let diff =
+    // Create the new XML Diff documents to contain our loadouts and placed ships
+    let xmlTemplate =
         XElement.Parse(
-            "<?xml version=\"1.0\" encoding=\"utf-8\"?>
-        <diff>
-        </diff>
-        "
+            """<?xml version="1.0" encoding="utf-8"?>
+        <diff xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" >
+        </diff>"""
+        )
+
+    let placedXML = XElement(xmlTemplate)
+    let loadoutXML = XElement(xmlTemplate)
+
+    let addElementsToDiff (diff: XElement) (elements: XElement list) =
+        elements
+        |> List.iter (fun element ->
+            diff.Add(element)
+            diff.Add(new XText("\n")) // Add a newline after each element so the output is readible
         )
 
     // Now add the abandoned ships, one by one, to the the xml diff.
-    [|
-        for element in shipDiff do
-            diff.Add(element)
-            diff.Add(new XText("\n")) // Add a newline after each element so the output is readible
-    |]
-    |> ignore // ignoring because the list comprehension is modifying 'diff' directly, as a csharp object.
+    addElementsToDiff placedXML ships
+    addElementsToDiff loadoutXML (loadouts |> List.choose id)
 
-    // printfn "%A" (diff.ToString())
-
-    // TODO: Write out any loadouts.
-    loadouts |> List.choose id |> ignore //printfn "%A"
-
-    WriteModfiles.write_xml_file "core" filename diff
+    WriteModfiles.write_xml_file "core" placedObjectsFilename placedXML
+    WriteModfiles.write_xml_file "core" loadoutFilename loadoutXML

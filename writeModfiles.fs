@@ -59,6 +59,15 @@ let getDLCOutDirectory (dlc: string) = DLCs.[dlc]
 let getDLCFileName dlc filename =
     (getDLCOutDirectory dlc) + "/" + filename
 
+let clean_mod_directory () =
+    if System.IO.Directory.Exists(modOutDirectory) then
+        try
+            System.IO.Directory.Delete(modOutDirectory, true)
+            printfn "Cleaned old mod directory: %s" modOutDirectory
+        with ex ->
+            printfn "Error cleaning mod directory: %s" ex.Message
+
+
 // Write our XML output to a directory called 'mod'. If the directrory doesn't exist, create it.
 let write_xml_file (dlc: string) (filename: string) (xml: XElement) =
     let fullname = (getDLCFileName dlc filename)
