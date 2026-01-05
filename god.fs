@@ -31,6 +31,7 @@ module X4.God
 open System.Xml.Linq
 open X4.Utilities
 open X4.Data
+open X4.Territories
 
 
 // the 'log' functions just extract a bit of data about a station, and log it
@@ -415,7 +416,7 @@ let generateGateDefenseStations () =
 // There are several new xenon stations we want to add to specific sectors defined in 'Data.newXenonStations'.
 // Here we create the XML oibjects that represent these in the approriate location.
 let addNewXenonStations (xenonShipyard: XElement) (xenonWharf: XElement) = [
-    for xenonStation in Data.newXenonStations do
+    for xenonStation in Territories.newXenonStations do
         // Extract the type of station, and it's location information. Create the apporpriate station XElement
         let (station, locClass, location) =
             match xenonStation with

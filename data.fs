@@ -399,22 +399,6 @@ let allStations, allProducts =
 
     allStations, allProducts
 
-// Type that specifies a station type and the class, locationj it will appear in.
-// ego: XenonShipyard "sector" "cluster_110_sector001_macro"
-type XenonStation =
-    | XenonShipyard of string * string
-    | XenonWharf of string * string
-
-// add new Xenon shipyards/wharfs to the following clusters:
-let newXenonStations = [
-    XenonShipyard("sector", "Cluster_46_sector001_macro") // Morningstar IV
-    XenonWharf("sector", "Cluster_46_sector001_macro")
-
-    XenonShipyard("sector", "Cluster_100_sector001_macro") // Asteroid belt
-    XenonShipyard("sector", "Cluster_109_sector001_macro") // Uranus
-
-    XenonWharf("sector", "Cluster_413_sector001_macro") // Tharka Ravine IV: Tharkas Fall
-]
 
 // ===== FINISHED LOADING DATA FROM XML FILES =====
 
