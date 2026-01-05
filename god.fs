@@ -33,6 +33,8 @@ open X4.Utilities
 open X4.Data
 open X4.Territories
 
+let ProductionRatio = 0.4 // only 0.4 of the faction's production factories will be left
+
 
 // the 'log' functions just extract a bit of data about a station, and log it
 // to the terminal for debugging and tracking purposes.
@@ -356,8 +358,8 @@ let processProduct (product: X4WorldStart.Product) =
     // can spawn all their factories in the slightly less bad .4 sunlight sector.
     //    Some (product_replace_xml product.Id "sector" ( Option.defaultValue 32 product.Quota.Sector * 2) )
     | _ ->
-        let divideAndRoundUp dividend divisor = ((dividend - 1) / divisor) + 1 // We want to round UP the result to ensure we don't ever get a 0 quota.
-        Some(product_replace_xml product.Id "galaxy" (divideAndRoundUp product.Quota.Galaxy 2)) // Everyone else gets half the quota.
+        let newGalaxyQuota = (float product.Quota.Galaxy) * ProductionRatio |> ceil |> int
+        Some(product_replace_xml product.Id "galaxy" newGalaxyQuota) // Everyone else gets half the quota.
 
 
 // Ok, now to generate the new defense stations that we need around each unsage gate.

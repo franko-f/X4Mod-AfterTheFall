@@ -101,7 +101,8 @@ let territories = [
     // 7.0 added new sectors which made the HOP placement a lot easier than before.
     { Territory.Default with faction = "holyorder"; cluster = "Cluster_35_macro"; resources=["helium"; "methane"; "ice"; "minerals"; "minerals"] }  // Lasting Vengence
     { Territory.Default with faction = "holyorder"; cluster = "Cluster_36_macro"; resources=["minerals"; "scrap"; "helium"; "methane"] }  // Cardinals Redress =
-    { Territory.Default with faction = "holyorder"; cluster = "Cluster_714_macro"; resources=["minerals"; "methane"; "helium"] }          // 7.0 introduces the perfectly placed 'Freedoms Reach' just under cardinals redress. We'll add a few resources though.
+    { Territory.Default with faction = "holyorder"; cluster = "Cluster_11_macro"; resources=["minerals"; "methane"; "helium"] }          // Pontifax claim. Separated by one sector, but very close gates. Still can get messy though, and kill HOP traders if Zenon XL camps gate. Which tends to happen...
+ //   { Territory.Default with faction = "holyorder"; cluster = "Cluster_714_macro"; resources=["minerals"; "methane"; "helium"] }          // 7.0 introduces the perfectly placed 'Freedoms Reach' just under cardinals redress. We'll add a few resources though. For some reason not spawning station though. Removing.
 
     // split: zyarth. freesplit: free families
     { Territory.Default with faction = "split";     cluster = "Cluster_405_macro"; resources=List.concat([["minerals"; "minerals"; "methane"; "hydrogen"]; standardResources1stHalf]) }  // Zyarth Dominion IV. These sectors are completely without resources, so through on some extra for ZYA
