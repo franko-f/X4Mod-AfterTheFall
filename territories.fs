@@ -42,6 +42,7 @@ let neutralClusters = [
     "Cluster_116_macro"     // Oort Cloud
     "Cluster_13_macro"      // second contact - Give ARG/ANt some breathing room, just a little, before Xenon storm through.
     "Cluster_09_macro"      // Bright promise - again, sector between TEL and PAR, to give a little bit of time before xenon play havoc
+    "Cluster_24_macro"      // Holy Vision - Since HOP is split in two, make the sector between neutral to start to give them some breathing room.
 ]
 
 // Type that specifies a station type and the class, locationj it will appear in.
@@ -62,6 +63,12 @@ let newXenonStations = [
 
     XenonWharf("sector", "Cluster_705_sector001_macro") // Nopoleas Memorial
     XenonShipyard("sector", "Cluster_722_sector001_macro") // Sanctum Verge
+
+    // Since we made Holy Vision (cluster_24_macro) a neutral sector, we'll add Xenon stations that
+    // would have spawned there nearby.
+    XenonShipyard("sector", "Cluster_12_sector001_macro") // True Sight.
+    XenonWharf("sector", "Cluster_12_sector001_macro") // True Sight.
+    XenonWharf("sector", "Cluster_725_sector001_macro") // Void of Opportunity
 ]
 
 

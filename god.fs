@@ -33,7 +33,7 @@ open X4.Utilities
 open X4.Data
 open X4.Territories
 
-let ProductionRatio = 0.4 // only 0.4 of the faction's production factories will be left
+let ProductionRatio = 0.35 // only about a third of the faction's production factories will be left
 
 
 // the 'log' functions just extract a bit of data about a station, and log it

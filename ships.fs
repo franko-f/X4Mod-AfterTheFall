@@ -219,6 +219,18 @@ let allShips =
                 })
 
             { ship with EquipmentSlots = slots }
+
+        // Same for terran in order to try resolve issues with ATF L/XL loadouts not being able to be repaired/modified.
+        | "ego_dlc_terran" ->
+            let slots =
+                ship.EquipmentSlots
+                |> List.map (fun slot -> {
+                    slot with
+                        Tags = slot.Tags |> Set.add "terran"
+                })
+
+            { ship with EquipmentSlots = slots }
+
         | _ -> ship)
 
 
@@ -269,12 +281,12 @@ let allShipEquipment =
                 |> Seq.tryHead
                 |> Option.defaultValue "none"
 
-            // If it's a boron ship, add the 'boron' tag to it's tags.
+            // If it's a boron or terran ship, add a tag to help with loadout generation.
             let tags =
-                if asset.DLC = "ego_dlc_boron" then
-                    tags.Add "boron"
-                else
-                    tags
+                match asset.DLC with
+                | "ego_dlc_boron" -> tags.Add "boron"
+                | "ego_dlc_terran" -> tags.Add "terran"
+                | _ -> tags
 
             return {
                 Name = asset.Name
@@ -596,6 +608,7 @@ let generateGroupLine groupName className count (equipment: EquipmentInfo) =
 let generateGroupsXml (ship: ShipInfo) =
     ship.EquipmentSlots
     |> shipEquipmentGroups
+    |> List.sortBy (fun (groupName, _className) -> groupName)
     |> List.map (fun ((groupName, className), slots) ->
         // printfn "GROUP for %s: %s, %s, %A" ship.Name groupName className slots[0].Tags
 
@@ -612,7 +625,10 @@ let generateSynchronizedMacroLines (slots: ShipEquipmentSlot list) =
     | [] -> []
     | first :: _ ->
         let equipment = pickEquipment first.Tags
-        slots |> List.map (fun slot -> generateMacroLine slot.Class slot.Name equipment)
+
+        slots
+        |> List.sortBy (fun x -> x.Name)
+        |> List.map (fun slot -> generateMacroLine slot.Class slot.Name equipment)
 
 // Generates XML for ungrouped equipment (main guns, etc.). Picks equipment for each slot independently.
 // EXCEPT for engines and shields - if there's more than one slot of them, ensure they're the same.
@@ -623,18 +639,18 @@ let generateMacrosXml (ship: ShipInfo) =
 
     let engineSlots = ungroupedSlots |> List.filter (fun s -> s.Class = "engine")
 
-    let shieldSlots =
-        ungroupedSlots |> List.filter (fun s -> s.Class = "shieldgenerator")
+    let shieldSlots = ungroupedSlots |> List.filter (fun s -> s.Class = "shield")
 
     let otherSlots =
         ungroupedSlots
-        |> List.filter (fun s -> s.Class <> "engine" && s.Class <> "shieldgenerator")
+        |> List.filter (fun s -> s.Class <> "engine" && s.Class <> "shield")
 
     let engineXmlLines = generateSynchronizedMacroLines engineSlots
     let shieldXmlLines = generateSynchronizedMacroLines shieldSlots
 
     let otherXmlLines =
         otherSlots
+        |> List.sortBy (fun x -> x.Name)
         |> List.map (fun slot -> pickEquipment slot.Tags |> generateMacroLine slot.Class slot.Name)
 
     List.concat [ engineXmlLines; shieldXmlLines; otherXmlLines ]
@@ -724,6 +740,7 @@ let ProcessShip ((ship, sector, (x, y, z), (yaw, pitch, roll)): ShipLocation) =
 let generate_abandoned_ships_file (placedObjectsFilename: string) (loadoutFilename: string) =
     let ships, loadouts =
         [
+
             // A bunch of ships in unsafe space to being
             generateRandomMilitaryAbandonedShips 4 "xl" |> List.map ProcessShip
             generateRandomMilitaryAbandonedShips 6 "l" |> List.map ProcessShip
@@ -734,13 +751,30 @@ let generate_abandoned_ships_file (placedObjectsFilename: string) (loadoutFilena
             generateRandomEconomyAbandonedShips 8 "m" |> List.map ProcessShip
             generateRandomEconomyAbandonedShips 6 "s" |> List.map ProcessShip
             [
+                // Make sure there's at least one Raptor!
                 filterBy [ "spl"; "xl"; "carrier" ]
                 |> generateRandomAbandonedShipFromList
                 |> ProcessShip
-            ] // Make sure there's at least one Raptor!
-            // Until we figure out how to generate these with faction specific equipment, we'll leave them out. Currently, they're spawning without main batteries.
-            //[filterBy ["atf"; "xl"; "battleship"] |> generateRandomAbandonedShipFromList |> ProcessShip]   // And Asgard!
-            //[filterBy ["atf"; "l"; "destroyer"]   |> generateRandomAbandonedShipFromList |> ProcessShip]     // And Syn.
+            ]
+            [
+                // And Asgard!
+                filterBy [ "atf"; "xl"; "battleship" ]
+                |> generateRandomAbandonedShipFromList
+                |> ProcessShip
+            ]
+            [
+                // And Syn.
+                filterBy [ "atf"; "l"; "destroyer" ]
+                |> generateRandomAbandonedShipFromList
+                |> ProcessShip
+            ]
+            [
+                // Guppy, because they're fun
+                filterBy [ "bor"; "l"; "carrier" ]
+                |> generateRandomAbandonedShipFromList
+                |> ProcessShip
+            ]
+
 
             // Lets generate a few battlefields of varying sizes
             generateBattlefield 1 3 2 2 |> List.map ProcessShip
@@ -782,17 +816,38 @@ let generate_abandoned_ships_file (placedObjectsFilename: string) (loadoutFilena
 
             ]
 
-            // And a terran XL or two
-            [
-                filterBy [ "atf"; "xl"; "battleship" ]
-                |> generateRandomAbandonedShipFromList
-                |> ProcessShip
-            ] // And Asgard!
-            [
-                filterBy [ "atf"; "l"; "destroyer" ]
-                |> generateRandomAbandonedShipFromList
-                |> ProcessShip
-            ] // And Syn.
+        // // Generate ships in specific sector to test loadouts for boron/terran
+        // [
+        //     filterBy [ "atf"; "xl"; "battleship" ]
+        //     |> generateRandomAbandonedShipFromListInSector "Cluster_01_Sector002_macro"
+        //     |> ProcessShip
+        // ]
+        // [
+        //     filterBy [ "atf"; "l"; "destroyer" ]
+        //     |> generateRandomAbandonedShipFromListInSector "Cluster_01_Sector002_macro"
+        //     |> ProcessShip
+        // ]
+        // [
+        //     filterBy [ "ter"; "l"; "destroyer" ]
+        //     |> generateRandomAbandonedShipFromListInSector "Cluster_01_Sector002_macro"
+        //     |> ProcessShip
+        // ]
+        // [
+        //     filterBy [ "spl"; "l"; "destroyer" ]
+        //     |> generateRandomAbandonedShipFromListInSector "Cluster_01_Sector002_macro"
+        //     |> ProcessShip
+        // ]
+        // [
+        //     filterBy [ "bor"; "xl"; "carrier" ]
+        //     |> generateRandomAbandonedShipFromListInSector "Cluster_01_Sector002_macro"
+        //     |> ProcessShip
+        // ]
+        // [
+        //     filterBy [ "bor"; "l"; "miner" ]
+        //     |> generateRandomAbandonedShipFromListInSector "Cluster_01_Sector002_macro"
+        //     |> ProcessShip
+        // ]
+
 
         ]
         |> List.concat

@@ -179,6 +179,29 @@ Lets add a little excitement to the terrans day, and stop them steamrolling thro
     </subordinates>
   </job>
 
+ <!-- Since Holy Vision is now 'neutral', add a patrol to make it tougher for HOP to just casually claim it, and
+     to interfere with trading between sectors -->
+
+  <job id="xenon_frigate_patrol_m_sector_hop_holy_vision" name="{20204,3401}" comment="asymmetrical">
+    <modifiers commandeerable="true"/>
+    <orders>
+      <order order="Patrol" default="true">
+        <param name="range" value="class.sector"/>
+      </order>
+    </orders>
+    <category faction="xenon" tags="[factionlogic, military, frigate]" size="ship_m"/>
+    <quota cluster="4" sector="4"/>
+    <location class="cluster" macro="Cluster_24_macro" faction="xenon" relation="self" comparison="exact" matchextension="false"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="xenon" tags="[military, medium]" size="ship_m"/>
+      <owner exact="xenon" overridenpc="true"/>
+    </ship>
+    <subordinates>
+      <subordinate job="xenon_frigate_escort_m"/>
+    </subordinates>
+  </job>
+
 
 </add>
 </diff>
