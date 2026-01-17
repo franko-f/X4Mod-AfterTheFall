@@ -190,7 +190,7 @@ Lets add a little excitement to the terrans day, and stop them steamrolling thro
       </order>
     </orders>
     <category faction="xenon" tags="[factionlogic, military, frigate]" size="ship_m" />
-    <quota cluster="6" sector="6" />
+    <quota cluster="3" sector="3" />
     <location class="sector" macro="Cluster_24_Sector001_macro" matchextension="false" />
     <environment buildatshipyard="true" />
     <ship>

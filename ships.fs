@@ -741,7 +741,7 @@ let generate_abandoned_ships_file (placedObjectsFilename: string) (loadoutFilena
     let ships, loadouts =
         [
 
-            // A bunch of ships in unsafe space to being
+            // A bunch of ships in unsafe space to begin
             generateRandomMilitaryAbandonedShips 4 "xl" |> List.map ProcessShip
             generateRandomMilitaryAbandonedShips 6 "l" |> List.map ProcessShip
             generateRandomMilitaryAbandonedShips 6 "m" |> List.map ProcessShip
@@ -750,6 +750,48 @@ let generate_abandoned_ships_file (placedObjectsFilename: string) (loadoutFilena
             generateRandomEconomyAbandonedShips 12 "l" |> List.map ProcessShip
             generateRandomEconomyAbandonedShips 8 "m" |> List.map ProcessShip
             generateRandomEconomyAbandonedShips 6 "s" |> List.map ProcessShip
+
+
+            // Lets generate a few battlefields of varying sizes
+            generateBattlefield 1 3 2 2 |> List.map ProcessShip
+            generateBattlefield 0 3 3 0 |> List.map ProcessShip
+            generateBattlefield 0 1 3 4 |> List.map ProcessShip
+            generateBattlefield 0 0 3 6 |> List.map ProcessShip
+            generateBattlefield 0 0 6 3 |> List.map ProcessShip
+
+            // followed by a bunch of M & S in safe space.
+            [
+                for i in 1..5 ->
+                    militaryShips
+                    |> filterListBy [ "m" ]
+                    |> (generateRandomAbandonedShipFromListInSector (X4.Data.selectRandomSafeSector().Name))
+                    |> ProcessShip
+                for i in 1..6 ->
+                    economyShips
+                    |> filterListBy [ "m" ]
+                    |> (generateRandomAbandonedShipFromListInSector (X4.Data.selectRandomSafeSector().Name))
+                    |> ProcessShip
+                for i in 1..6 ->
+                    militaryShips
+                    |> filterListBy [ "s" ]
+                    |> (generateRandomAbandonedShipFromListInSector (X4.Data.selectRandomSafeSector().Name))
+                    |> ProcessShip
+                for i in 1..8 ->
+                    economyShips
+                    |> filterListBy [ "s" ]
+                    |> (generateRandomAbandonedShipFromListInSector (X4.Data.selectRandomSafeSector().Name))
+                    |> ProcessShip
+
+                // ok, a couple large l economy ship.
+                for i in 1..2 ->
+                    economyShips
+                    |> filterListBy [ "l" ]
+                    |> (generateRandomAbandonedShipFromListInSector (X4.Data.selectRandomSafeSector().Name))
+                    |> ProcessShip
+
+            ]
+
+            // And finally a few individual ships
             [
                 // Make sure there's at least one Raptor!
                 filterBy [ "spl"; "xl"; "carrier" ]
@@ -773,47 +815,6 @@ let generate_abandoned_ships_file (placedObjectsFilename: string) (loadoutFilena
                 filterBy [ "bor"; "l"; "carrier" ]
                 |> generateRandomAbandonedShipFromList
                 |> ProcessShip
-            ]
-
-
-            // Lets generate a few battlefields of varying sizes
-            generateBattlefield 1 3 2 2 |> List.map ProcessShip
-            generateBattlefield 0 3 4 0 |> List.map ProcessShip
-            generateBattlefield 0 1 4 5 |> List.map ProcessShip
-            generateBattlefield 0 0 4 8 |> List.map ProcessShip
-            generateBattlefield 0 0 8 2 |> List.map ProcessShip
-
-
-            // followed by a bunch of M & S in safe space.
-            [
-                for i in 1..6 ->
-                    militaryShips
-                    |> filterListBy [ "m" ]
-                    |> (generateRandomAbandonedShipFromListInSector (X4.Data.selectRandomSafeSector().Name))
-                    |> ProcessShip
-                for i in 1..8 ->
-                    economyShips
-                    |> filterListBy [ "m" ]
-                    |> (generateRandomAbandonedShipFromListInSector (X4.Data.selectRandomSafeSector().Name))
-                    |> ProcessShip
-                for i in 1..8 ->
-                    militaryShips
-                    |> filterListBy [ "s" ]
-                    |> (generateRandomAbandonedShipFromListInSector (X4.Data.selectRandomSafeSector().Name))
-                    |> ProcessShip
-                for i in 1..10 ->
-                    economyShips
-                    |> filterListBy [ "s" ]
-                    |> (generateRandomAbandonedShipFromListInSector (X4.Data.selectRandomSafeSector().Name))
-                    |> ProcessShip
-
-                // ok, a couple large l economy ship.
-                for i in 1..2 ->
-                    economyShips
-                    |> filterListBy [ "l" ]
-                    |> (generateRandomAbandonedShipFromListInSector (X4.Data.selectRandomSafeSector().Name))
-                    |> ProcessShip
-
             ]
 
         // // Generate ships in specific sector to test loadouts for boron/terran

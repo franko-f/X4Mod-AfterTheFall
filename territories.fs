@@ -42,7 +42,7 @@ let neutralClusters = [
     "Cluster_116_macro"     // Oort Cloud
     "Cluster_13_macro"      // second contact - Give ARG/ANt some breathing room, just a little, before Xenon storm through.
     "Cluster_09_macro"      // Bright promise - again, sector between TEL and PAR, to give a little bit of time before xenon play havoc
-    "Cluster_24_macro"      // Holy Vision - Since HOP is split in two, make the sector between neutral to start to give them some breathing room.
+    //"Cluster_24_macro"      // Holy Vision - Since HOP is split in two, make the sector between neutral to start to give them some breathing room.
 ]
 
 // Type that specifies a station type and the class, locationj it will appear in.
@@ -111,8 +111,8 @@ let territories = [
     // 7.0 added new sectors which made the HOP placement a lot easier than before.
     { Territory.Default with faction = "holyorder"; cluster = "Cluster_35_macro"; resources=["helium"; "methane"; "ice"; "minerals"; "minerals"] }  // Lasting Vengence
     { Territory.Default with faction = "holyorder"; cluster = "Cluster_36_macro"; resources=["minerals"; "scrap"; "helium"; "methane"] }  // Cardinals Redress =
-    { Territory.Default with faction = "holyorder"; cluster = "Cluster_11_macro"; resources=["minerals"; "methane"; "helium"] }          // Pontifax claim. Separated by one sector, but very close gates. Still can get messy though, and kill HOP traders if Zenon XL camps gate. Which tends to happen...
- //   { Territory.Default with faction = "holyorder"; cluster = "Cluster_714_macro"; resources=["minerals"; "methane"; "helium"] }          // 7.0 introduces the perfectly placed 'Freedoms Reach' just under cardinals redress. We'll add a few resources though. For some reason not spawning station though. Removing.
+    { Territory.Default with faction = "holyorder"; cluster = "Cluster_714_macro"; resources=["minerals"; "minerals"; "methane"; "helium"] }          // 7.0 introduces the perfectly placed 'Freedoms Reach' just under cardinals redress. We'll add a few resources though. For some reason not spawning station though. Removing.
+    // { Territory.Default with faction = "holyorder"; cluster = "Cluster_11_macro"; resources=["minerals"; "methane"; "helium"] }        // Pontifax claim. I've given this back to Xenon, as it broke them up too much, reducing pressure on places like Second contact and holy vision.
 
     // split: zyarth. freesplit: free families
     { Territory.Default with faction = "split";     cluster = "Cluster_405_macro"; resources=List.concat([["minerals"; "minerals"; "methane"; "hydrogen"]; standardResources1stHalf]) }  // Zyarth Dominion IV. These sectors are completely without resources, so through on some extra for ZYA
