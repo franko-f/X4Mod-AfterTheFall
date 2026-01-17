@@ -55,6 +55,9 @@ let X4GodFilePirate =
 let X4GodFileBoron =
     X4UnpackedDataFolder + "/extensions/ego_dlc_boron/libraries/god.xml" // Core game data.
 
+let X4GodFileTimelines =
+    X4UnpackedDataFolder + "/extensions/ego_dlc_timelines/libraries/god.xml" // Core game data.
+
 [<Literal>]
 let X4ClusterFileCore = X4UnpackedDataFolder + "/maps/xu_ep2_universe/clusters.xml"
 
@@ -73,6 +76,10 @@ let X4ClusterFilePirate =
 let X4ClusterFileBoron =
     X4UnpackedDataFolder
     + "/extensions/ego_dlc_boron/maps/xu_ep2_universe/dlc_boron_clusters.xml"
+
+let X4ClusterFileTimelines =
+    X4UnpackedDataFolder
+    + "/extensions/ego_dlc_timelines/maps/xu_ep2_universe/dlc7_clusters.xml"
 
 [<Literal>]
 let X4SectorFileCore = X4UnpackedDataFolder + "/maps/xu_ep2_universe/sectors.xml" // This core sectors file needs to be a literal, as it's also our type provider
@@ -93,6 +100,10 @@ let X4SectorFileBoron =
     X4UnpackedDataFolder
     + "/extensions/ego_dlc_boron/maps/xu_ep2_universe/dlc_boron_sectors.xml"
 
+let X4SectorFileTimelines =
+    X4UnpackedDataFolder
+    + "/extensions/ego_dlc_timelines/maps/xu_ep2_universe/dlc7_sectors.xml"
+
 [<Literal>]
 let X4ZoneFileCore = X4UnpackedDataFolder + "/maps/xu_ep2_universe/zones.xml"
 
@@ -111,6 +122,10 @@ let X4ZoneFilePirate =
 let X4ZoneFileBoron =
     X4UnpackedDataFolder
     + "/extensions/ego_dlc_boron/maps/xu_ep2_universe/dlc_boron_zones.xml"
+
+let X4ZoneFileTimelines =
+    X4UnpackedDataFolder
+    + "/extensions/ego_dlc_timelines/maps/xu_ep2_universe/dlc7_zones.xml"
 
 [<Literal>]
 let X4GalaxyFileCore = X4UnpackedDataFolder + "/maps/xu_ep2_universe/galaxy.xml"
@@ -131,6 +146,10 @@ let X4GalaxyFilePirate =
 let X4GalaxyFileBoron =
     X4UnpackedDataFolder
     + "/extensions/ego_dlc_boron/maps/xu_ep2_universe/galaxy.xml"
+
+let X4GalaxyFileTimelines =
+    X4UnpackedDataFolder
+    + "/extensions/ego_dlc_timelines/maps/xu_ep2_universe/galaxy.xml"
 
 // Regions for mining fields
 [<Literal>]
@@ -244,6 +263,7 @@ let AllClusters =
     let X4ClusterTerran = X4Cluster.Load(X4ClusterFileTerran)
     let X4ClusterPirate = X4Cluster.Load(X4ClusterFilePirate)
     let X4ClusterBoron = X4Cluster.Load(X4ClusterFileBoron)
+    let X4ClusterTimelines = X4Cluster.Load(X4ClusterFileTimelines)
 
     Array.toList
     <| Array.concat [
@@ -252,6 +272,7 @@ let AllClusters =
         X4ClusterTerran.Macros
         X4ClusterPirate.Macros
         X4ClusterBoron.Macros
+        X4ClusterTimelines.Macros
     ]
 
 // Load the sector data from each individual sector file. We'll combine them in to one list.
@@ -261,6 +282,7 @@ let allSectors =
     let X4SectorTerran = X4Sector.Load(X4SectorFileTerran)
     let X4SectorPirate = X4Sector.Load(X4SectorFilePirate)
     let X4SectorBoron = X4Sector.Load(X4SectorFileBoron)
+    let X4SectorTimelines = X4Sector.Load(X4SectorFileTimelines)
 
     Array.toList
     <| Array.concat [
@@ -269,6 +291,7 @@ let allSectors =
         X4SectorTerran.Macros
         X4SectorPirate.Macros
         X4SectorBoron.Macros
+        X4SectorTimelines.Macros
     ]
 
 let allZones =
@@ -277,6 +300,7 @@ let allZones =
     let X4ZoneTerran = X4Zone.Load(X4ZoneFileTerran)
     let X4ZonePirate = X4Zone.Load(X4ZoneFilePirate)
     let X4ZoneBoron = X4Zone.Load(X4ZoneFileBoron)
+    let X4ZoneTimelines = X4Zone.Load(X4ZoneFileTimelines)
 
     Array.toList
     <| Array.concat [
@@ -285,6 +309,7 @@ let allZones =
         X4ZoneTerran.Macros
         X4ZonePirate.Macros
         X4ZoneBoron.Macros
+        X4ZoneTimelines.Macros
     ]
 
 
@@ -305,6 +330,7 @@ let allGalaxy =
     let X4GalaxyTerran = X4GalaxyDiff.Load(X4GalaxyFileTerran)
     let X4GalaxyPirate = X4GalaxyDiff.Load(X4GalaxyFilePirate)
     let X4GalaxyBoron = X4GalaxyDiff.Load(X4GalaxyFileBoron)
+    let X4GalaxyTimelines = X4GalaxyDiff.Load(X4GalaxyFileTimelines)
 
     Array.toList
     <| Array.concat [
@@ -313,6 +339,7 @@ let allGalaxy =
         loadFromDiff X4GalaxyTerran
         loadFromDiff X4GalaxyPirate
         loadFromDiff X4GalaxyBoron
+        loadFromDiff X4GalaxyTimelines
     ]
 
 // The 'index' xml files contain 'entries' that are used to map an entity name (component or macro)
@@ -373,6 +400,7 @@ let allStations, allProducts =
     let X4GodTerran = X4GodMod.Load(X4GodFileTerran)
     let X4GodPirate = X4GodMod.Load(X4GodFilePirate)
     let X4GodBoron = X4GodMod.Load(X4GodFileBoron)
+    let X4GodTimelines = X4GodMod.Load(X4GodFileTimelines)
 
     // Finally build up an uberlist of all our stations across all DLC and core game.
     // The DLC stations are of a different type: they're an XML DIFF file, not the GOD
@@ -385,6 +413,7 @@ let allStations, allProducts =
             getStationsFromDiff X4GodTerran.Adds
             getStationsFromDiff X4GodPirate.Adds
             getStationsFromDiff X4GodBoron.Adds
+            getStationsFromDiff X4GodTimelines.Adds
         ]
 
     // Do the same for products
@@ -395,6 +424,7 @@ let allStations, allProducts =
             getProductFromDiff X4GodTerran.Adds
             getProductFromDiff X4GodPirate.Adds
             getProductFromDiff X4GodBoron.Adds
+            getProductFromDiff X4GodTimelines.Adds
         ]
 
     allStations, allProducts
@@ -689,6 +719,7 @@ let (allAssets: Asset list) =
             printfn "Children of <components>:"
             raw.Root.Elements() |> Seq.iter (fun e -> printfn "- %s" e.Name.LocalName)
             printfn "End of children.\n"
+
             None)
     |> List.choose id
 

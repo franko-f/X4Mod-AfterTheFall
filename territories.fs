@@ -69,6 +69,9 @@ let newXenonStations = [
     XenonShipyard("sector", "Cluster_12_sector001_macro") // True Sight.
     XenonWharf("sector", "Cluster_12_sector001_macro") // True Sight.
     XenonWharf("sector", "Cluster_725_sector001_macro") // Void of Opportunity
+
+    // Same for TEL/Hewa
+    XenonWharf("sector", "Cluster_43_sector001_macro") // Hewas Twin 5
 ]
 
 

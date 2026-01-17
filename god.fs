@@ -118,7 +118,16 @@ let ignoreStation (station: X4WorldStart.Station) =
         ] // Station is in the territory of a fr
 
     let isIgnored =
-        List.contains station.Owner [ "khaak"; "xenon"; "yaki"; "scaleplate"; "buccaneers"; "player" ]
+        List.contains station.Owner [
+            "khaak"
+            "xenon"
+            "yaki"
+            "scaleplate"
+            "buccaneers"
+            "player"
+            "kaori"
+            "holyorderfanatic"
+        ]
 
     let isPirateBase =
         station.Station.Select |> Option.exists (fun s -> s.Tags = "[piratebase]")
