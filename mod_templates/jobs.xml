@@ -136,28 +136,6 @@ Lets add a little excitement to the terrans day, and stop them steamrolling thro
 
 
 
-  <job id="xenon_destroyer_patrol_xl_comp_atf_hop_holy_vision" name="{20204,3801}" comment="compression">
-    <!-- Strong Xenon patrol to keep HOP under pressure, and reduce chance of quickly expanding out. -->
-    <modifiers commandeerable="true"/>
-    <orders>
-      <order order="Patrol" default="true">
-        <param name="range" value="class.zone"/>
-      </order>
-    </orders>
-    <category faction="xenon" tags="[military, destroyer]" size="ship_xl"/>
-    <quota cluster="3" sector="3"/>
-    <location class="cluster" macro="Cluster_24_macro" faction="xenon" relation="self" comparison="exact" matchextension="false"/>
-    <environment buildatshipyard="true"/>
-    <ship>
-      <select faction="xenon" tags="[military, destroyer]" size="ship_xl"/>
-      <owner exact="xenon" overridenpc="true"/>
-    </ship>
-    <subordinates>
-      <subordinate job="xenon_frigate_escort_m"/>
-    </subordinates>
-  </job>
-
-
   <job id="xenon_destroyer_patrol_xl_comp_atf_morningstar_iv" name="{20204,3801}" comment="compression">
     <!-- Force ARG to fight to reclaim morningstar IV. . -->
     <modifiers commandeerable="true"/>
@@ -179,26 +157,69 @@ Lets add a little excitement to the terrans day, and stop them steamrolling thro
     </subordinates>
   </job>
 
- <!-- Since Holy Vision is now 'neutral', add a patrol to make it tougher for HOP to just casually claim it, and
+	<!-- Since Holy Vision is now 'neutral', add a patrol to make it tougher for HOP to just casually claim it, and
      to interfere with trading between sectors -->
-
-  <job id="xenon_frigate_patrol_m_sector_hop_holy_vision" name="{20204,3401}" comment="asymmetrical">
-    <modifiers commandeerable="true"/>
+	 
+	<job id="xenon_destroyer_patrol_xl_comp_atf_hop_holy_vision" name="{20204,3801}" comment="compression">
+    <!-- Strong Xenon patrol to keep HOP under pressure, and reduce chance of quickly expanding out. -->
+    <modifiers commandeerable="false" />
     <orders>
       <order order="Patrol" default="true">
-        <param name="range" value="class.sector"/>
+        <param name="range" value="class.zone" />
       </order>
     </orders>
-    <category faction="xenon" tags="[factionlogic, military, frigate]" size="ship_m"/>
-    <quota cluster="4" sector="4"/>
-    <location class="cluster" macro="Cluster_24_macro" faction="xenon" relation="self" comparison="exact" matchextension="false"/>
-    <environment buildatshipyard="true"/>
+    <category faction="xenon" tags="[military, destroyer]" size="ship_xl" />
+    <quota cluster="3" sector="3" />
+    <location class="sector" macro="Cluster_24_Sector001_macro" matchextension="false" />
+    <environment buildatshipyard="true" />
     <ship>
-      <select faction="xenon" tags="[military, medium]" size="ship_m"/>
-      <owner exact="xenon" overridenpc="true"/>
+      <select faction="xenon" tags="[military, destroyer]" size="ship_xl" />
+      <owner exact="xenon" overridenpc="true" />
     </ship>
     <subordinates>
-      <subordinate job="xenon_frigate_escort_m"/>
+      <subordinate job="xenon_frigate_escort_m" />
+    </subordinates>
+  </job>
+
+  <job id="xenon_frigate_patrol_m_sector_hop_holy_vision" name="{20204,3401}" comment="asymmetrical">
+	<!-- plus plenty of ships to harass trade -->
+    <modifiers commandeerable="false" />
+    <orders>
+      <order order="Patrol" default="true">
+        <param name="range" value="class.sector" />
+      </order>
+    </orders>
+    <category faction="xenon" tags="[factionlogic, military, frigate]" size="ship_m" />
+    <quota cluster="6" sector="6" />
+    <location class="sector" macro="Cluster_24_Sector001_macro" matchextension="false" />
+    <environment buildatshipyard="true" />
+    <ship>
+      <select faction="xenon" tags="[military, medium]" size="ship_m" />
+      <owner exact="xenon" overridenpc="true" />
+    </ship>
+    <subordinates>
+      <subordinate job="xenon_frigate_escort_m" />
+    </subordinates>
+  </job>
+
+  <job id="xenon_frigate_patrol_m_sector_arg_hatikvahs_choice" name="{20204,3401}" comment="asymmetrical">
+	<!-- H Choice needs a bit of tension to prevent easy ARG expansion and mining -->
+    <modifiers commandeerable="false" />
+    <orders>
+      <order order="Patrol" default="true">
+        <param name="range" value="class.sector" />
+      </order>
+    </orders>
+    <category faction="xenon" tags="[factionlogic, military, frigate]" size="ship_m" />
+    <quota cluster="3" sector="3" />
+    <location class="sector" macro="Cluster_706_Sector001_macro" matchextension="false" />
+    <environment buildatshipyard="true" />
+    <ship>
+      <select faction="xenon" tags="[military, medium]" size="ship_m" />
+      <owner exact="xenon" overridenpc="true" />
+    </ship>
+    <subordinates>
+      <subordinate job="xenon_frigate_escort_m" />
     </subordinates>
   </job>
 
