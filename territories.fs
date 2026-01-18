@@ -120,14 +120,15 @@ let territories = [
     // { Territory.Default with faction = "antigone"; cluster = "Cluster_49_macro"; resources=[] }                // Frontiers Edge.
 
     { Territory.Default with faction = "teladi";   cluster = "Cluster_15_macro"; resources=List.concat([standardResourcesGases; standardResourcesOres; ["minerals"; "scrap"; "methane"; "hydrogen"]]) }   // Ianumas Zura
-    { Territory.Default with faction = "teladi";   cluster = "Cluster_19_macro"; sectors=["cluster_19_sector001_macro"]; resources=[] }   // Hewas Twin I. Next to PAR, but slightly distant from rest of TEL to add some spice
+    { Territory.Default with faction = "teladi";   cluster = "Cluster_19_macro"; sectors=["cluster_19_sector002_macro"]; resources=[] }   // Hewas Twin 2. Next to PAR, PAR/TEL share cluster to avoid issue where superhighways don't generate bastions
     //{ Territory.Default with faction = "teladi";   cluster = "Cluster_408_macro"; resources=[] }   // Thuruks Demise: A sector from Split DLC. Leaves Freelsplit just slightly less isolated. Won't put resources here due to a flaw in our code. Needs a refactor to permit added resources to another factions DLC sector.. Also does not generate stations in this territory either!
     { Territory.Default with faction = "ministry"; cluster = "Cluster_15_macro" }   // No need for resources, they're in teladi sectors already.
 //    { faction = "scaleplate"; sector = "" }
 
     { Territory.Default with faction = "paranid";   cluster = "Cluster_18_macro";} // resources=["helium"; "methane"; "minerals"; "ice"] }    // Trinity III - already has some resources, but adding more.
     { Territory.Default with faction = "paranid";   cluster = "Cluster_47_macro";} // resources=["minerals"; "scrap"] }      // Trinity VII
-    { Territory.Default with faction = "paranid";   cluster = "Cluster_10_macro"; resources=List.concat([standardResourcesGases; standardResourcesOres])  }      // Unholy Retribution
+    { Territory.Default with faction = "paranid";   cluster = "Cluster_19_macro"; sectors=["cluster_19_sector001_macro"]; resources=List.concat([standardResourcesGases; standardResourcesOres])  }      // Hewas Twin 1
+    // { Territory.Default with faction = "paranid";   cluster = "Cluster_10_macro"; resources=List.concat([standardResourcesGases; standardResourcesOres])  }      // Unholy Retribution
     { Territory.Default with faction = "alliance";  cluster = "Cluster_47_macro" }  // If we have to move an ALI station, move it to PAR space.
 
     // 7.0 added new sectors which made the HOP placement a lot easier than before.
