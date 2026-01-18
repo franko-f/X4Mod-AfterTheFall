@@ -11,9 +11,9 @@ let resourceMap = Map [
     "minerals", "atf_90km_asteroid_field_high";     // ore, silicon and a little bit of nvidium
     "ice",      "atf_60km_ice_field_high";          // ice
     "scrap",    "atf_wreckfield_xenon_battle_30km"; // scrap
-    "hydrogen", "atf_60km_hydrogen_highyield_field";
-    "helium",   "atf_60km_helium_highyield_field";
-    "methane",  "atf_60km_methane_highyield_field"
+    "hydrogen", "atf_150km_hydrogen_highyield_field";
+    "helium",   "atf_150km_helium_highyield_field";
+    "methane",  "atf_150km_methane_highyield_field"
 ]
 // The standard resources that we'll use to populate the sectors. Two halves, one for each system.
 let standardResourcesGases = ["hydrogen"; "helium"; "methane" ]

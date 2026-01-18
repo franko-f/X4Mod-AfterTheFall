@@ -126,9 +126,9 @@
   </region>
 
 
-  <region name="atf_60km_hydrogen_highyield_field" density="1.5" rotation="0" noisescale="1000" seed="32" minnoisevalue="0.0" maxnoisevalue="1">
+  <region name="atf_150km_hydrogen_highyield_field" density="1.5" rotation="0" noisescale="1000" seed="32" minnoisevalue="0.0" maxnoisevalue="1">
     <boundary class="cylinder">
-      <size r="30000" linear="15500" />
+      <size r="75000" linear="20000" />
     </boundary>
     <falloff>
       <lateral>
@@ -155,9 +155,9 @@
     </resources>
   </region>
 
-   <region name="atf_60km_helium_highyield_field" density="1.5" rotation="0" noisescale="1000" seed="32" minnoisevalue="0.0" maxnoisevalue="1">
+   <region name="atf_150km_helium_highyield_field" density="1.5" rotation="0" noisescale="1000" seed="32" minnoisevalue="0.0" maxnoisevalue="1">
     <boundary class="cylinder">
-      <size r="30000" linear="15500" />
+      <size r="75000" linear="20000" />
     </boundary>
     <falloff>
       <lateral>
@@ -184,9 +184,9 @@
     </resources>
   </region>
 
-   <region name="atf_60km_methane_highyield_field" density="1.5" rotation="0" noisescale="1000" seed="32" minnoisevalue="0.0" maxnoisevalue="1">
+   <region name="atf_150km_methane_highyield_field" density="1.5" rotation="0" noisescale="1000" seed="32" minnoisevalue="0.0" maxnoisevalue="1">
     <boundary class="cylinder">
-      <size r="30000" linear="15500" />
+      <size r="75000" linear="20000" />
     </boundary>
     <falloff>
       <lateral>
