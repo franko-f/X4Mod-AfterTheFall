@@ -8,12 +8,12 @@ module X4.Territories
 // lookup map to the resource definitions from the XML that we will use to place extra resources
 // for factions now in sectors without resources.
 let resourceMap = Map [
-    "minerals", "atf_60km_asteroid_field_high";     // ore, silicon and a little bit of nvidium
+    "minerals", "atf_90km_asteroid_field_high";     // ore, silicon and a little bit of nvidium
     "ice",      "atf_60km_ice_field_high";          // ice
     "scrap",    "atf_wreckfield_xenon_battle_30km"; // scrap
-    "hydrogen", "atf_40km_hydrogen_highyield_field";
-    "helium",   "atf_40km_helium_highyield_field";
-    "methane",  "atf_40km_methane_highyield_field"
+    "hydrogen", "atf_60km_hydrogen_highyield_field";
+    "helium",   "atf_60km_helium_highyield_field";
+    "methane",  "atf_60km_methane_highyield_field"
 ]
 // The standard resources that we'll use to populate the sectors. Two halves, one for each system.
 let standardResourcesGases = ["hydrogen"; "helium"; "methane" ]
@@ -54,12 +54,12 @@ let neutralClusters = [
 
     // some breathing room for Split
     // Free families
-    "Cluster_409_macro"     // Tharkas Ravine XXIV
-    "Cluster_407_macro"     // Family Tkr
+    // "Cluster_409_macro"     // Tharkas Ravine XXIV
+    // "Cluster_407_macro"     // Family Tkr
     // Zyarth - Create a line of neutral sectors to give some space, and make the universe a bit more interesting.
     "Cluster_401_macro"     // Family Zhin
     "Cluster_404_macro"     // Zyarth Dominion I
-    "Cluster_408_macro"     // Family Nhuut
+    "Cluster_418_macro"     // Family Nhuut
     "Cluster_422_macro"     // Wretched Skies X
 
 ]
@@ -109,13 +109,13 @@ let territories = [
     { Territory.Default with faction = "argon";    cluster = "Cluster_14_macro"; resources=standardResourcesOres }   // Argon Prime
     //{ Territory.Default with faction = "argon";    cluster = "Cluster_30_macro"; resources=List.concat([standardResources1stHalf; standardResources2ndHalf]) } // Morningstar III - Lets add more resources here where it's more exposed and dangerous.
 
-    { Territory.Default with faction = "hatikvah"; cluster = "Cluster_706_macro"; resources=standardResourcesGases}     // Hatikvahs Faith. Move HAT behind ARG, and open up this pathway for Xenon to control, making ARG/TEL/PAR further apart.
-//    { Territory.Default with faction = "hatikvah"; cluster = "Cluster_29_macro"; resources=standardResources1stHalf }     // Hatikvahs Choice . ARG also have a station in one of the sectors in Hat choice via manual station assignment.
+//    { Territory.Default with faction = "hatikvah"; cluster = "Cluster_706_macro"; resources=standardResourcesGases}     // Hatikvahs Faith. Move HAT behind ARG, and open up this pathway for Xenon to control, making ARG/TEL/PAR further apart.
+    { Territory.Default with faction = "hatikvah"; cluster = "Cluster_29_macro"; resources=standardResourcesGases }     // Hatikvahs Choice . ARG also have a station in one of the sectors in Hat choice via manual station assignment.
 
     { Territory.Default with faction = "antigone"; cluster = "Cluster_27_macro"; resources=["ice"; "scrap"] }  // The Void
     { Territory.Default with faction = "antigone"; cluster = "Cluster_28_macro"; resources=List.concat([standardResourcesGases; ["minerals"]]) }      // Antigone Memorial
+    { Territory.Default with faction = "antigone"; cluster = "Cluster_40_macro"; resources=[] }                // Second Contact VII - split from the other sectors to add some spice; also to give enough territory to spawn all stations.
     // { Territory.Default with faction = "antigone"; cluster = "Cluster_49_macro"; resources=[] }                // Frontiers Edge.
-    // { Territory.Default with faction = "antigone"; cluster = "Cluster_40_macro"; resources=[] }                // Second Contact VII - split from the other sectors to add some spice; also to give enough territory to spawn all stations.
 
     { Territory.Default with faction = "teladi";   cluster = "Cluster_15_macro"; resources=List.concat([standardResourcesGases; standardResourcesOres; ["minerals"; "scrap"; "methane"; "hydrogen"]]) }   // Ianumas Zura
     // { Territory.Default with faction = "teladi";   cluster = "Cluster_19_macro"; resources=[] }   // Hewas Twin. Next to PAR, but slightly distant from rest of TEL to add some spice

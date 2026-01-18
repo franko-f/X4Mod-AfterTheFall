@@ -203,7 +203,7 @@ Lets add a little excitement to the terrans day, and stop them steamrolling thro
   </job>
 
 	<!-- H Choice needs a bit of tension to prevent easy ARG expansion and mining -->
-  <!-- job id="xenon_frigate_patrol_m_sector_arg_hatikvahs_choice" name="{20204,3401}" comment="asymmetrical">
+  <job id="xenon_frigate_patrol_m_sector_arg_hatikvahs_choice" name="{20204,3401}" comment="asymmetrical">
     <modifiers commandeerable="false" />
     <orders>
       <order order="Patrol" default="true">
@@ -221,7 +221,7 @@ Lets add a little excitement to the terrans day, and stop them steamrolling thro
     <subordinates>
       <subordinate job="xenon_frigate_escort_m" />
     </subordinates>
-  </job -->
+  </job>
 
 
 </add>

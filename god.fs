@@ -33,7 +33,7 @@ open X4.Utilities
 open X4.Data
 open X4.Territories
 
-let ProductionRatio = 0.25 // only about a quarter of the faction's production factories will be left
+let ProductionRatio = 0.20 // only about a quarter of the faction's production factories will be left
 let XenonProductionRatio = 3 // Xenon get 3 times as many solar factories as vanilla. So can, in theory, build much faster than before
 
 
