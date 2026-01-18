@@ -58,7 +58,7 @@ let getFactionProductCount (factionProducts: FactionProductMap) (faction: string
 // OR, return a default string of '---' if the quota doesn't exist for the product.
 let getFactionProductCountAsString (factionProducts: FactionProductMap) (faction: string) (product: string) =
     getFactionProductCount factionProducts faction product
-    |> Option.fold (fun s quota -> sprintf "%i/%i" quota.QuotaGalaxy quota.QuotaSector) "---"
+    |> Option.fold (fun s quota -> sprintf "%i/%i/%i" quota.QuotaGalaxy quota.QuotaCluster quota.QuotaSector) "---"
 
 
 let printTableHeaders (factions: string list) =

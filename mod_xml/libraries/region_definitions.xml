@@ -39,8 +39,8 @@
       <asteroid groupref="asteroid_silicon_xs" densityfactor="1" rotation="360" rotationvariation="32" noisescale="1500" seed="2001" minnoisevalue="0.35" maxnoisevalue="1"/>
     </fields>
     <resources>
-      <resource ware="ore" yield="highplus" />
-      <resource ware="silicon" yield="highplus" />
+      <resource ware="ore" yield="veryhigh" />
+      <resource ware="silicon" yield="veryhigh" />
       <resource ware="nividium" yield="high" />
     </resources>
   </region>
@@ -72,7 +72,7 @@
       <asteroid groupref="asteroid_ice_xs" densityfactor="30" rotation="0" rotationvariation="64" noisescale="5000" seed="26041984" minnoisevalue="0.75" maxnoisevalue="1"/>
     </fields>
     <resources>
-      <resource ware="ice" yield="high" />
+      <resource ware="ice" yield="highplus" />
     </resources>
   </region>
 
@@ -121,13 +121,97 @@
     </fields>
     <resources>
       <resource ware="hydrogen" yield="medium" />
-      <resource ware="rawscrap" yield="medium" />
+      <resource ware="rawscrap" yield="medhigh" />
     </resources>
   </region>
 
-<!-- For gases, we can use the vanilla
-p1_40km_hydrogen_field
-p1_40km_helium_highyield_field
-p1_40km_methane_highyield_field 
--->
+
+  <region name="atf_40km_hydrogen_highyield_field" density="1.5" rotation="0" noisescale="1000" seed="32" minnoisevalue="0.0" maxnoisevalue="1">
+    <boundary class="cylinder">
+      <size r="25000" linear="15500" />
+    </boundary>
+    <falloff>
+      <lateral>
+        <step position="0.0" value="0.0" />
+        <step position="0.1" value="1.0" />
+        <step position="0.9" value="1.0" />
+        <step position="1.0" value="0.0" />
+      </lateral>
+      <radial>
+        <step position="0.0" value="1.0" />
+        <step position="0.3" value="1.0" />
+        <step position="0.5" value="0.9" />
+        <step position="0.9" value="0.4" />
+        <step position="1.0" value="0.0" />
+      </radial>
+    </falloff>
+    <fields>
+      <volumetricfog multiplier="0.2" medium="hydrogen" texture="assets/textures/environments/fog_maskrnd_07" lodrule="nebulafar" size="10000" sizevariation="0.84" densityfactor="0.37" rotation="360" rotationvariation="0.5" noisescale="10000" seed="320014" minnoisevalue="0.350" maxnoisevalue="1.0" distancefactor="0.3"/>
+      <!--       <positional ref="fog_outside_set1_blue_macro" densityfactor="0.50" rotationvariation="0.5" noisescale="1000" seed="32" minnoisevalue="0.30" maxnoisevalue="1" distancefactor="0.5"/> -->
+      <nebula ref="fogvolume_small_macro" localred="100" localgreen="100" localblue="100" localdensity="0.8" uniformred="49" uniformgreen="49" uniformblue="49" uniformdensity="0.2" backgroundfog="true" resources="hydrogen" />
+    </fields>
+    <resources>
+      <resource ware="hydrogen" yield="veryhigh" />
+    </resources>
+  </region>
+
+   <region name="atf_40km_helium_highyield_field" density="1.5" rotation="0" noisescale="1000" seed="32" minnoisevalue="0.0" maxnoisevalue="1">
+    <boundary class="cylinder">
+      <size r="25000" linear="15500" />
+    </boundary>
+    <falloff>
+      <lateral>
+        <step position="0.0" value="0.0" />
+        <step position="0.1" value="1.0" />
+        <step position="0.9" value="1.0" />
+        <step position="1.0" value="0.0" />
+      </lateral>
+      <radial>
+        <step position="0.0" value="1.0" />
+        <step position="0.3" value="1.0" />
+        <step position="0.5" value="0.9" />
+        <step position="0.9" value="0.4" />
+        <step position="1.0" value="0.0" />
+      </radial>
+    </falloff>
+    <fields>
+      <volumetricfog multiplier="0.2" medium="helium" texture="assets/textures/environments/fog_maskrnd_07" lodrule="nebulafar" size="10000" sizevariation="0.84" densityfactor="0.37" rotation="360" rotationvariation="0.5" noisescale="10000" seed="30214" minnoisevalue="0.350" maxnoisevalue="1.0" distancefactor="0.3"/>
+      <!--       <positional ref="fog_outside_set1_blue_macro" densityfactor="1.0" rotationvariation="0.5" noisescale="1000" seed="32" minnoisevalue="0.30" maxnoisevalue="1" distancefactor="0.5"/> -->
+      <nebula ref="fogvolume_small_macro" localred="100" localgreen="100" localblue="100" localdensity="0.8" uniformred="49" uniformgreen="49" uniformblue="49" uniformdensity="0.2" backgroundfog="true" resources="helium" />
+    </fields>
+    <resources>
+      <resource ware="helium" yield="veryhigh" />
+    </resources>
+  </region>
+
+   <region name="atf_40km_methane_highyield_field" density="1.5" rotation="0" noisescale="1000" seed="32" minnoisevalue="0.0" maxnoisevalue="1">
+    <boundary class="cylinder">
+      <size r="25000" linear="15500" />
+    </boundary>
+    <falloff>
+      <lateral>
+        <step position="0.0" value="0.0" />
+        <step position="0.1" value="1.0" />
+        <step position="0.9" value="1.0" />
+        <step position="1.0" value="0.0" />
+      </lateral>
+      <radial>
+        <step position="0.0" value="1.0" />
+        <step position="0.3" value="1.0" />
+        <step position="0.5" value="0.9" />
+        <step position="0.9" value="0.4" />
+        <step position="1.0" value="0.0" />
+      </radial>
+    </falloff>
+    <fields>
+      <volumetricfog multiplier="0.2" medium="hydrogen" texture="assets/textures/environments/fog_maskrnd_07" lodrule="nebulafar" size="10000" sizevariation="0.84"  densityfactor="0.37" rotation="360" rotationvariation="0.5" noisescale="10000" seed="3214" minnoisevalue="0.35" maxnoisevalue="1.0" distancefactor="0.3"/>
+      <!--       <positional ref="fog_outside_set1_blue_macro" densityfactor="1.0" rotationvariation="0.5" noisescale="1000" seed="32" minnoisevalue="0.30" maxnoisevalue="1" distancefactor="0.5"/> -->
+      <nebula ref="fogvolume_small_macro" localred="100" localgreen="100" localblue="100" localdensity="0.8" uniformred="49" uniformgreen="49" uniformblue="49" uniformdensity="0.2" backgroundfog="true" resources="methane" />
+    </fields>
+    <resources>
+      <resource ware="methane" yield="veryhigh" />
+    </resources>
+  </region>
+
+
 </regions>

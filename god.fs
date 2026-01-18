@@ -33,7 +33,8 @@ open X4.Utilities
 open X4.Data
 open X4.Territories
 
-let ProductionRatio = 0.35 // only about a third of the faction's production factories will be left
+let ProductionRatio = 0.25 // only about a quarter of the faction's production factories will be left
+let XenonProductionRatio = 3 // Xenon get 3 times as many solar factories as vanilla. So can, in theory, build much faster than before
 
 
 // the 'log' functions just extract a bit of data about a station, and log it
@@ -355,7 +356,7 @@ let processProduct (product: X4WorldStart.Product) =
     logProduct product
 
     match product.Owner, product.Ware with
-    | "xenon", _ -> Some(product_replace_xml product.Id "galaxy" (product.Quota.Galaxy * 4)) // Xenon get a 4x quota
+    | "xenon", _ -> Some(product_replace_xml product.Id "galaxy" (product.Quota.Galaxy * XenonProductionRatio)) // Xenon get a 4x quota
     | "khaak", _
     | "yaki", _
     | "scaleplate", _
