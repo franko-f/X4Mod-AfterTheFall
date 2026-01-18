@@ -581,18 +581,18 @@ let findFactionFromSector (sector: string) =
     | Some cluster ->
         // TODO: A cluster might be listed more than once, for factions like MIN. Probably not important in our use case.
         // Find the territory record, then check if the sector is in the list of sectors for that territory.
-        match getTerritoryFromClusterName cluster with
-        | Some territory ->
+        territories
+        |> List.filter (fun record -> record.cluster =? cluster)
+        |> List.tryPick (fun territory ->
             if List.contains sector territory.sectors then
                 // Is this sector explicitly listed? then it belongs to the territories faction.
                 Some territory.faction
-            else if List.isEmpty territory.sectors then
+            else if territory.sectors.IsEmpty then
                 // if the list is empty, it means the faction owns the entire cluster
                 Some territory.faction
             else
-                // otherwise, it's not in the list, so it doesn't belong to the faction.
-                None
-        | None -> None
+                // otherwise, it's not in the list, for this specific territory record.
+                None)
     | None -> None
 
 let findFactionFromZone (zone: string) =
