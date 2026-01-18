@@ -96,15 +96,19 @@ let newXenonStations = [
 
 type Territory = {
     faction: string;
+    dlc: Option<string>; // Allow us to explicitly set the dlc for this territory. Useful for assigning resources to Xenon controlled.
     cluster: string;
     sectors: string list
     resources: string list
-    } with static member Default = { faction = ""; cluster = ""; sectors = []; resources = []}
+    } with static member Default = { faction = ""; dlc = None; cluster = ""; sectors = []; resources = []}
 
 // create a list of all the factions and their territories as Territory records
 // We'll pull resources and gates from the xml files, based on the sector name.
 // We will likely need to create a zone (or find) in each of these sectors to place the station
 let territories = [
+    // Add some resources to Xenon dead-end sectors
+    { Territory.Default with faction = "xenon";    dlc = Some "terran"; cluster = "Cluster_104_macro"; resources=standardResourcesOres }  // Earth and Moon
+
     // core
     { Territory.Default with faction = "argon";    cluster = "Cluster_07_macro"; resources=standardResourcesGases }   // The Reach
     { Territory.Default with faction = "argon";    cluster = "Cluster_14_macro"; resources=standardResourcesOres }   // Argon Prime
@@ -116,18 +120,18 @@ let territories = [
 
     { Territory.Default with faction = "antigone"; cluster = "Cluster_27_macro"; resources=["ice"; "scrap"] }  // The Void
     { Territory.Default with faction = "antigone"; cluster = "Cluster_28_macro"; resources=List.concat([standardResourcesGases; ["minerals"]]) }      // Antigone Memorial
-    { Territory.Default with faction = "antigone"; cluster = "Cluster_40_macro"; resources=[] }                // Second Contact VII - split from the other sectors to add some spice; also to give enough territory to spawn all stations.
+    { Territory.Default with faction = "antigone"; cluster = "Cluster_40_macro"; resources=["minerals"] }                // Second Contact VII - split from the other sectors to add some spice; also to give enough territory to spawn all stations.
     // { Territory.Default with faction = "antigone"; cluster = "Cluster_49_macro"; resources=[] }                // Frontiers Edge.
 
-    { Territory.Default with faction = "teladi";   cluster = "Cluster_15_macro"; resources=List.concat([standardResourcesGases; standardResourcesOres; ["minerals"; "scrap"; "methane"; "hydrogen"]]) }   // Ianumas Zura
-    { Territory.Default with faction = "teladi";   cluster = "Cluster_19_macro"; sectors=["cluster_19_sector001_macro"]; resources=[] }   // Hewas Twin 1. Next to PAR, PAR/TEL share cluster to avoid issue where superhighways don't generate bastions. Tell get HT1 since they already have trade station here.
+    { Territory.Default with faction = "teladi";   cluster = "Cluster_15_macro"; resources=List.concat([standardResourcesGases; standardResourcesOres]) }   // Ianumas Zura
+    { Territory.Default with faction = "teladi";   cluster = "Cluster_19_macro"; sectors=["cluster_19_sector001_macro"]; resources=["minerals"] }   // Hewas Twin 1. Next to PAR, PAR/TEL share cluster to avoid issue where superhighways don't generate bastions. Tell get HT1 since they already have trade station here.
     //{ Territory.Default with faction = "teladi";   cluster = "Cluster_408_macro"; resources=[] }   // Thuruks Demise: A sector from Split DLC. Leaves Freelsplit just slightly less isolated. Won't put resources here due to a flaw in our code. Needs a refactor to permit added resources to another factions DLC sector.. Also does not generate stations in this territory either!
     { Territory.Default with faction = "ministry"; cluster = "Cluster_15_macro" }   // No need for resources, they're in teladi sectors already.
 //    { faction = "scaleplate"; sector = "" }
 
-    { Territory.Default with faction = "paranid";   cluster = "Cluster_18_macro";} // resources=["helium"; "methane"; "minerals"; "ice"] }    // Trinity III - already has some resources, but adding more.
-    { Territory.Default with faction = "paranid";   cluster = "Cluster_47_macro";} // resources=["minerals"; "scrap"] }      // Trinity VII
-    { Territory.Default with faction = "paranid";   cluster = "Cluster_19_macro"; sectors=["cluster_19_sector002_macro"]; resources=List.concat([standardResourcesGases; standardResourcesOres])  }      // Hewas Twin 2
+    { Territory.Default with faction = "paranid";   cluster = "Cluster_18_macro"; resources=["helium"; "methane"; "minerals"; "ice"] }    // Trinity III - already has some resources, but adding more.
+    { Territory.Default with faction = "paranid";   cluster = "Cluster_47_macro"; resources=["minerals"; "scrap"] }      // Trinity VII
+    { Territory.Default with faction = "paranid";   cluster = "Cluster_19_macro"; sectors=["cluster_19_sector002_macro"]; resources=["hydrogen"] }      // Hewas Twin 2
     // { Territory.Default with faction = "paranid";   cluster = "Cluster_10_macro"; resources=List.concat([standardResourcesGases; standardResourcesOres])  }      // Unholy Retribution
     { Territory.Default with faction = "alliance";  cluster = "Cluster_47_macro" }  // If we have to move an ALI station, move it to PAR space.
 
@@ -138,18 +142,22 @@ let territories = [
     // { Territory.Default with faction = "holyorder"; cluster = "Cluster_11_macro"; resources=["minerals"; "methane"; "helium"] }        // Pontifax claim. I've given this back to Xenon, as it broke them up too much, reducing pressure on places like Second contact and holy vision.
 
     // split: zyarth. freesplit: free families
-    { Territory.Default with faction = "split";     cluster = "Cluster_405_macro"; resources=List.concat([["minerals"; "minerals"; "methane"; "hydrogen"]; standardResourcesGases]) }  // Zyarth Dominion IV. These sectors are completely without resources, so through on some extra for ZYA
-    { Territory.Default with faction = "split";     cluster = "Cluster_406_macro"; resources=List.concat([["minerals"; "helium"; "hydrogen"]; standardResourcesOres]) }  // Zyarth Dominion X
-    { Territory.Default with faction = "split";     cluster = "Cluster_417_macro";}  // 11th Hour: Former Argon, but added in split DLC.
+    // These territories have NO resources by default, so give ZYA extra. Plus they're pretty isolated up there.
+    { Territory.Default with faction = "split";     cluster = "Cluster_405_macro"; resources=List.concat([["minerals"]; standardResourcesGases]) }  // Zyarth Dominion IV.
+    { Territory.Default with faction = "split";     cluster = "Cluster_406_macro"; resources=standardResourcesOres }  // Zyarth Dominion X
+    { Territory.Default with faction = "split";     cluster = "Cluster_417_macro"; resources=["minerals"; "helium"; "hydrogen"; "methane"] }  // 11th Hour: Former Argon, but added in split DLC.
 
-    { Territory.Default with faction = "freesplit"; cluster = "Cluster_409_macro"; } // Tharkas Ravine XXIV
-    { Territory.Default with faction = "freesplit"; cluster = "Cluster_410_macro"; resources=["minerals"; "scrap"; "methane"; "helium"] }      // Tharkas Ravine XVI
-    { Territory.Default with faction = "freesplit"; cluster = "Cluster_411_macro"; resources=["minerals"; "helium"; "methane"; "hydrogen"] }                // Heart of Acrmony II
+    { Territory.Default with faction = "freesplit"; cluster = "Cluster_409_macro"; resources=["minerals"; "methane"; ]} // Tharkas Ravine XXIV
+    { Territory.Default with faction = "freesplit"; cluster = "Cluster_410_macro"; resources=["minerals"; "scrap"; "helium"] }      // Tharkas Ravine XVI
+    { Territory.Default with faction = "freesplit"; cluster = "Cluster_411_macro"; resources=["helium"; "methane"; "hydrogen"] }                // Heart of Acrmony II
     // { Territory.Default with faction = "freesplit"; cluster = "Cluster_412_macro"; resources=["minerals"] }  // Tharkas Ravine VIII
 
     // cradle of humanity
-    { Territory.Default with faction = "terran";   cluster = "Cluster_104_macro"; resources= standardResourcesOres }   // Earth and the Moon
-    { Territory.Default with faction = "terran";   cluster = "Cluster_102_macro"; resources= standardResourcesGases }   // Venus
+    // Muchj like ZYA, these sectors have no resources by default. Give a little extra.
+    { Territory.Default with faction = "terran";   cluster = "Cluster_101_macro"; resources= standardResourcesOres }   // Mars - Allows people with lower faction rating visit terran territory.
+    { Territory.Default with faction = "terran";   cluster = "Cluster_102_macro"; resources= List.concat([["minerals"]; standardResourcesGases]) }   // Venus
+    { Territory.Default with faction = "terran";   cluster = "Cluster_106_macro"; resources= ["minerals"; "hydrogen"; "methane"] }   // Mercury
+
     { Territory.Default with faction = "pioneers"; cluster = "Cluster_113_macro" }   // Segaris   - Plenty resources already, and next door to ANT.
     { Territory.Default with faction = "pioneers"; cluster = "Cluster_114_macro" }   // Gaian Prophecy
     { Territory.Default with faction = "pioneers"; cluster = "Cluster_115_macro"; resources=["minerals"; "helium"] }   // Brennans Triumph. Since pioneers never seem to take territory, we'll leave them with their full original range.

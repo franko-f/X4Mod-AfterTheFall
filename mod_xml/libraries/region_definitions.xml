@@ -39,8 +39,8 @@
       <asteroid groupref="asteroid_silicon_xs" densityfactor="1" rotation="360" rotationvariation="32" noisescale="1500" seed="2001" minnoisevalue="0.35" maxnoisevalue="1"/>
     </fields>
     <resources>
-      <resource ware="ore" yield="veryhigh" />
-      <resource ware="silicon" yield="veryhigh" />
+      <resource ware="ore" yield="highplus" />
+      <resource ware="silicon" yield="highplus" />
       <resource ware="nividium" yield="high" />
     </resources>
   </region>
@@ -151,7 +151,7 @@
       <nebula ref="fogvolume_small_macro" localred="100" localgreen="100" localblue="100" localdensity="0.8" uniformred="49" uniformgreen="49" uniformblue="49" uniformdensity="0.2" backgroundfog="true" resources="hydrogen" />
     </fields>
     <resources>
-      <resource ware="hydrogen" yield="veryhigh" />
+      <resource ware="hydrogen" yield="high" />
     </resources>
   </region>
 
@@ -180,7 +180,7 @@
       <nebula ref="fogvolume_small_macro" localred="100" localgreen="100" localblue="100" localdensity="0.8" uniformred="49" uniformgreen="49" uniformblue="49" uniformdensity="0.2" backgroundfog="true" resources="helium" />
     </fields>
     <resources>
-      <resource ware="helium" yield="veryhigh" />
+      <resource ware="helium" yield="high" />
     </resources>
   </region>
 
@@ -209,7 +209,7 @@
       <nebula ref="fogvolume_small_macro" localred="100" localgreen="100" localblue="100" localdensity="0.8" uniformred="49" uniformgreen="49" uniformblue="49" uniformdensity="0.2" backgroundfog="true" resources="methane" />
     </fields>
     <resources>
-      <resource ware="methane" yield="veryhigh" />
+      <resource ware="methane" yield="high" />
     </resources>
   </region>
 

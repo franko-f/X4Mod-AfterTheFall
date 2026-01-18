@@ -447,7 +447,13 @@ let dlcFactions dlc = X4.WriteModfiles.dlcFactions dlc
 // Filter the territories list to only include those that are in the specified DLC
 let dlcTerritories dlc =
     let factions = dlcFactions dlc
-    territories |> List.filter (fun t -> List.contains t.faction factions)
+
+    territories
+    |> List.filter (fun t ->
+        // This is a little messy: A territory may explicitly set a DLC. Check for this.
+        match t.dlc with
+        | Some territoryDlc -> territoryDlc = dlc
+        | None -> List.contains t.faction factions)
 
 // Given a cluster name, return the X4Cluster object representing it.
 let findCluster (clusterName: string) =

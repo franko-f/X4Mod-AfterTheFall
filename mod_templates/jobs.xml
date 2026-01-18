@@ -69,8 +69,9 @@ Lets add a little excitement to the terrans day, and stop them steamrolling thro
     </subordinates>
   </job>
 
-  <job id="xenon_destroyer_patrol_xl_comp_atf_terran_mercury" name="{20204,3801}" comment="compression">
-    <!-- Mercury is useless on it's own, with no resources Xenon can use, and it's cut off. But lets make it tough to reclaim with heavy Xenon patrols. -->
+  <!-- Mercury now belongs to terrans, so removed patrols there for now.
+  Mercury is useless on it's own, with no resources Xenon can use, and it's cut off. But lets make it tough to reclaim with heavy Xenon patrols.  -->
+  <!-- job id="xenon_destroyer_patrol_xl_comp_atf_terran_mercury" name="{20204,3801}" comment="compression">
     <modifiers commandeerable="true"/>
     <orders>
       <order order="Patrol" default="true">
@@ -88,12 +89,31 @@ Lets add a little excitement to the terrans day, and stop them steamrolling thro
     <subordinates>
       <subordinate job="xenon_frigate_escort_m"/>
     </subordinates>
+  </job -->
+
+  <!-- Lets put a Xenon I around earth/moon to make it epic to reclaim. -->
+  <job id="xenon_carrier_patrol_xl_border_zone_defence_atf_terran_earth" name="{20204,3801}" comment="one">
+    <modifiers commandeerable="false"/>
+    <orders>
+      <order order="Patrol" default="true">
+        <param name="range" value="class.zone"/>
+      </order>
+    </orders>
+    <category faction="xenon" tags="[military, carrier]" size="ship_xl"/>
+    <quota galaxy="1"/>
+    <location class="sector" macro="Cluster_104_Sector001_macro" faction="xenon" relation="self" comparison="exact" matchextension="false"/>
+    <environment buildatshipyard="true"/>
+    <ship>
+      <select faction="xenon" tags="[military, carrier]" size="ship_xl"/>
+      <owner exact="xenon" overridenpc="true"/>
+    </ship>
+    <subordinates>
+      <subordinate job="xenon_destroyer_escort_xl" assignment="attack"/>
+    </subordinates>
   </job>
 
-
-
-  <job id="xenon_destroyer_patrol_xl_comp_atf_terran_mars" name="{20204,3801}" comment="compression">
-    <!-- We'll make Mars heavily defended too, so slow TER expansion and reconnection to PIO. -->
+  <job id="xenon_destroyer_patrol_xl_comp_atf_terran_earthmoon" name="{20204,3801}" comment="compression">
+    <!-- More protection around the earth and moon to make it harder to reclaim -->
     <modifiers commandeerable="true"/>
     <orders>
       <order order="Patrol" default="true">
@@ -102,7 +122,7 @@ Lets add a little excitement to the terrans day, and stop them steamrolling thro
     </orders>
     <category faction="xenon" tags="[military, destroyer]" size="ship_xl"/>
     <quota cluster="3" sector="3"/>
-    <location class="cluster" macro="Cluster_101_macro" faction="xenon" relation="self" comparison="exact" matchextension="false"/>
+    <location class="cluster" macro="Cluster_104_macro" faction="xenon" relation="self" comparison="exact" matchextension="false"/>
     <environment buildatshipyard="true"/>
     <ship>
       <select faction="xenon" tags="[military, destroyer]" size="ship_xl"/>
