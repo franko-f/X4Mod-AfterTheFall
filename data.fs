@@ -477,8 +477,29 @@ let getFactionClusters (faction: string) =
     |> List.filter (fun record -> record.faction = faction)
     |> List.map (fun record -> record.cluster)
 
+let getTerritoryFromClusterName (clusterName: string) =
+    territories |> List.tryFind (fun record -> record.cluster =? clusterName)
+
+// Given a faction and a territory record (encapsulating a cluster and the faction that owns it), return all the sectors in that territory that belong to the faction. Empty list if none.
+let getFactionSectorsInTerritory (faction: string) (territory: Territory) =
+    if territory.faction <> faction then
+        // If the territory doesn't belong to the faction, then no sectors do.
+        []
+    else if territory.sectors.IsEmpty then
+        // If sectors list is empty, then all sectors belong to the faction
+        findSectorsInCluster territory.cluster
+    else
+        // Otherwise, return the sectors explicitly listed in the territory.
+        territory.sectors
+
 let getFactionSectors (faction: string) =
-    getFactionClusters faction |> List.collect findSectorsInCluster
+    territories
+    |> List.collect (fun territory -> getFactionSectorsInTerritory faction territory)
+
+let getFactionSectorsInCluster (faction: string) (cluster: string) =
+    territories
+    |> List.filter (fun territory -> territory.cluster =? cluster)
+    |> List.collect (fun territory -> getFactionSectorsInTerritory faction territory)
 
 // Given a sector name, which cluster does it belong to?
 let findClusterFromSector (sector: string) =
@@ -520,14 +541,17 @@ let findClusterFromLocation (locationClass: string) (locationMacro: string) =
 
 // Explicit check for whether we've ALLOWED a faction in a cluster in our territory mapping.
 // For most factions this is a lot less than what is in the base game.
+// Cluster is not fine grained enough for most things (we can assign down to sector level), but
+// jobs are often defined at the cluster level. This should not be used for most things.
 let isFactionInCluster (faction: string) (cluster: string) =
     territories
     |> List.exists (fun record -> record.faction = faction && record.cluster =? cluster)
 
 // This function returns whether a faction is ALLOWED to be in the sector as per our mod rules
 let isFactionInSector (faction: string) (sector: string) =
+    // Find the cluster the sector belongs to, THEN check if sector is in the list of faction sectors in that cluster.
     findClusterFromSector sector
-    |> Option.map (fun cluster -> isFactionInCluster faction cluster)
+    |> Option.map (fun cluster -> getFactionSectorsInCluster faction cluster |> List.exists (fun s -> s =? sector))
     |> Option.defaultValue false
 
 // Have we ALLOWED the faction to be in this specific zone?
@@ -551,9 +575,24 @@ let findFactionFromCluster (cluster: string) =
     |> List.tryFind (fun record -> record.cluster =? cluster)
     |> Option.map (fun record -> record.faction)
 
+// Sectors are a bit more complicated, as a faction might only have *some* of the sectors in a cluster.
 let findFactionFromSector (sector: string) =
     match findClusterFromSector sector with
-    | Some cluster -> findFactionFromCluster cluster
+    | Some cluster ->
+        // TODO: A cluster might be listed more than once, for factions like MIN. Probably not important in our use case.
+        // Find the territory record, then check if the sector is in the list of sectors for that territory.
+        match getTerritoryFromClusterName cluster with
+        | Some territory ->
+            if List.contains sector territory.sectors then
+                // Is this sector explicitly listed? then it belongs to the territories faction.
+                Some territory.faction
+            else if List.isEmpty territory.sectors then
+                // if the list is empty, it means the faction owns the entire cluster
+                Some territory.faction
+            else
+                // otherwise, it's not in the list, so it doesn't belong to the faction.
+                None
+        | None -> None
     | None -> None
 
 let findFactionFromZone (zone: string) =

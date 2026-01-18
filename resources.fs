@@ -93,7 +93,8 @@ let generateDLCResources (dlc: string) (filename: string) =
         for territory in (X4.Data.dlcTerritories dlc) do
             // extract each cluster and list of resource definition from territories, then look up the sectors in the cluster
             // 'sectors' is an infinite sequence that will start again at the first sector in the cluster when it reaches the end
-            let sectors = findSectorsInCluster territory.cluster |> cycle
+            let sectors =
+                getFactionSectorsInCluster territory.faction territory.cluster |> cycle
             // iterate through the resources, and cycle through the sectors in the cluster,
             // assigning each resource to a sector in a round robin fashion
             yield!
