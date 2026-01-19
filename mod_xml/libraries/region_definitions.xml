@@ -10,7 +10,7 @@
 <regions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="region_definitions.xsd">
   <region name="atf_asteroid_field_high" density="4.5" rotation="0">
     <boundary class="cylinder">
-      <size r="35000" linear="7000" />
+      <size r="30000" linear="7000" />
     </boundary>
     <falloff>
       <lateral>
@@ -128,7 +128,7 @@
 
   <region name="atf_hydrogen_highyield_field" density="1.5" rotation="0" noisescale="1000" seed="32" minnoisevalue="0.0" maxnoisevalue="1">
     <boundary class="cylinder">
-      <size r="60000" linear="15000" />
+      <size r="53000" linear="15000" />
     </boundary>
     <falloff>
       <lateral>
@@ -157,7 +157,7 @@
 
    <region name="atf_helium_highyield_field" density="1.5" rotation="0" noisescale="1000" seed="32" minnoisevalue="0.0" maxnoisevalue="1">
     <boundary class="cylinder">
-      <size r="60000" linear="15000" />
+      <size r="53000" linear="15000" />
     </boundary>
     <falloff>
       <lateral>
@@ -186,7 +186,7 @@
 
    <region name="atf_methane_highyield_field" density="1.5" rotation="0" noisescale="1000" seed="32" minnoisevalue="0.0" maxnoisevalue="1">
     <boundary class="cylinder">
-      <size r="60000" linear="15000" />
+      <size r="53000" linear="15000" />
     </boundary>
     <falloff>
       <lateral>

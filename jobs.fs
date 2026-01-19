@@ -408,10 +408,10 @@ let processJob (job: X4Job.Job) =
         // XENON: Determine the quota mupliplier based on ship size and military/civilian
         let multiplier =
             match isMilitaryJob job, size with
-            | true, "ship_xl" -> 2.5 // battleships and carriers
-            | true, "ship_l" -> 2.5 // destroyers: of which Xenon should have none in vanilla
-            | true, _ -> 3.5 // S and M military ships
-            | false, _ -> 4.0 // s & m civilian ships
+            | true, "ship_xl" -> 2.8 // battleships and carriers
+            | true, "ship_l" -> 2.8 // destroyers: of which Xenon should have none in vanilla
+            | true, _ -> 3.8 // S and M military ships
+            | false, _ -> 5.0 // s & m civilian ships - High number cranks up the Xenon economy. We want them printing ships.
 
         maybeGenerateQuotaReplacementXML job.Quota multiplier
 
