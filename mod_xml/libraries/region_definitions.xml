@@ -8,9 +8,9 @@
     the below list (or the default list from the vanilla region definitions).
 -->
 <regions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="region_definitions.xsd">
-  <region name="atf_90km_asteroid_field_high" density="4.5" rotation="0">
+  <region name="atf_asteroid_field_high" density="4.5" rotation="0">
     <boundary class="cylinder">
-      <size r="45000" linear="9000" />
+      <size r="35000" linear="7000" />
     </boundary>
     <falloff>
       <lateral>
@@ -46,7 +46,7 @@
   </region>
 
 
-  <region name="atf_60km_ice_field_high" density="1.5" rotation="0">
+  <region name="atf_ice_field_high" density="1.5" rotation="0">
     <boundary class="cylinder">
       <size r="30000" linear="4000" />
     </boundary>
@@ -77,7 +77,7 @@
   </region>
 
 
-  <region name="atf_wreckfield_xenon_battle_30km" density="1.5" rotation="0" noisescale="10000" seed="32" minnoisevalue="0.0" maxnoisevalue="1">
+  <region name="atf_wreckfield_xenon_battle" density="1.5" rotation="0" noisescale="10000" seed="32" minnoisevalue="0.0" maxnoisevalue="1">
     <boundary class="cylinder">
       <size r="15000" linear="6000" />
     </boundary>
@@ -126,9 +126,9 @@
   </region>
 
 
-  <region name="atf_150km_hydrogen_highyield_field" density="1.5" rotation="0" noisescale="1000" seed="32" minnoisevalue="0.0" maxnoisevalue="1">
+  <region name="atf_hydrogen_highyield_field" density="1.5" rotation="0" noisescale="1000" seed="32" minnoisevalue="0.0" maxnoisevalue="1">
     <boundary class="cylinder">
-      <size r="75000" linear="20000" />
+      <size r="60000" linear="15000" />
     </boundary>
     <falloff>
       <lateral>
@@ -155,9 +155,9 @@
     </resources>
   </region>
 
-   <region name="atf_150km_helium_highyield_field" density="1.5" rotation="0" noisescale="1000" seed="32" minnoisevalue="0.0" maxnoisevalue="1">
+   <region name="atf_helium_highyield_field" density="1.5" rotation="0" noisescale="1000" seed="32" minnoisevalue="0.0" maxnoisevalue="1">
     <boundary class="cylinder">
-      <size r="75000" linear="20000" />
+      <size r="60000" linear="15000" />
     </boundary>
     <falloff>
       <lateral>
@@ -184,9 +184,9 @@
     </resources>
   </region>
 
-   <region name="atf_150km_methane_highyield_field" density="1.5" rotation="0" noisescale="1000" seed="32" minnoisevalue="0.0" maxnoisevalue="1">
+   <region name="atf_methane_highyield_field" density="1.5" rotation="0" noisescale="1000" seed="32" minnoisevalue="0.0" maxnoisevalue="1">
     <boundary class="cylinder">
-      <size r="75000" linear="20000" />
+      <size r="60000" linear="15000" />
     </boundary>
     <falloff>
       <lateral>

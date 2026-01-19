@@ -8,12 +8,12 @@ module X4.Territories
 // lookup map to the resource definitions from the XML that we will use to place extra resources
 // for factions now in sectors without resources.
 let resourceMap = Map [
-    "minerals", "atf_90km_asteroid_field_high";     // ore, silicon and a little bit of nvidium
-    "ice",      "atf_60km_ice_field_high";          // ice
-    "scrap",    "atf_wreckfield_xenon_battle_30km"; // scrap
-    "hydrogen", "atf_150km_hydrogen_highyield_field";
-    "helium",   "atf_150km_helium_highyield_field";
-    "methane",  "atf_150km_methane_highyield_field"
+    "minerals", "atf_asteroid_field_high";     // ore, silicon and a little bit of nvidium
+    "ice",      "atf_ice_field_high";          // ice
+    "scrap",    "atf_wreckfield_xenon_battle"; // scrap
+    "hydrogen", "atf_hydrogen_highyield_field";
+    "helium",   "atf_helium_highyield_field";
+    "methane",  "atf_methane_highyield_field"
 ]
 // The standard resources that we'll use to populate the sectors. Two halves, one for each system.
 let standardResourcesGases = ["hydrogen"; "helium"; "methane" ]
@@ -50,7 +50,6 @@ let neutralClusters = [
 
     // Small cluster of neutral sectors on the fringe of the map
     "Cluster_43_macro"      // Hewas Twin 5
-    "Cluster_42_macro"      // Hewa's Twin 3&4
 
     // some breathing room for Split
     // Free families
@@ -90,7 +89,7 @@ let newXenonStations = [
     XenonWharf("sector", "Cluster_725_sector001_macro") // Void of Opportunity
 
     // Same for TEL/Hewa
-    XenonWharf("sector", "Cluster_43_sector001_macro") // Hewas Twin 5
+    XenonWharf("sector", "Cluster_42_sector001_macro") // Hewas Twin 3
 ]
 
 

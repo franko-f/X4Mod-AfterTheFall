@@ -411,7 +411,7 @@ let processJob (job: X4Job.Job) =
             | true, "ship_xl" -> 2.5 // battleships and carriers
             | true, "ship_l" -> 2.5 // destroyers: of which Xenon should have none in vanilla
             | true, _ -> 3.5 // S and M military ships
-            | false, _ -> 2.5 // s & m civilian ships
+            | false, _ -> 4.0 // s & m civilian ships
 
         maybeGenerateQuotaReplacementXML job.Quota multiplier
 
