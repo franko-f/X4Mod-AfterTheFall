@@ -74,20 +74,16 @@ let newXenonStations = [
     XenonShipyard("sector", "Cluster_46_sector001_macro") // Morningstar IV
     XenonWharf("sector", "Cluster_46_sector001_macro")
 
+    // Former terran space.
     XenonShipyard("sector", "Cluster_100_sector001_macro") // Asteroid belt
     XenonWharf("sector", "Cluster_100_sector001_macro")    // Asteroid Belt.
     XenonShipyard("sector", "Cluster_109_sector001_macro") // Uranus
+    XenonShipyard("sector", "Cluster_108_sector003_macro") // Saturn 2
 
     XenonWharf("sector", "Cluster_413_sector001_macro") // Tharka Ravine IV: Tharkas Fall
 
     XenonWharf("sector", "Cluster_705_sector001_macro") // Nopoleas Memorial
-    XenonShipyard("sector", "Cluster_722_sector001_macro") // Sanctum Verge
-
-    // Since we made Holy Vision (cluster_24_macro) a neutral sector, we'll add Xenon stations that
-    // would have spawned there nearby.
-    // XenonShipyard("sector", "Cluster_12_sector001_macro") // True Sight.
-    // XenonWharf("sector", "Cluster_11_sector001_macro") // Pontifax Claim
-    // XenonWharf("sector", "Cluster_725_sector001_macro") // Void of Opportunity
+    XenonShipyard("sector", "Cluster_720_sector001_macro") // Ore belt - moved from Sanctum Verge (cluster 722)
 
     // Same for TEL/Hewa
     XenonWharf("sector", "Cluster_42_sector001_macro") // Hewas Twin 3
