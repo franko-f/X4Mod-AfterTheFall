@@ -427,22 +427,62 @@ let generateGateDefenseStations () =
 
 // There are several new xenon stations we want to add to specific sectors defined in 'Data.newXenonStations'.
 // Here we create the XML oibjects that represent these in the approriate location.
-let addNewXenonStations (xenonShipyard: XElement) (xenonWharf: XElement) = [
-    for xenonStation in Territories.newXenonStations do
-        // Extract the type of station, and it's location information. Create the apporpriate station XElement
-        let (station, locClass, location) =
-            match xenonStation with
-            | XenonShipyard(locClass, location) ->
-                (new X4GodMod.Station(new XElement(xenonShipyard)), locClass, location)
-            | XenonWharf(locClass, location) -> (new X4GodMod.Station(new XElement(xenonWharf)), locClass, location)
-
+// There are several new xenon stations we want to add to specific sectors defined in 'Data.newXenonStations'.
+// Here we create the XML oibjects that represent these in the approriate location.
+let addNewXenonStations (xenonShipyard: XElement) (xenonWharf: XElement) =
+    Territories.newXenonStations
+    |> List.choose (fun xenonStation ->
+        match xenonStation with
+        | XenonShipyard(locClass, location) ->
+            Some(new X4GodMod.Station(new XElement(xenonShipyard)), locClass, location)
+        | XenonWharf(locClass, location) -> Some(new X4GodMod.Station(new XElement(xenonWharf)), locClass, location)
+        | XenonSolarStation _ -> None)
+    |> List.map (fun (station, locClass, location) ->
         // Update the location and ID of our new station.
         station.Location.XElement.SetAttributeValue(XName.Get("class"), locClass)
         station.Location.XElement.SetAttributeValue(XName.Get("macro"), location)
         station.XElement.SetAttributeValue(XName.Get("id"), station.Id + location) // Give it a new unique ID
         logAddStation "ADDING" station
-        station.XElement
-]
+        station.XElement)
+
+// While defense stations are predefined; Xenon solar stations are not. It's quite possible that we could
+// create a concept of solar stations like defense/wharf/etc, that seems like more work. Instead we'll simply
+// define a new product with a location of the sector, and a quota of 1 for each instance.
+let addNewXenonProducts () =
+    Territories.newXenonStations
+    |> List.choose (fun xenonStation ->
+        match xenonStation with
+        | XenonSolarStation(locClass, location) -> Some(locClass, location)
+        | _ -> None)
+    |> List.map (fun (locClass, location) ->
+        let id = "xen_solar_" + location
+
+        let product =
+            new XElement(
+                "product",
+                new XAttribute("id", id),
+                new XAttribute("ware", "energycells"),
+                new XAttribute("owner", "xenon"),
+                new XAttribute("type", "factory"),
+                new XText("\n"),
+                new XElement("quotas", new XElement("quota", new XAttribute("galaxy", 2), new XAttribute("sector", 2))),
+                new XText("\n"),
+                new XElement(
+                    "location",
+                    new XAttribute("class", locClass),
+                    new XAttribute("macro", location),
+                    new XAttribute("matchextension", "false")
+                ),
+                new XText("\n"),
+                new XElement(
+                    "module",
+                    new XElement("select", new XAttribute("ware", "energycells"), new XAttribute("race", "xenon"))
+                ),
+                new XText("\n")
+            )
+
+        printfn "   ADDING PRODUCT xen_solar to %s:%s" locClass location
+        product)
 
 // Process the GOD file from the core game, and the DLCs.
 // extract the stations and products, tweak some values, then write out a new GOD file.
@@ -487,6 +527,8 @@ let generate_god_file (filename: string) =
 
     let newDefenseStations = generateGateDefenseStations ()
     let newXenonStations = addNewXenonStations xenonShipyard xenonWharf
+    let newXenonProducts = addNewXenonProducts ()
+
 
     // Now that everything has been processed, and we've got new stations and products,
     // we generate the modded XML, and write it out.
@@ -502,11 +544,15 @@ let generate_god_file (filename: string) =
         <diff>
             <add sel=\"//god/stations\">
             </add>
+            <add sel=\"//god/products\">
+            </add>
         </diff>
     "
         )
 
     let stationsAddElem = find_add_selector "//god/stations" outGodFile.Adds
+    let productsAddElem = find_add_selector "//god/products" outGodFile.Adds
+
     // The stations we're replacing with Xenon.
     [
         for element in addStations do
@@ -530,6 +576,14 @@ let generate_god_file (filename: string) =
             stationsAddElem.XElement.Add(new XText("\n")) // Add a newline after each element so the output is readible
     ]
     |> ignore
+
+    [
+        for element in newXenonProducts do
+            productsAddElem.XElement.Add(element)
+            productsAddElem.XElement.Add(new XText("\n")) // Add a newline after each element so the output is readible
+    ]
+    |> ignore
+
 
 
     // Add out 'remove' tags to the end of the diff block.

@@ -68,25 +68,41 @@ let neutralClusters = [
 type XenonStation =
     | XenonShipyard of string * string
     | XenonWharf of string * string
+    | XenonSolarStation of string * string
 
-// add new Xenon shipyards/wharfs to the following clusters:
+// add new Xenon shipyards/wharfs to the following clusters. We also explicitly add solar stations
+// to some that might otherwise be isolated.
 let newXenonStations = [
     XenonShipyard("sector", "Cluster_46_sector001_macro") // Morningstar IV
     XenonWharf("sector", "Cluster_46_sector001_macro")
 
     // Former terran space.
-    XenonShipyard("sector", "Cluster_100_sector001_macro") // Asteroid belt
-    XenonWharf("sector", "Cluster_100_sector001_macro")    // Asteroid Belt.
+    // Asteroid belt
+    XenonShipyard("sector", "Cluster_100_sector001_macro")
+    XenonWharf("sector", "Cluster_100_sector001_macro")
+    XenonSolarStation("sector", "Cluster_100_sector001_macro")
+
     XenonShipyard("sector", "Cluster_109_sector001_macro") // Uranus
+
+    // Saturn
     XenonShipyard("sector", "Cluster_108_sector003_macro") // Saturn 2
+    XenonSolarStation("sector", "Cluster_108_sector003_macro") // Saturn 2
 
-    XenonWharf("sector", "Cluster_413_sector001_macro") // Tharka Ravine IV: Tharkas Fall
+    // Tharka Ravine IV: Tharkas Fall
+    XenonWharf("sector", "Cluster_413_sector001_macro")
+    XenonSolarStation("sector", "Cluster_413_sector001_macro")
 
-    XenonWharf("sector", "Cluster_705_sector001_macro") // Nopoleas Memorial
-    XenonShipyard("sector", "Cluster_720_sector001_macro") // Ore belt - moved from Sanctum Verge (cluster 722)
+    // Nopoleas Memorial
+    XenonWharf("sector", "Cluster_705_sector001_macro")
+    XenonSolarStation("sector", "Cluster_705_sector001_macro")
+
+    // Ore belt - moved from Sanctum Verge (cluster 722)
+    XenonShipyard("sector", "Cluster_720_sector001_macro")
+    XenonSolarStation("sector", "Cluster_720_sector001_macro")
 
     // Same for TEL/Hewa
     XenonWharf("sector", "Cluster_42_sector001_macro") // Hewas Twin 3
+    XenonSolarStation("sector", "Cluster_42_sector001_macro") // Hewas Twin 3
 ]
 
 
