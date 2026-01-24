@@ -73,8 +73,10 @@ type XenonStation =
 // add new Xenon shipyards/wharfs to the following clusters. We also explicitly add solar stations
 // to some that might otherwise be isolated.
 let newXenonStations = [
-    XenonShipyard("sector", "Cluster_46_sector001_macro") // Morningstar IV
+    // Morningstar IV
+    XenonShipyard("sector", "Cluster_46_sector001_macro")
     XenonWharf("sector", "Cluster_46_sector001_macro")
+    XenonSolarStation("sector", "Cluster_46_sector001_macro")
 
     // Former terran space.
     // Asteroid belt
@@ -82,11 +84,12 @@ let newXenonStations = [
     XenonWharf("sector", "Cluster_100_sector001_macro")
     XenonSolarStation("sector", "Cluster_100_sector001_macro")
 
-    XenonShipyard("sector", "Cluster_109_sector001_macro") // Uranus
-
     // Saturn
     XenonShipyard("sector", "Cluster_108_sector003_macro") // Saturn 2
     XenonSolarStation("sector", "Cluster_108_sector003_macro") // Saturn 2
+
+    XenonShipyard("sector", "Cluster_109_sector001_macro") // Uranus
+    XenonSolarStation("sector", "Cluster_104_sector001_macro") // Earth
 
     // Tharka Ravine IV: Tharkas Fall
     XenonWharf("sector", "Cluster_413_sector001_macro")
@@ -103,6 +106,10 @@ let newXenonStations = [
     // Same for TEL/Hewa
     XenonWharf("sector", "Cluster_42_sector001_macro") // Hewas Twin 3
     XenonSolarStation("sector", "Cluster_42_sector001_macro") // Hewas Twin 3
+
+    XenonSolarStation("sector", "Cluster_39_sector001_macro") // Memory of Profit X
+    XenonSolarStation("sector", "Cluster_23_sector001_macro") // Sacred Relic
+    XenonSolarStation("sector", "Cluster_602_sector001_macro") // Barren Shores
 ]
 
 
@@ -120,6 +127,8 @@ type Territory = {
 let territories = [
     // Add some resources to Xenon dead-end sectors
     { Territory.Default with faction = "xenon";    dlc = Some "terran"; cluster = "Cluster_104_macro"; resources=standardResourcesOres }  // Earth and Moon
+    { Territory.Default with faction = "xenon";                         sectors = ["cluster_42_sector002_macro"] ; resources=standardResourcesOres }  // Hewas Cove IV
+
 
     // core
     { Territory.Default with faction = "argon";    cluster = "Cluster_07_macro"; resources=standardResourcesGases }   // The Reach
