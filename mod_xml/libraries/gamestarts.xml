@@ -1,101 +1,1952 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <diff xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" >
+	<add sel="/groups">
+		<group id="atf" name="After The Fall" description="Example gamestarts for the After the Fall mod:" />
+	</add>
 
     <add sel="/gamestarts">
 
-        <!-- Modified from the Scientist gamestart. Just sets up a universe where we have full visibility with everything for 
-        testing the mod and ensuring universe changes are correct.  -->
-        <gamestart 
-            id="endofdays_gamestart_test" 
-            name="End of Days test gamestart" 
-            description="Sets up a universe where we have full visibility with everything for testing the mod and ensuring universe changes are correct. " 
-            image="gamestart_scientist" group="4">
+	  <gamestart 
+		id="eod_honest_businessman"
+		name="Just an honest scrap hauler"
+        description="A scraphauler trying to make ends meet. You start with a salvage station, a loyal crew, and a modest fleet of salvagers and freighters. In a time where the Xenon destroyed everything, there's money to be made in picking up the pieces.
+		You start with the player HQ unlocked, and boron gate open." 
+		group="atf">
             <info>
                 <!-- Name, Gender, Location, Starting Ship(,2)/Ships(,10), Cash, Property -->
-                <item name="Location"   value="{1021,802}" />
+                <!--
+				<item name="Location"   value="{1021,802}" />
                 <item name="Name"  value="{1021,813}" />
-                <item name="Starting Ships"   value="Unknown" />
+				-->
+                <item name="Starting Ships"   value="Teuta" />
                 <item />
-                <item name="Cash"   value="2500000"/>
-                <item name="Property"   value="Satellites" />
+                <item name="Cash"   value="1500000"/>
+                <item name="Property"   value="Station" />
             </info>
+			
+		<location galaxy="xu_ep2_universe_macro" sector="cluster_18_sector001_macro"/>
+		<player macro="character_player_kaori_customgamestart_teladi_macro" name="{1021,102}" money="1500000">
+		  <inventory>
+			<ware ware="weapon_gen_spacesuit_repairlaser_01_mk1"/>
+			<ware ware="software_scannerobjectmk3"/>
+		  </inventory>
+		  <blueprints>
+			<ware ware="module_arg_dock_m_01_lowtech"/>
+			<ware ware="module_arg_conn_cross_01"/>
+			<ware ware="module_gen_prod_scrap_recycler"/>
+			<ware ware="module_arg_conn_base_03"/>
+			<ware ware="module_arg_def_disc_01"/>
+			<ware ware="module_gen_prod_energycells_01"/>
+			<ware ware="module_arg_def_tube_01"/>
+			<ware ware="module_arg_conn_base_01"/>
+			<ware ware="module_gen_proc_scrapworks"/>
+			<ware ware="module_arg_conn_base_02"/>
+			<ware ware="module_tel_stor_solid_l_01"/>
+			<ware ware="module_arg_dock_m_02"/>
+			<ware ware="module_pir_hab_l_01"/>
+			<ware ware="module_tel_stor_container_l_01"/>
+			<ware ware="module_arg_dock_m_02_lowtech"/>
+			<ware ware="module_arg_pier_l_01"/>
+			<ware ware="paintmod_0006"/>
+			<ware ware="paintmod_0048"/>
+			<ware ware="paintmod_0049"/>
+			<ware ware="paintmod_0050"/>
+			<ware ware="paintmod_0097"/>
+			<ware ware="paintmod_0098"/>
+			<ware ware="paintmod_0099"/>
+			<ware ware="paintmod_0100"/>
+		  </blueprints>
+		  <knownspace>
+			<space sector="cluster_18_sector001_macro"/>
+			<space sector="cluster_09_sector001_macro"/>
+			<space sector="cluster_15_sector001_macro"/>
+		  </knownspace>
+		  <knownobjects>
+			<object sector="cluster_18_sector001_macro" class="station"/>
+			<object sector="cluster_09_sector001_macro" class="station"/>
+			<object sector="cluster_15_sector001_macro" class="station"/>
+		  </knownobjects>
+		  <theme paint="painttheme_player_01"/>
+		  <ship macro="ship_pir_l_scrapper_01_macro" name="Finders Keepers">
+			<loadout>
+			  <macros>
+				<engine macro="engine_ter_l_allround_01_mk1_macro" path="../con_engine_03"/>
+				<engine macro="engine_ter_l_allround_01_mk1_macro" path="../con_engine_02"/>
+				<engine macro="engine_ter_l_allround_01_mk1_macro" path="../con_engine_01"/>
+				<engine macro="engine_ter_l_allround_01_mk1_macro" path="../con_engine_04"/>
+				<shield macro="shield_tel_l_standard_01_mk2_macro" path="../con_shieldgen_l_01"/>
+			  </macros>
+			  <groups>
+				<shields macro="shield_tel_m_standard_02_mk2_macro" group="group_back_mid_left" exact="2"/>
+				<shields macro="shield_arg_m_standard_02_mk2_macro" group="group_back_mid_mid" exact="4"/>
+				<shields macro="shield_tel_m_standard_02_mk2_macro" group="group_mid_mid_down"/>
+				<turrets macro="turret_arg_m_gatling_02_mk1_macro" group="group_back_mid_left" exact="3"/>
+				<turrets macro="turret_arg_m_laser_02_mk1_macro" group="group_mid_mid_down" exact="2"/>
+			  </groups>
+			  <ammunition>
+				<ammunition macro="eq_arg_resourceprobe_01_macro" exact="10"/>
+				<ammunition macro="ship_gen_s_lasertower_01_a_macro" exact="20"/>
+				<ammunition macro="ship_gen_xs_lasertower_01_a_macro" exact="30"/>
+				<ammunition macro="eq_arg_satellite_02_macro" exact="30"/>
+				<ammunition macro="countermeasure_flares_01_macro" exact="10"/>
+				<unit macro="ship_gen_xs_cargodrone_empty_01_a_macro" exact="4"/>
+				<unit macro="ship_gen_xs_buildingdrone_01_a_macro" exact="14"/>
+				<unit macro="ship_gen_xs_repairdrone_01_a_macro" exact="2"/>
+				<unit macro="ship_gen_s_fightingdrone_01_a_macro" exact="20"/>
+			  </ammunition>
+			  <software>
+				<software ware="software_dockmk2"/>
+				<software ware="software_flightassistmk1"/>
+				<software ware="software_scannerlongrangemk2"/>
+				<software ware="software_scannerobjectmk2"/>
+				<software ware="software_targetmk1"/>
+				<software ware="software_trademk1"/>
+			  </software>
+			  <virtualmacros>
+				<thruster macro="thruster_gen_l_allround_01_mk2_macro"/>
+			  </virtualmacros>
+			  <crew>
+				<crew role="service" exact="0"/>
+				<crew role="marine" exact="0"/>
+			  </crew>
+			</loadout>
+			<people people="player_scavenger_regular_freighter_crew" fillpercent="82.7586"/>
+		  </ship>
+		  <property>
+			<station id="player_HQ_1769066271" macro="station_pla_headquarters_base_01_macro">
+			  <location sector="cluster_18_sector001_macro">
+				<position x="265153.281" z="52300.125"/>
+			  </location>
+			  <construction ref="x4ep1_playerheadquarters_with_dock"/>
+			  <manager>
+				<skills>
+				  <skill type="boarding"/>
+				  <skill type="engineering"/>
+				  <skill type="management"/>
+				  <skill type="morale"/>
+				  <skill type="piloting"/>
+				</skills>
+			  </manager>
+			</station>
+			<station id="station1_1769066498" macro="station_gen_factory_base_01_macro">
+			  <location sector="cluster_18_sector001_macro">
+				<position x="141355.328" z="-129420.43"/>
+			  </location>
+			  <construction ref="player_1709622866"/>
+			  <manager>
+				<skills>
+				  <skill type="management" value="8"/>
+				  <skill type="morale"/>
+				  <skill type="piloting"/>
+				  <skill type="boarding"/>
+				  <skill type="engineering"/>
+				</skills>
+			  </manager>
+			</station>
+			<ship id="station1_sub0_1769066715" count="10" macro="ship_gen_m_tugboat_01_a_macro">
+			  <location sector="cluster_18_sector001_macro"/>
+			  <loadout>
+				<macros>
+				  <engine macro="engine_arg_m_allround_01_mk2_macro" path="../con_engine_03"/>
+				  <engine macro="engine_arg_m_allround_01_mk2_macro" path="../con_engine_02"/>
+				  <engine macro="engine_arg_m_allround_01_mk2_macro" path="../con_engine_01"/>
+				  <engine macro="engine_arg_m_allround_01_mk2_macro" path="../con_engine_05"/>
+				  <engine macro="engine_arg_m_allround_01_mk2_macro" path="../con_engine_04"/>
+				  <shield macro="shield_arg_m_standard_01_mk2_macro" path="../con_shield_01"/>
+				  <turret macro="turret_gen_m_scrapbeam_01_mk1_macro" path="../con_turret_03"/>
+				  <turret macro="turret_gen_m_scrapbeam_01_mk1_macro" path="../con_turret_02"/>
+				  <turret macro="turret_gen_m_scrapbeam_01_mk1_macro" path="../con_turret_01"/>
+				</macros>
+				<ammunition>
+				  <ammunition macro="countermeasure_flares_01_macro" exact="8"/>
+				</ammunition>
+				<software>
+				  <software ware="software_dockmk2"/>
+				  <software ware="software_flightassistmk1"/>
+				  <software ware="software_scannerlongrangemk2"/>
+				  <software ware="software_scannerobjectmk2"/>
+				  <software ware="software_targetmk1"/>
+				  <software ware="software_trademk1"/>
+				</software>
+				<virtualmacros>
+				  <thruster macro="thruster_gen_m_combat_01_mk2_macro"/>
+				</virtualmacros>
+				<crew>
+				  <crew role="service" exact="0"/>
+				  <crew role="marine" exact="0"/>
+				</crew>
+			  </loadout>
+			  <pilot>
+				<skills>
+				  <skill type="boarding"/>
+				  <skill type="engineering"/>
+				  <skill type="management"/>
+				  <skill type="morale"/>
+				  <skill type="piloting"/>
+				</skills>
+			  </pilot>
+			  <people people="player_argon_veteran_freighter_crew" fillpercent="71.4286"/>
+			</ship>
+			<ship id="station1_sub1_1769066783" count="6" macro="ship_arg_s_trans_container_01_a_macro">
+			  <location sector="cluster_18_sector001_macro"/>
+			  <loadout>
+				<macros>
+				  <engine macro="engine_arg_s_combat_01_mk2_macro" path="../con_engine_03"/>
+				  <engine macro="engine_arg_s_combat_01_mk2_macro" path="../con_engine_02"/>
+				  <engine macro="engine_arg_s_combat_01_mk2_macro" path="../con_engine_01"/>
+				  <weapon macro="weapon_gen_s_laser_01_mk1_macro" path="../con_weapon"/>
+				  <shield macro="shield_tel_s_standard_01_mk3_macro" path="../con_shield"/>
+				</macros>
+				<ammunition>
+				  <ammunition macro="countermeasure_flares_01_macro" exact="4"/>
+				</ammunition>
+				<software>
+				  <software ware="software_dockmk1"/>
+				  <software ware="software_flightassistmk1"/>
+				  <software ware="software_scannerlongrangemk1"/>
+				  <software ware="software_scannerobjectmk2"/>
+				  <software ware="software_targetmk1"/>
+				  <software ware="software_trademk1"/>
+				</software>
+				<virtualmacros>
+				  <thruster macro="thruster_gen_s_combat_01_mk1_macro"/>
+				</virtualmacros>
+				<crew>
+				  <crew role="service" exact="0"/>
+				  <crew role="marine" exact="0"/>
+				</crew>
+			  </loadout>
+			  <pilot>
+				<skills>
+				  <skill type="boarding"/>
+				  <skill type="engineering"/>
+				  <skill type="management"/>
+				  <skill type="morale"/>
+				  <skill type="piloting" value="5"/>
+				</skills>
+			  </pilot>
+			  <people people="player_scavenger_veteran_freighter_crew" fillpercent="80"/>
+			</ship>
+			<ship id="station1_sub2_1769067307" count="2" macro="ship_par_m_trans_container_03_a_macro">
+				<location sector="cluster_18_sector001_macro"/>
+			  <loadout>
+				<macros>
+				  <engine macro="engine_par_m_combat_01_mk3_macro" path="../con_engine_01"/>
+				  <weapon macro="weapon_gen_m_plasma_01_mk2_macro" path="../con_weapon_03"/>
+				  <weapon macro="weapon_gen_m_plasma_01_mk2_macro" path="../con_weapon_02"/>
+				  <weapon macro="weapon_gen_m_plasma_01_mk2_macro" path="../con_weapon_01"/>
+				  <shield macro="shield_tel_m_standard_01_mk2_macro" path="../con_shield_01"/>
+				  <shield macro="shield_tel_m_standard_01_mk2_macro" path="../con_shield_02"/>
+				  <turret macro="turret_arg_m_laser_01_mk1_macro" path="../con_turret_03"/>
+				  <turret macro="turret_arg_m_flak_01_mk1_macro" path="../con_turret_02"/>
+				  <turret macro="turret_arg_m_flak_01_mk1_macro" path="../con_turret_01"/>
+				</macros>
+				<ammunition>
+				  <ammunition macro="countermeasure_flares_01_macro" exact="8"/>
+				</ammunition>
+				<software>
+				  <software ware="software_dockmk2"/>
+				  <software ware="software_flightassistmk1"/>
+				  <software ware="software_scannerlongrangemk2"/>
+				  <software ware="software_scannerobjectmk2"/>
+				  <software ware="software_targetmk1"/>
+				  <software ware="software_trademk1"/>
+				</software>
+				<virtualmacros>
+				  <thruster macro="thruster_gen_m_combat_01_mk2_macro"/>
+				</virtualmacros>
+				<crew>
+				  <crew role="service" exact="7"/>
+				  <crew role="marine" exact="3"/>
+				</crew>
+			  </loadout>
+			  <pilot>
+				<skills>
+				  <skill type="boarding"/>
+				  <skill type="engineering"/>
+				  <skill type="management"/>
+				  <skill type="morale"/>
+				  <skill type="piloting"/>
+				</skills>
+			  </pilot>
+			  <people people="player_scavenger_regular_military_crew" fillpercent="100"/>
+			</ship>
+		  </property>
+		</player>
+		<universe>
+		  <factions>
+			<relations>
+			  <relation faction="player" otherfaction="terran" relation="0.01"/>
+			</relations>
+		  </factions>
+		  <stories>
+			<story ref="story_boron_wayfinder" state="1"/>
+			<story ref="story_hq_boso" state="1"/>
+		  </stories>
+		</universe>
+	  </gamestart>		
+		
+		
+		
+	  <gamestart 
+		id="eod_lostfish" 
+		name="Just me and my fish ship."
+		description="You and your loyal crew have limped back to safe space after a nasty brush with the Xenon. You have a light carrier, no fighters, almost no cash, and now you're probably going to have to haul cargo for a while until you can afford to buy enough fighters to start your 'cargo acquisition' empire again.
+		You start with the player HQ unlocked, and boron gate open."
+		 group="atf"
+	  >
+            <info>
+                <!-- Name, Gender, Location, Starting Ship(,2)/Ships(,10), Cash, Property -->
+                <!--
+				<item name="Location"   value="{1021,802}" />
+                <item name="Name"  value="{1021,813}" />
+				-->
+                <item name="Starting Ships"   value="Guppy" />
+                <item />
+                <item name="Cash"   value="114000"/>
+                <item name="Property"   value="Not much but your ship. But at least it's a nice ship." />
+            </info>
+				  
+		<location galaxy="xu_ep2_universe_macro" sector="cluster_40_sector001_macro"/>
+		<player macro="character_player_pirate_gamestart2_macro" female="1" name="{1021,102}" money="114000">
+		  <inventory>
+			<ware ware="weapon_gen_spacesuit_repairlaser_01_mk1"/>
+			<ware ware="software_scannerobjectmk3"/>
+		  </inventory>
+		  <blueprints>
+			<ware ware="module_arg_dock_m_01_lowtech"/>
+			<ware ware="paintmod_0006"/>
+			<ware ware="paintmod_0048"/>
+			<ware ware="paintmod_0049"/>
+			<ware ware="paintmod_0050"/>
+			<ware ware="paintmod_0097"/>
+			<ware ware="paintmod_0098"/>
+			<ware ware="paintmod_0099"/>
+			<ware ware="paintmod_0100"/>
+		  </blueprints>
+		  <knownspace>
+			<space sector="cluster_40_sector001_macro"/>
+			<space sector="cluster_14_sector001_macro"/>
+		  </knownspace>
+		  <knownobjects>
+			<object sector="cluster_40_sector001_macro" class="station"/>
+			<object sector="cluster_14_sector001_macro" class="station"/>
+		  </knownobjects>		  
+		  <theme paint="painttheme_player_01"/>
+		  <ship macro="ship_bor_l_carrier_01_a_macro" name="Starsail">
+			<loadout>
+			  <macros>
+				<engine macro="engine_bor_l_travel_01_mk1_macro" path="../con_engine_03"/>
+				<engine macro="engine_bor_l_travel_01_mk1_macro" path="../con_engine_02"/>
+				<engine macro="engine_bor_l_travel_01_mk1_macro" path="../con_engine_01"/>
+				<engine macro="engine_bor_l_travel_01_mk1_macro" path="../con_engine_07"/>
+				<engine macro="engine_bor_l_travel_01_mk1_macro" path="../con_engine_06"/>
+				<engine macro="engine_bor_l_travel_01_mk1_macro" path="../con_engine_05"/>
+				<engine macro="engine_bor_l_travel_01_mk1_macro" path="../con_engine_04"/>
+				<shield macro="shield_bor_l_standard_01_mk3_macro" path="../con_shield_l_04"/>
+				<shield macro="shield_bor_l_standard_01_mk3_macro" path="../con_shield_l_03"/>
+				<shield macro="shield_bor_l_standard_01_mk3_macro" path="../con_shield_l_02"/>
+				<shield macro="shield_bor_l_standard_01_mk3_macro" path="../con_shield_l_01"/>
+			  </macros>
+			  <groups>
+				<shields macro="shield_bor_m_standard_02_mk3_macro" group="group_engines" exact="6"/>
+				<shields macro="shield_bor_m_standard_02_mk2_macro" group="group_front_down_left"/>
+				<shields macro="shield_bor_m_standard_02_mk2_macro" group="group_front_down_right"/>
+				<shields macro="shield_bor_m_standard_02_mk3_macro" group="group_front_mid_down"/>
+				<shields macro="shield_bor_m_standard_02_mk3_macro" group="group_front_up_left"/>
+				<shields macro="shield_bor_m_standard_02_mk2_macro" group="group_front_up_right"/>
+				<shields macro="shield_bor_m_standard_02_mk2_macro" group="group_mid_up_mid"/>
+				<shields macro="shield_bor_m_standard_02_mk2_macro" group="group_rear_down_mid"/>
+				<shields macro="shield_bor_m_standard_02_mk3_macro" group="group_rear_up_mid"/>
+				<turrets macro="turret_bor_m_railgun_02_mk1_macro" group="group_front_down_left" exact="2"/>
+				<turrets macro="turret_bor_m_arc_02_mk1_macro" group="group_front_down_right" exact="2"/>
+				<turrets macro="turret_bor_m_laser_02_mk1_macro" group="group_front_mid_down" exact="2"/>
+				<turrets macro="turret_bor_m_railgun_02_mk1_macro" group="group_front_up_left" exact="2"/>
+				<turrets macro="turret_bor_m_railgun_02_mk1_macro" group="group_front_up_right" exact="2"/>
+				<turrets macro="turret_bor_m_arc_02_mk1_macro" group="group_mid_up_mid" exact="2"/>
+				<turrets macro="turret_bor_m_laser_02_mk1_macro" group="group_rear_down_mid" exact="2"/>
+				<turrets macro="turret_bor_m_railgun_02_mk1_macro" group="group_rear_up_mid" exact="2"/>
+			  </groups>
+			  <ammunition>
+				<ammunition macro="weapon_gen_mine_02_macro" exact="10"/>
+				<ammunition macro="eq_arg_resourceprobe_01_macro" exact="10"/>
+				<ammunition macro="eq_arg_satellite_01_macro" exact="10"/>
+				<ammunition macro="eq_arg_satellite_02_macro" exact="10"/>
+				<ammunition macro="ship_gen_xs_lasertower_01_a_macro" exact="20"/>				
+				<ammunition macro="ship_gen_s_lasertower_01_a_macro" exact="20"/>
+				<ammunition macro="countermeasure_flares_01_macro" exact="20"/>
+				<unit macro="ship_gen_s_fightingdrone_01_a_macro" exact="14"/>
+				<unit macro="ship_gen_xs_cargodrone_empty_01_a_macro" exact="2"/>
+				<unit macro="ship_gen_xs_repairdrone_01_a_macro" exact="4"/>
+			  </ammunition>
+			  <software>
+				<software ware="software_dockmk2"/>
+				<software ware="software_flightassistmk1"/>
+				<software ware="software_scannerlongrangemk2"/>
+				<software ware="software_scannerobjectmk2"/>
+				<software ware="software_targetmk1"/>
+				<software ware="software_trademk1"/>
+			  </software>
+			  <virtualmacros>
+				<thruster macro="thruster_gen_l_allround_01_mk2_macro"/>
+			  </virtualmacros>
+			  <crew>
+				<crew role="service" exact="0"/>
+				<crew role="marine" exact="0"/>
+			  </crew>
+			</loadout>
+			<people people="player_argon_veteran_freighter_crew" fillpercent="86.6667"/>
+		  </ship>
+		  <property>
+			<station id="player_HQ_1769066271" macro="station_pla_headquarters_base_01_macro">
+			  <location sector="cluster_14_sector001_macro">
+				<position x="234224.609" y="0.03173" z="10739.975"/>
+			  </location>
+			  <construction ref="x4ep1_playerheadquarters_with_dock"/>
+			  <manager>
+				<skills>
+				  <skill type="boarding"/>
+				  <skill type="engineering"/>
+				  <skill type="management"/>
+				  <skill type="morale"/>
+				  <skill type="piloting"/>
+				</skills>
+			  </manager>
+			</station>
+		  </property>
+		</player>
+		<universe>
+		  <factions>
+			<relations>
+			  <relation faction="player" otherfaction="terran" relation="0.01"/>
+			</relations>
+		  </factions>
+		  <stories>
+			<story ref="story_boron_wayfinder" state="1"/>
+			<story ref="story_hq_boso" state="1"/>
+		  </stories>
+		</universe>
+	  </gamestart>
 
-            <location galaxy="xu_ep2_universe_macro" sector="cluster_14_sector001_macro" >
-                    <position x="1000.05115" y="1.806" z="-2000.541"/>
-                    <rotation yaw="179.69951" pitch="-1.83378"/>
-            </location>
-            <player macro="character_player_scientist_macro" female="true" money="2500000" name="{1021,802}">
-                <ship macro="ship_par_s_fighter_01_a_macro">
-                    <loadout>
-                        <macros>
-                            <engine macro="engine_par_s_combat_01_mk1_macro" path="../con_engine_01" />
-                            <engine macro="engine_par_s_combat_01_mk1_macro" path="../con_engine_02" />
-                            <engine macro="engine_par_s_combat_01_mk1_macro" path="../con_engine_03" />
-                            <weapon macro="weapon_gen_s_laser_01_mk1_macro" path="../con_weapon_01" optional="true" />
-                            <weapon macro="weapon_gen_s_guided_01_mk1_macro" path="../con_weapon_02" optional="true" />
-                            <shield macro="shield_par_s_standard_01_mk1_macro" path="../con_shield_01" optional="true" />
-                        </macros>
-                        <ammunition>
-                            <ammunition macro="missile_guided_light_mk1_macro" exact="10" optional="true" />
-                            <ammunition macro="eq_arg_satellite_01_macro" exact="5" optional="true"/>
-                            <ammunition macro="env_deco_nav_beacon_t1_macro" exact="5" optional="true"/>
-                            <ammunition macro="eq_arg_resourceprobe_01_macro" exact="5" optional="true"/>
-                        </ammunition>
-                        <software>
-                            <software ware="software_targetmk1" />
-                        </software>
-                        <virtualmacros>
-                            <thruster macro="thruster_gen_s_allround_01_mk1_macro" />
-                        </virtualmacros>
-                    </loadout>
-                </ship>
-                <inventory>
-                    <ware ware="weapon_gen_spacesuit_repairlaser_01_mk1" amount="1" />
-                    <ware ware="software_scannerobjectmk3" amount="1" />
-                </inventory>
-                <blueprints>
-                    <ware ware="clothingmod_0001" />
-                    <ware ware="clothingmod_0002" />
-                    <ware ware="module_arg_dock_m_01_lowtech" />
-                    <ware ware="module_arg_pier_l_03" />
-                    <ware ware="module_arg_stor_container_s_01" />
-                    <ware ware="module_arg_conn_base_01" />
-                    <ware ware="module_arg_conn_cross_01" />
-                    <ware ware="module_arg_conn_vertical_01" />
-                    <ware ware="module_gen_prod_energycells_01" />
-                    <ware ware="module_arg_prod_meat_01" />
-                    <ware ware="paintmod_0006"/>
-                    <ware ware="paintmod_0048"/>
-                    <ware ware="paintmod_0049"/>
-                    <ware ware="paintmod_0050"/>
-                    <ware ware="paintmod_0097"/>
-                    <ware ware="paintmod_0098"/>
-                    <ware ware="paintmod_0099"/>
-                    <ware ware="paintmod_0100"/>
-                </blueprints>
-                <research>
-                    <ware ware="research_radioreceiver" />
-                    <ware ware="research_sensorbooster" />
-                    <ware ware="research_tradeinterface" />
-                </research>
-                <encyclopedia>
-                    <entry type="warebasket" ref="research_gamestart_common"/>
-                </encyclopedia>
-                <theme paint="painttheme_player_01" />
-            </player>
-            <universe>
-               <!-- Advanced Alliance gamestart = very friendly with Alliance, slight boost with ARG and PAR because they're ALI-affiliated -->
-                <factions>
-                    <relations>
-                    <relation faction="alliance" otherfaction="player" relation="0.01"/>
-                    <relation faction="argon" otherfaction="player" relation="0.0032"/>
-                    <relation faction="antigone" otherfaction="player" relation="1.0"/>
-                    <relation faction="paranid" otherfaction="player" relation="0.0032"/>
-                    </relations>
-                </factions>
-            </universe>
-        </gamestart>
+
+  <gamestart id="eod_galaxy" name="battlecarrier galaxy"
+  
+		description="Your homeworld is destroyed, and you command the last surviving battlecarrier and it's fighters, protecting a ragtag fleet of civilian vessels. You are lost somewhere in the savage galaxy, and must chart a course to safety.
+		Guide as many of the fragile civilian ships to a new home before the Xenon find and destroy them. Once there, build a new empire reclaim the galaxy from the Xenon threat.
+		You must choose when to stand your ground, and when to flee. Will you bring these civilians to safety, or perish trying?"
+		 group="atf"
+	  >
+            <info>
+                <!-- Name, Gender, Location, Starting Ship(,2)/Ships(,10), Cash, Property -->
+                <!--
+				<item name="Location"   value="{1021,802}" />
+                <item name="Name"  value="{1021,813}" />
+				-->
+                <item name="Starting Ships"   value="Raptor" />
+                <item />
+                <item name="Cash"   value="10000000"/>
+                <item name="Property"   value="A fleet" />
+            </info>
+			
+  
+  
+    <location galaxy="xu_ep2_universe_macro" sector="cluster_711_sector001_macro"/>
+    <player macro="character_player_kaori_customgamestart_paranid_macro" name="{1021,102}" money="10000000">
+      <inventory>
+        <ware ware="weapon_gen_spacesuit_repairlaser_01_mk1"/>
+        <ware ware="software_scannerobjectmk3"/>
+      </inventory>
+      <blueprints>
+        <ware ware="module_arg_dock_m_01_lowtech"/>
+        <ware ware="ship_gen_xs_cargodrone_empty_01_a"/>
+        <ware ware="ship_gen_s_fightingdrone_01_a"/>
+        <ware ware="module_gen_prod_energycells_01"/>
+        <ware ware="module_gen_prod_graphene_01"/>
+        <ware ware="module_gen_prod_hullparts_01"/>
+        <ware ware="turret_par_l_plasma_01_mk1"/>
+        <ware ware="shield_par_l_standard_01_mk1"/>
+        <ware ware="turret_par_m_laser_02_mk1"/>
+        <ware ware="shield_par_m_standard_02_mk1"/>
+        <ware ware="shield_par_s_standard_01_mk1"/>
+        <ware ware="module_par_pier_l_02"/>
+        <ware ware="module_par_conn_base_01"/>
+        <ware ware="module_par_conn_cross_01"/>
+        <ware ware="module_par_stor_container_s_01"/>
+        <ware ware="module_par_hab_s_01"/>
+        <ware ware="module_par_stor_liquid_s_01"/>
+        <ware ware="module_par_stor_solid_s_01"/>
+        <ware ware="module_par_conn_vertical_01"/>
+        <ware ware="module_par_conn_cross_03"/>
+        <ware ware="module_gen_prod_refinedmetals_01"/>
+        <ware ware="ship_gen_xs_repairdrone_01_a"/>
+        <ware ware="module_gen_prod_scrap_recycler"/>
+        <ware ware="module_gen_prod_siliconwafers_01"/>
+        <ware ware="module_gen_proc_scrapworks"/>
+        <ware ware="paintmod_0006"/>
+        <ware ware="paintmod_0048"/>
+        <ware ware="paintmod_0049"/>
+        <ware ware="paintmod_0050"/>
+        <ware ware="paintmod_0097"/>
+        <ware ware="paintmod_0098"/>
+        <ware ware="paintmod_0099"/>
+        <ware ware="paintmod_0100"/>
+      </blueprints>
+      <knownspace>
+        <space sector="cluster_711_sector001_macro"/>
+      </knownspace>
+      <theme paint="painttheme_player_01"/>
+      <ship macro="ship_spl_xl_carrier_01_a_macro" name="Battlecarrier Galaxy">
+        <loadout>
+          <macros>
+            <engine macro="engine_par_xl_allround_01_mk1_macro" path="../con_engine_01"/>
+            <shield macro="shield_tel_xl_standard_01_mk1_macro" path="../con_shieldgen_xl_01"/>
+          </macros>
+          <groups>
+            <shields macro="shield_tel_m_standard_02_mk2_macro" group="group_back_mid_bottom" exact="2"/>
+            <shields macro="shield_arg_m_standard_02_mk2_macro" group="group_back_mid_mid"/>
+            <shields macro="shield_tel_m_standard_02_mk2_macro" group="group_back_mid_mid_2" exact="4"/>
+            <shields macro="shield_tel_m_standard_02_mk2_macro" group="group_back_mid_mid_3" exact="2"/>
+            <shields macro="shield_tel_m_standard_02_mk2_macro" group="group_front_mid_bottom_02" exact="2"/>
+            <shields macro="shield_tel_m_standard_02_mk2_macro" group="group_front_mid_front" exact="4"/>
+            <shields macro="shield_tel_m_standard_02_mk2_macro" group="group_front_mid_top_01" exact="4"/>
+            <shields macro="shield_tel_m_standard_02_mk2_macro" group="group_interior_hangar_01" exact="2"/>
+            <shields macro="shield_tel_m_standard_02_mk2_macro" group="group_mid_left_bottom_01" exact="2"/>
+            <shields macro="shield_tel_m_standard_02_mk2_macro" group="group_mid_left_bottom_l" exact="2"/>
+            <shields macro="shield_tel_m_standard_02_mk2_macro" group="group_mid_left_mid"/>
+            <shields macro="shield_tel_m_standard_02_mk2_macro" group="group_mid_left_top_l" exact="2"/>
+            <shields macro="shield_tel_m_standard_02_mk2_macro" group="group_mid_mid_bottom_01" exact="4"/>
+            <shields macro="shield_tel_m_standard_02_mk2_macro" group="group_mid_mid_top_01" exact="4"/>
+            <shields macro="shield_tel_m_standard_02_mk2_macro" group="group_mid_mid_top_02" exact="2"/>
+            <shields macro="shield_tel_m_standard_02_mk2_macro" group="group_mid_mid_top_03" exact="4"/>
+            <shields macro="shield_tel_m_standard_02_mk2_macro" group="group_mid_right_bottom_01" exact="2"/>
+            <shields macro="shield_tel_m_standard_02_mk2_macro" group="group_mid_right_bottom_l" exact="2"/>
+            <shields macro="shield_tel_m_standard_02_mk2_macro" group="group_mid_right_mid"/>
+            <shields macro="shield_tel_m_standard_02_mk2_macro" group="group_mid_right_top_l" exact="2"/>
+            <turrets macro="turret_arg_m_gatling_02_mk1_macro" group="group_back_mid_bottom" exact="5"/>
+            <turrets macro="turret_arg_m_laser_02_mk1_macro" group="group_back_mid_mid_2" exact="10"/>
+            <turrets macro="turret_arg_m_gatling_02_mk1_macro" group="group_back_mid_mid_3" exact="2"/>
+            <turrets macro="turret_arg_m_flak_02_mk1_macro" group="group_front_mid_bottom_02" exact="5"/>
+            <turrets macro="turret_arg_m_gatling_02_mk1_macro" group="group_front_mid_front" exact="10"/>
+            <turrets macro="turret_arg_m_plasma_02_mk1_macro" group="group_front_mid_top_01" exact="9"/>
+            <turrets macro="turret_arg_m_laser_02_mk1_macro" group="group_interior_hangar_01" exact="4"/>
+            <turrets macro="turret_arg_m_laser_02_mk1_macro" group="group_mid_left_bottom_01" exact="5"/>
+            <turrets macro="turret_par_l_plasma_01_mk1_macro" group="group_mid_left_bottom_l" exact="2"/>
+            <turrets macro="turret_arg_m_laser_02_mk1_macro" group="group_mid_left_mid" exact="2"/>
+            <turrets macro="turret_par_l_plasma_01_mk1_macro" group="group_mid_left_top_l" exact="2"/>
+            <turrets macro="turret_arg_m_plasma_02_mk1_macro" group="group_mid_mid_bottom_01" exact="10"/>
+            <turrets macro="turret_arg_m_gatling_02_mk1_macro" group="group_mid_mid_top_01" exact="10"/>
+            <turrets macro="turret_arg_m_flak_02_mk1_macro" group="group_mid_mid_top_02" exact="4"/>
+            <turrets macro="turret_arg_m_flak_02_mk1_macro" group="group_mid_mid_top_03" exact="10"/>
+            <turrets macro="turret_arg_m_laser_02_mk1_macro" group="group_mid_right_bottom_01" exact="5"/>
+            <turrets macro="turret_par_l_plasma_01_mk1_macro" group="group_mid_right_bottom_l" exact="2"/>
+            <turrets macro="turret_arg_m_laser_02_mk1_macro" group="group_mid_right_mid" exact="2"/>
+            <turrets macro="turret_par_l_plasma_01_mk1_macro" group="group_mid_right_top_l" exact="2"/>
+          </groups>
+          <ammunition>
+            <ammunition macro="countermeasure_flares_01_macro" exact="40"/>
+            <unit macro="ship_gen_xs_cargodrone_empty_01_a_macro"/>
+            <unit macro="ship_gen_xs_repairdrone_01_a_macro" exact="19"/>
+          </ammunition>
+          <software>
+            <software ware="software_dockmk2"/>
+            <software ware="software_flightassistmk1"/>
+            <software ware="software_scannerlongrangemk2"/>
+            <software ware="software_scannerobjectmk2"/>
+            <software ware="software_targetmk1"/>
+            <software ware="software_trademk1"/>
+          </software>
+          <virtualmacros>
+            <thruster macro="thruster_gen_xl_allround_01_mk3_macro"/>
+          </virtualmacros>
+          <crew>
+            <crew role="marine" exact="0"/>
+            <crew role="service" exact="0"/>
+          </crew>
+        </loadout>
+        <people people="player_split_veteran_military_crew" fillpercent="78.3172"/>
+      </ship>
+      <property>
+        <ship id="fleet0_1769154327" macro="ship_ter_xl_resupplier_01_a_macro">
+          <loadout>
+            <macros>
+              <engine macro="engine_ter_xl_travel_01_mk1_macro" path="../con_engine_01"/>
+              <shield macro="shield_ter_xl_standard_01_mk2_macro" path="../con_shieldgen_xl_01"/>
+            </macros>
+            <groups>
+              <shields macro="shield_ter_m_standard_02_mk2_macro" group="group_back_cent_up"/>
+              <shields macro="shield_ter_m_standard_02_mk2_macro" group="group_back_left_down"/>
+              <shields macro="shield_ter_m_standard_02_mk2_macro" group="group_back_mid_down" exact="2"/>
+              <shields macro="shield_ter_m_standard_02_mk2_macro" group="group_back_right_down"/>
+              <shields macro="shield_ter_m_standard_02_mk2_macro" group="group_cent_cent_down"/>
+              <shields macro="shield_ter_m_standard_02_mk2_macro" group="group_cent_right_top"/>
+              <shields macro="shield_ter_m_standard_02_mk2_macro" group="group_front_cent_top"/>
+              <shields macro="shield_ter_m_standard_02_mk2_macro" group="group_front_mid_down"/>
+              <turrets macro="turret_ter_m_gatling_02_mk1_macro" group="group_back_cent_up" exact="2"/>
+              <turrets macro="turret_ter_m_gatling_02_mk1_macro" group="group_back_left_down" exact="2"/>
+              <turrets macro="turret_ter_m_gatling_02_mk1_macro" group="group_back_right_down" exact="2"/>
+              <turrets macro="turret_ter_m_gatling_02_mk1_macro" group="group_cent_cent_down" exact="2"/>
+              <turrets macro="turret_ter_m_gatling_02_mk1_macro" group="group_cent_right_top" exact="2"/>
+              <turrets macro="turret_ter_m_gatling_02_mk1_macro" group="group_front_cent_top" exact="2"/>
+              <turrets macro="turret_ter_m_gatling_02_mk1_macro" group="group_front_mid_down" exact="2"/>
+            </groups>
+            <ammunition>
+              <ammunition macro="countermeasure_flares_01_macro" exact="40"/>
+              <unit macro="ship_gen_xs_cargodrone_empty_01_a_macro" exact="11"/>
+              <unit macro="ship_gen_xs_repairdrone_01_a_macro" exact="27"/>
+            </ammunition>
+            <software>
+              <software ware="software_dockmk2"/>
+              <software ware="software_flightassistmk1"/>
+              <software ware="software_scannerlongrangemk2"/>
+              <software ware="software_scannerobjectmk2"/>
+              <software ware="software_targetmk1"/>
+              <software ware="software_trademk1"/>
+            </software>
+            <virtualmacros>
+              <thruster macro="thruster_gen_xl_allround_01_mk2_macro"/>
+            </virtualmacros>
+            <crew>
+              <crew role="marine" exact="0"/>
+              <crew role="service" exact="0"/>
+            </crew>
+          </loadout>
+          <pilot>
+            <skills>
+              <skill type="boarding"/>
+              <skill type="engineering"/>
+              <skill type="management"/>
+              <skill type="morale"/>
+              <skill type="piloting"/>
+            </skills>
+          </pilot>
+          <people people="player_argon_veteran_freighter_crew" fillpercent="50"/>
+        </ship>
+        <ship id="fleet1_1769154531" count="1m" macro="ship_bor_l_carrier_01_a_macro">
+          <loadout>
+            <macros>
+              <engine macro="engine_ter_l_allround_02_mk1_macro" path="../con_engine_03"/>
+              <engine macro="engine_ter_l_allround_02_mk1_macro" path="../con_engine_02"/>
+              <engine macro="engine_ter_l_allround_02_mk1_macro" path="../con_engine_01"/>
+              <engine macro="engine_ter_l_allround_02_mk1_macro" path="../con_engine_07"/>
+              <engine macro="engine_ter_l_allround_02_mk1_macro" path="../con_engine_06"/>
+              <engine macro="engine_ter_l_allround_02_mk1_macro" path="../con_engine_05"/>
+              <engine macro="engine_ter_l_allround_02_mk1_macro" path="../con_engine_04"/>
+              <shield macro="shield_bor_l_standard_01_mk3_macro" path="../con_shield_l_04"/>
+              <shield macro="shield_bor_l_standard_01_mk3_macro" path="../con_shield_l_03"/>
+              <shield macro="shield_bor_l_standard_01_mk3_macro" path="../con_shield_l_02"/>
+              <shield macro="shield_bor_l_standard_01_mk3_macro" path="../con_shield_l_01"/>
+            </macros>
+            <groups>
+              <shields macro="shield_bor_m_standard_02_mk2_macro" group="group_engines" exact="6"/>
+              <shields macro="shield_bor_m_standard_02_mk2_macro" group="group_front_down_left"/>
+              <shields macro="shield_bor_m_standard_02_mk2_macro" group="group_front_down_right"/>
+              <shields macro="shield_bor_m_standard_02_mk2_macro" group="group_front_mid_down"/>
+              <shields macro="shield_bor_m_standard_02_mk2_macro" group="group_front_up_left"/>
+              <shields macro="shield_bor_m_standard_02_mk2_macro" group="group_front_up_right"/>
+              <shields macro="shield_bor_m_standard_02_mk2_macro" group="group_mid_up_mid"/>
+              <shields macro="shield_bor_m_standard_02_mk2_macro" group="group_rear_down_mid"/>
+              <shields macro="shield_bor_m_standard_02_mk2_macro" group="group_rear_up_mid"/>
+              <turrets macro="turret_bor_m_laser_02_mk1_macro" group="group_front_down_left" exact="2"/>
+              <turrets macro="turret_bor_m_arc_02_mk1_macro" group="group_front_down_right" exact="2"/>
+              <turrets macro="turret_bor_m_railgun_02_mk1_macro" group="group_front_mid_down" exact="2"/>
+              <turrets macro="turret_bor_m_railgun_02_mk1_macro" group="group_front_up_left" exact="2"/>
+              <turrets macro="turret_bor_m_arc_02_mk1_macro" group="group_front_up_right" exact="2"/>
+              <turrets macro="turret_bor_m_laser_02_mk1_macro" group="group_mid_up_mid" exact="2"/>
+              <turrets macro="turret_bor_m_laser_02_mk1_macro" group="group_rear_down_mid" exact="2"/>
+              <turrets macro="turret_bor_m_laser_02_mk1_macro" group="group_rear_up_mid" exact="2"/>
+            </groups>
+            <ammunition>
+              <ammunition macro="countermeasure_flares_01_macro" exact="20"/>
+              <ammunition macro="ship_gen_s_lasertower_01_a_macro" exact="20"/>
+              <ammunition macro="ship_gen_xs_lasertower_01_a_macro" exact="30"/>
+              <ammunition macro="weapon_gen_mine_02_macro" exact="50"/>
+              <ammunition macro="eq_arg_satellite_01_macro" exact="10"/>
+              <ammunition macro="eq_arg_satellite_02_macro" exact="10"/>
+              <unit macro="ship_gen_s_fightingdrone_01_a_macro" exact="12"/>
+              <unit macro="ship_gen_xs_repairdrone_01_a_macro" exact="6"/>
+              <unit macro="ship_gen_xs_cargodrone_empty_01_a_macro" exact="2"/>
+            </ammunition>
+            <software>
+              <software ware="software_dockmk2"/>
+              <software ware="software_flightassistmk1"/>
+              <software ware="software_scannerlongrangemk2"/>
+              <software ware="software_scannerobjectmk2"/>
+              <software ware="software_targetmk1"/>
+              <software ware="software_trademk1"/>
+            </software>
+            <virtualmacros>
+              <thruster macro="thruster_gen_l_allround_01_mk2_macro"/>
+            </virtualmacros>
+            <crew>
+              <crew role="marine" exact="0"/>
+              <crew role="service" exact="0"/>
+            </crew>
+          </loadout>
+          <pilot>
+            <skills>
+              <skill type="boarding"/>
+              <skill type="engineering"/>
+              <skill type="management"/>
+              <skill type="morale"/>
+              <skill type="piloting" value="7"/>
+            </skills>
+          </pilot>
+          <people people="player_boron_veteran_military_crew" fillpercent="65"/>
+        </ship>
+        <ship id="fleet0_sub0_1769154560" count="2" commander="fleet0_1769154327" macro="ship_arg_s_trans_container_01_a_macro">
+          <loadout>
+            <macros>
+              <engine macro="engine_arg_s_combat_01_mk2_macro" path="../con_engine_03"/>
+              <engine macro="engine_arg_s_combat_01_mk2_macro" path="../con_engine_02"/>
+              <engine macro="engine_arg_s_combat_01_mk2_macro" path="../con_engine_01"/>
+              <weapon macro="weapon_gen_s_laser_01_mk1_macro" path="../con_weapon"/>
+              <shield macro="shield_tel_s_standard_01_mk3_macro" path="../con_shield"/>
+            </macros>
+            <ammunition>
+              <ammunition macro="countermeasure_flares_01_macro" exact="4"/>
+            </ammunition>
+            <software>
+              <software ware="software_dockmk1"/>
+              <software ware="software_flightassistmk1"/>
+              <software ware="software_scannerlongrangemk1"/>
+              <software ware="software_scannerobjectmk2"/>
+              <software ware="software_targetmk1"/>
+              <software ware="software_trademk1"/>
+            </software>
+            <virtualmacros>
+              <thruster macro="thruster_gen_s_combat_01_mk1_macro"/>
+            </virtualmacros>
+            <crew>
+              <crew role="marine" exact="0"/>
+              <crew role="service" exact="0"/>
+            </crew>
+          </loadout>
+          <pilot>
+            <skills>
+              <skill type="boarding"/>
+              <skill type="engineering"/>
+              <skill type="management"/>
+              <skill type="morale"/>
+              <skill type="piloting"/>
+            </skills>
+          </pilot>
+          <people people="player_scavenger_regular_freighter_crew" fillpercent="100"/>
+        </ship>
+        <ship id="fleet1_sub0_1769154617" count="8" commander="fleet1_1769154531" macro="ship_bor_s_heavyfighter_01_a_macro">
+          <loadout>
+            <macros>
+              <engine macro="engine_bor_s_allround_01_mk3_macro" path="../con_engine_01"/>
+              <weapon macro="weapon_bor_s_arc_01_mk1_macro" path="../con_weapon_02"/>
+              <weapon macro="weapon_bor_s_arc_01_mk1_macro" path="../con_weapon_01"/>
+              <weapon macro="weapon_bor_s_arc_01_mk1_macro" path="../con_weapon_03"/>
+              <shield macro="shield_bor_s_standard_01_mk3_macro" path="../con_shield_01"/>
+              <shield macro="shield_bor_s_standard_01_mk3_macro" path="../con_shield_02"/>
+              <shield macro="shield_bor_s_standard_01_mk3_macro" path="../con_shield_03"/>
+            </macros>
+            <ammunition>
+              <ammunition macro="countermeasure_flares_01_macro" exact="4"/>
+            </ammunition>
+            <software>
+              <software ware="software_dockmk2"/>
+              <software ware="software_flightassistmk1"/>
+              <software ware="software_scannerlongrangemk2"/>
+              <software ware="software_scannerobjectmk2"/>
+              <software ware="software_targetmk1"/>
+              <software ware="software_trademk1"/>
+            </software>
+            <virtualmacros>
+              <thruster macro="thruster_gen_s_allround_01_mk3_macro"/>
+            </virtualmacros>
+            <crew>
+              <crew role="marine" exact="0"/>
+              <crew role="service" exact="0"/>
+            </crew>
+          </loadout>
+          <pilot>
+            <skills>
+              <skill type="boarding"/>
+              <skill type="engineering"/>
+              <skill type="management"/>
+              <skill type="morale"/>
+              <skill type="piloting"/>
+            </skills>
+          </pilot>
+          <people people="player_argon_elite_freighter_crew" fillpercent="100"/>
+        </ship>
+        <ship id="fleet1_sub1_1769154668" count="8" commander="fleet1_1769154531" macro="ship_bor_s_fighter_01_a_macro">
+          <loadout>
+            <macros>
+              <engine macro="engine_bor_s_allround_01_mk2_macro" path="../con_engine_02"/>
+              <engine macro="engine_bor_s_allround_01_mk2_macro" path="../con_engine_01"/>
+              <weapon macro="weapon_bor_s_laser_01_mk1_macro" path="../con_weapon_01"/>
+              <weapon macro="weapon_bor_s_laser_01_mk1_macro" path="../con_weapon_02"/>
+              <shield macro="shield_bor_s_standard_01_mk3_macro" path="../con_shield_01"/>
+            </macros>
+            <ammunition>
+              <ammunition macro="countermeasure_flares_01_macro" exact="4"/>
+            </ammunition>
+            <software>
+              <software ware="software_dockmk2"/>
+              <software ware="software_flightassistmk1"/>
+              <software ware="software_scannerlongrangemk2"/>
+              <software ware="software_scannerobjectmk2"/>
+              <software ware="software_targetmk1"/>
+              <software ware="software_trademk1"/>
+            </software>
+            <virtualmacros>
+              <thruster macro="thruster_gen_s_combat_01_mk2_macro"/>
+            </virtualmacros>
+            <crew>
+              <crew role="marine"/>
+              <crew role="service"/>
+            </crew>
+          </loadout>
+          <pilot>
+            <skills>
+              <skill type="boarding"/>
+              <skill type="engineering"/>
+              <skill type="management"/>
+              <skill type="morale"/>
+              <skill type="piloting"/>
+            </skills>
+          </pilot>
+          <people fillpercent="100"/>
+        </ship>
+        <ship id="fleet2_1769154719" count="10" macro="ship_par_s_heavyfighter_01_a_macro">
+          <loadout>
+            <macros>
+              <engine macro="engine_spl_s_combat_01_mk2_macro" path="../con_engine_03"/>
+              <engine macro="engine_spl_s_combat_01_mk2_macro" path="../con_engine_02"/>
+              <engine macro="engine_spl_s_combat_01_mk2_macro" path="../con_engine_01"/>
+              <weapon macro="weapon_gen_s_plasma_01_mk2_macro" path="../con_weapon_02"/>
+              <weapon macro="weapon_gen_s_plasma_01_mk2_macro" path="../con_weapon_04"/>
+              <weapon macro="weapon_gen_s_plasma_01_mk2_macro" path="../con_weapon_03"/>
+              <weapon macro="weapon_gen_s_plasma_01_mk2_macro" path="../con_weapon_01"/>
+              <shield macro="shield_tel_s_standard_01_mk3_macro" path="../con_shield_01"/>
+              <shield macro="shield_tel_s_standard_01_mk3_macro" path="../con_shield_02"/>
+              <shield macro="shield_tel_s_standard_01_mk3_macro" path="../con_shield_03"/>
+            </macros>
+            <ammunition>
+              <ammunition macro="countermeasure_flares_01_macro" exact="4"/>
+            </ammunition>
+            <software>
+              <software ware="software_dockmk1"/>
+              <software ware="software_flightassistmk1"/>
+              <software ware="software_scannerlongrangemk2"/>
+              <software ware="software_scannerobjectmk2"/>
+              <software ware="software_targetmk1"/>
+            </software>
+            <virtualmacros>
+              <thruster macro="thruster_gen_s_combat_01_mk2_macro"/>
+            </virtualmacros>
+            <crew>
+              <crew role="marine" exact="0"/>
+              <crew role="service" exact="0"/>
+            </crew>
+          </loadout>
+          <pilot>
+            <skills>
+              <skill type="boarding"/>
+              <skill type="engineering"/>
+              <skill type="management"/>
+              <skill type="morale"/>
+              <skill type="piloting"/>
+            </skills>
+          </pilot>
+          <people fillpercent="100"/>
+        </ship>
+        <ship id="fleet3_1769154745" count="10" macro="ship_spl_s_fighter_02_a_macro">
+          <loadout>
+            <macros>
+              <engine macro="engine_spl_s_combat_01_mk2_macro" path="../con_engine_03"/>
+              <engine macro="engine_spl_s_combat_01_mk2_macro" path="../con_engine_02"/>
+              <weapon macro="weapon_gen_s_laser_01_mk2_macro" path="../con_weapon_04"/>
+              <weapon macro="weapon_gen_s_laser_01_mk2_macro" path="../con_weapon_03"/>
+              <weapon macro="weapon_gen_s_laser_01_mk2_macro" path="../con_weapon_02"/>
+              <shield macro="shield_tel_s_standard_01_mk3_macro" path="../con_shield_01"/>
+            </macros>
+            <ammunition>
+              <ammunition macro="countermeasure_flares_01_macro" exact="4"/>
+            </ammunition>
+            <software>
+              <software ware="software_dockmk2"/>
+              <software ware="software_flightassistmk1"/>
+              <software ware="software_scannerlongrangemk2"/>
+              <software ware="software_scannerobjectmk2"/>
+              <software ware="software_targetmk1"/>
+            </software>
+            <virtualmacros>
+              <thruster macro="thruster_gen_s_combat_01_mk2_macro"/>
+            </virtualmacros>
+            <crew>
+              <crew role="marine" exact="0"/>
+              <crew role="service" exact="0"/>
+            </crew>
+          </loadout>
+          <pilot>
+            <skills>
+              <skill type="boarding"/>
+              <skill type="engineering"/>
+              <skill type="management"/>
+              <skill type="morale"/>
+              <skill type="piloting"/>
+            </skills>
+          </pilot>
+          <people fillpercent="100"/>
+        </ship>
+        <ship id="fleet4_1769154786" count="10" macro="ship_ter_s_fighter_01_a_macro">
+          <loadout>
+            <macros>
+              <engine macro="engine_par_s_combat_01_mk3_macro" path="../con_engine_01"/>
+              <weapon macro="weapon_ter_s_laser_01_mk2_macro" path="../con_weapon_03"/>
+              <weapon macro="weapon_ter_s_gatling_01_mk1_macro" path="../con_weapon_01"/>
+              <weapon macro="weapon_ter_s_gatling_01_mk1_macro" path="../con_weapon_02"/>
+              <shield macro="shield_ter_s_standard_01_mk3_macro" path="../con_shield_01"/>
+            </macros>
+            <ammunition>
+              <ammunition macro="countermeasure_flares_01_macro" exact="4"/>
+            </ammunition>
+            <software>
+              <software ware="software_dockmk2"/>
+              <software ware="software_flightassistmk1"/>
+              <software ware="software_scannerlongrangemk2"/>
+              <software ware="software_scannerobjectmk2"/>
+              <software ware="software_targetmk1"/>
+              <software ware="software_trademk1"/>
+            </software>
+            <virtualmacros>
+              <thruster macro="thruster_gen_s_combat_01_mk2_macro"/>
+            </virtualmacros>
+            <crew>
+              <crew role="marine"/>
+              <crew role="service"/>
+            </crew>
+          </loadout>
+          <pilot>
+            <skills>
+              <skill type="boarding"/>
+              <skill type="engineering"/>
+              <skill type="management"/>
+              <skill type="morale"/>
+              <skill type="piloting"/>
+            </skills>
+          </pilot>
+          <people fillpercent="100"/>
+        </ship>
+        <ship id="fleet5_1769154886" count="10" macro="ship_yak_s_fighter_01_a_macro">
+          <loadout>
+            <macros>
+              <engine macro="engine_ter_s_combat_01_mk2_macro" path="../con_engine_02"/>
+              <engine macro="engine_ter_s_combat_01_mk2_macro" path="../con_engine_01"/>
+              <weapon macro="weapon_gen_s_laser_01_mk2_macro" path="../con_weapon_02"/>
+              <weapon macro="weapon_gen_s_laser_01_mk2_macro" path="../con_weapon_04"/>
+              <weapon macro="weapon_gen_s_laser_01_mk2_macro" path="../con_weapon_03"/>
+              <weapon macro="weapon_gen_s_laser_01_mk2_macro" path="../con_weapon_01"/>
+              <shield macro="shield_ter_s_standard_01_mk2_macro" path="../con_shield_01"/>
+            </macros>
+            <ammunition>
+              <ammunition macro="countermeasure_flares_01_macro" exact="2"/>
+            </ammunition>
+            <software>
+              <software ware="software_dockmk2"/>
+              <software ware="software_flightassistmk1"/>
+              <software ware="software_scannerlongrangemk2"/>
+              <software ware="software_scannerobjectmk2"/>
+              <software ware="software_targetmk1"/>
+              <software ware="software_trademk1"/>
+            </software>
+            <virtualmacros>
+              <thruster macro="thruster_gen_s_allround_01_mk2_macro"/>
+            </virtualmacros>
+            <crew>
+              <crew role="marine" exact="0"/>
+              <crew role="service" exact="0"/>
+            </crew>
+          </loadout>
+          <pilot>
+            <skills>
+              <skill type="boarding"/>
+              <skill type="engineering"/>
+              <skill type="management"/>
+              <skill type="morale"/>
+              <skill type="piloting"/>
+            </skills>
+          </pilot>
+          <people people="player_argon_veteran_freighter_crew" fillpercent="50"/>
+        </ship>
+        <ship id="fleet6_1769154909" count="4" macro="ship_bor_s_scout_02_a_macro">
+          <loadout>
+            <macros>
+              <engine macro="engine_bor_s_allround_01_mk3_macro" path="../con_engine_03"/>
+              <engine macro="engine_bor_s_allround_01_mk3_macro" path="../con_engine_02"/>
+              <engine macro="engine_bor_s_allround_01_mk3_macro" path="../con_engine_01"/>
+              <weapon macro="weapon_bor_s_arc_01_mk1_macro" path="../con_weapon_01"/>
+              <shield macro="shield_bor_s_standard_01_mk3_macro" path="../con_shield_01"/>
+            </macros>
+            <ammunition>
+              <ammunition macro="countermeasure_flares_01_macro" exact="4"/>
+              <ammunition macro="eq_arg_satellite_01_macro" exact="10"/>
+              <ammunition macro="eq_arg_satellite_02_macro" exact="10"/>			  
+            </ammunition>
+            <software>
+              <software ware="software_dockmk2"/>
+              <software ware="software_flightassistmk1"/>
+              <software ware="software_scannerlongrangemk2"/>
+              <software ware="software_scannerobjectmk2"/>
+              <software ware="software_targetmk1"/>
+              <software ware="software_trademk1"/>
+            </software>
+            <virtualmacros>
+              <thruster macro="thruster_gen_s_allround_01_mk3_macro"/>
+            </virtualmacros>
+            <crew>
+              <crew role="marine" exact="0"/>
+              <crew role="service" exact="0"/>
+            </crew>
+          </loadout>
+          <pilot>
+            <skills>
+              <skill type="boarding"/>
+              <skill type="engineering"/>
+              <skill type="management"/>
+              <skill type="morale"/>
+              <skill type="piloting"/>
+            </skills>
+          </pilot>
+          <people people="player_argon_elite_freighter_crew" fillpercent="100"/>
+        </ship>
+        <ship id="fleet7_1769154964" count="4" macro="ship_ter_m_frigate_01_a_macro">
+          <loadout>
+            <macros>
+              <engine macro="engine_ter_m_combat_01_mk2_macro" path="../con_engine_003"/>
+              <engine macro="engine_ter_m_combat_01_mk2_macro" path="../con_engine_002"/>
+              <engine macro="engine_ter_m_combat_01_mk2_macro" path="../con_engine_005"/>
+              <engine macro="engine_ter_m_combat_01_mk2_macro" path="../con_engine_004"/>
+              <engine macro="engine_ter_m_combat_01_mk2_macro" path="../con_engine_006"/>
+              <engine macro="engine_ter_m_combat_01_mk2_macro" path="../con_engine_01"/>
+              <weapon macro="weapon_ter_m_gatling_01_mk2_macro" path="../con_weapon_01"/>
+              <weapon macro="weapon_ter_m_gatling_01_mk2_macro" path="../con_weapon_03"/>
+              <weapon macro="weapon_ter_m_gatling_01_mk2_macro" path="../con_weapon_04"/>
+              <weapon macro="weapon_ter_m_gatling_01_mk2_macro" path="../con_weapon_02"/>
+              <shield macro="shield_ter_m_standard_01_mk3_macro" path="../con_shield_01"/>
+              <shield macro="shield_ter_m_standard_01_mk3_macro" path="../con_shield_02"/>
+              <turret macro="turret_ter_m_laser_01_mk1_macro" path="../con_turret_l"/>
+              <turret macro="turret_ter_m_gatling_01_mk1_macro" path="../con_turret_r"/>
+            </macros>
+            <ammunition>
+              <ammunition macro="countermeasure_flares_01_macro" exact="8"/>
+              <unit macro="ship_gen_xs_repairdrone_01_a_macro" exact="2"/>
+              <unit macro="ship_gen_s_fightingdrone_01_a_macro" exact="10"/>
+            </ammunition>
+            <software>
+              <software ware="software_dockmk2"/>
+              <software ware="software_flightassistmk1"/>
+              <software ware="software_scannerlongrangemk2"/>
+              <software ware="software_scannerobjectmk2"/>
+              <software ware="software_targetmk1"/>
+              <software ware="software_trademk1"/>
+            </software>
+            <virtualmacros>
+              <thruster macro="thruster_gen_m_combat_01_mk3_macro"/>
+            </virtualmacros>
+            <crew>
+              <crew role="marine" exact="5"/>
+              <crew role="service" exact="18"/>
+            </crew>
+          </loadout>
+          <pilot>
+            <skills>
+              <skill type="boarding"/>
+              <skill type="engineering"/>
+              <skill type="management"/>
+              <skill type="morale"/>
+              <skill type="piloting"/>
+            </skills>
+          </pilot>
+          <people people="player_terran_regular_military_crew" fillpercent="86.9565"/>
+        </ship>
+        <ship id="fleet7_sub0_1769155008" count="2" commander="fleet7_1769154964" macro="ship_ter_s_fighter_02_a_macro">
+          <loadout>
+            <macros>
+              <engine macro="engine_arg_s_combat_01_mk3_macro" path="../con_engine_02"/>
+              <engine macro="engine_arg_s_combat_01_mk3_macro" path="../con_engine_01"/>
+              <weapon macro="weapon_ter_s_laser_01_mk2_macro" path="../con_weapon_03"/>
+              <weapon macro="weapon_ter_s_laser_01_mk2_macro" path="../con_weapon_02"/>
+              <shield macro="shield_ter_s_standard_01_mk3_macro" path="../con_shield_04"/>
+              <shield macro="shield_ter_s_standard_01_mk3_macro" path="../con_shield_01"/>
+              <shield macro="shield_ter_s_standard_01_mk3_macro" path="../con_shield_02"/>
+              <shield macro="shield_ter_s_standard_01_mk3_macro" path="../con_shield_03"/>
+            </macros>
+            <ammunition>
+              <ammunition macro="countermeasure_flares_01_macro" exact="4"/>
+            </ammunition>
+            <software>
+              <software ware="software_dockmk2"/>
+              <software ware="software_flightassistmk1"/>
+              <software ware="software_scannerlongrangemk2"/>
+              <software ware="software_scannerobjectmk2"/>
+              <software ware="software_targetmk1"/>
+              <software ware="software_trademk1"/>
+            </software>
+            <virtualmacros>
+              <thruster macro="thruster_gen_s_allround_01_mk3_macro"/>
+            </virtualmacros>
+            <crew>
+              <crew role="marine"/>
+              <crew role="service"/>
+            </crew>
+          </loadout>
+          <pilot>
+            <skills>
+              <skill type="boarding"/>
+              <skill type="engineering"/>
+              <skill type="management"/>
+              <skill type="morale"/>
+              <skill type="piloting"/>
+            </skills>
+          </pilot>
+          <people fillpercent="100"/>
+        </ship>
+        <ship id="fleet8_1769155059" count="4" macro="ship_ter_m_corvette_01_a_macro">
+          <loadout>
+            <macros>
+              <engine macro="engine_spl_m_combat_01_mk4_macro" path="../con_engine_02"/>
+              <engine macro="engine_spl_m_combat_01_mk4_macro" path="../con_engine_01"/>
+              <weapon macro="weapon_ter_m_gatling_01_mk1_macro" path="../con_weapon_01"/>
+              <weapon macro="weapon_ter_m_gatling_01_mk1_macro" path="../con_weapon_02"/>
+              <weapon macro="weapon_ter_m_gatling_01_mk1_macro" path="../con_weapon_03"/>
+              <weapon macro="weapon_ter_m_gatling_01_mk1_macro" path="../con_weapon_04"/>
+              <shield macro="shield_ter_m_standard_01_mk3_macro" path="../con_shield_01"/>
+              <shield macro="shield_ter_m_standard_01_mk3_macro" path="../con_shield_02"/>
+              <turret macro="turret_arg_m_gatling_01_mk1_macro" path="../con_turret_mid"/>
+              <turret macro="turret_arg_m_flak_01_mk1_macro" path="../con_turret_front"/>
+            </macros>
+            <software>
+              <software ware="software_dockmk2"/>
+              <software ware="software_flightassistmk1"/>
+              <software ware="software_scannerlongrangemk2"/>
+              <software ware="software_scannerobjectmk2"/>
+              <software ware="software_targetmk1"/>
+              <software ware="software_trademk1"/>
+            </software>
+            <virtualmacros>
+              <thruster macro="thruster_gen_m_combat_01_mk3_macro"/>
+            </virtualmacros>
+            <crew>
+              <crew role="marine" exact="2"/>
+              <crew role="service" exact="4"/>
+            </crew>
+          </loadout>
+          <pilot>
+            <skills>
+              <skill type="boarding"/>
+              <skill type="engineering"/>
+              <skill type="management"/>
+              <skill type="morale"/>
+              <skill type="piloting"/>
+            </skills>
+          </pilot>
+          <people fillpercent="100"/>
+        </ship>
+        <ship id="fleet9_1769155104" count="4" macro="ship_ter_m_gunboat_01_a_macro">
+          <loadout>
+            <macros>
+              <engine macro="engine_ter_m_combat_01_mk2_macro" path="../con_engine_02"/>
+              <engine macro="engine_ter_m_combat_01_mk2_macro" path="../con_engine_01"/>
+              <weapon macro="weapon_ter_m_gatling_01_mk2_macro" path="../con_weapon_01"/>
+              <shield macro="shield_ter_m_standard_01_mk3_macro" path="../con_shield_01"/>
+              <shield macro="shield_ter_m_standard_01_mk3_macro" path="../con_shield_02"/>
+              <turret macro="turret_ter_m_gatling_01_mk1_macro" path="../con_turret_06"/>
+              <turret macro="turret_ter_m_gatling_01_mk1_macro" path="../con_turret_05"/>
+              <turret macro="turret_ter_m_laser_01_mk1_macro" path="../con_turret_04"/>
+              <turret macro="turret_ter_m_laser_01_mk1_macro" path="../con_turret_03"/>
+              <turret macro="turret_ter_m_laser_01_mk1_macro" path="../con_turret_02"/>
+              <turret macro="turret_ter_m_laser_01_mk1_macro" path="../con_turret_01"/>
+            </macros>
+            <ammunition>
+              <ammunition macro="countermeasure_flares_01_macro" exact="8"/>
+            </ammunition>
+            <software>
+              <software ware="software_dockmk2"/>
+              <software ware="software_flightassistmk1"/>
+              <software ware="software_scannerlongrangemk2"/>
+              <software ware="software_scannerobjectmk2"/>
+              <software ware="software_targetmk1"/>
+              <software ware="software_trademk1"/>
+            </software>
+            <virtualmacros>
+              <thruster macro="thruster_gen_m_combat_01_mk2_macro"/>
+            </virtualmacros>
+            <crew>
+              <crew role="marine" exact="2"/>
+              <crew role="service" exact="6"/>
+            </crew>
+          </loadout>
+          <pilot>
+            <skills>
+              <skill type="boarding"/>
+              <skill type="engineering"/>
+              <skill type="management"/>
+              <skill type="morale"/>
+              <skill type="piloting"/>
+            </skills>
+          </pilot>
+          <people people="player_yaki_regular_military_crew" fillpercent="100"/>
+        </ship>
+        <ship id="fleet10_1769155139" macro="ship_bor_l_destroyer_01_a_macro">
+          <loadout>
+            <macros>
+              <engine macro="engine_bor_l_travel_01_mk1_macro" path="../con_engine_03"/>
+              <engine macro="engine_bor_l_travel_01_mk1_macro" path="../con_engine_02"/>
+              <engine macro="engine_bor_l_travel_01_mk1_macro" path="../con_engine_01"/>
+              <engine macro="engine_bor_l_travel_01_mk1_macro" path="../con_engine_04"/>
+              <weapon macro="weapon_bor_l_beam_01_mk1_macro" path="../con_weapon_l_01"/>
+              <shield macro="shield_bor_l_standard_01_mk3_macro" path="../con_shield_l_04"/>
+              <shield macro="shield_bor_l_standard_01_mk3_macro" path="../con_shield_l_03"/>
+              <shield macro="shield_bor_l_standard_01_mk3_macro" path="../con_shield_l_02"/>
+              <shield macro="shield_bor_l_standard_01_mk3_macro" path="../con_shield_l_01"/>
+            </macros>
+            <groups>
+              <shields macro="shield_bor_m_standard_02_mk3_macro" group="group_engines" exact="4"/>
+              <shields macro="shield_bor_m_standard_02_mk3_macro" group="group_front_down_left"/>
+              <shields macro="shield_bor_m_standard_02_mk3_macro" group="group_front_down_mid" exact="2"/>
+              <shields macro="shield_bor_m_standard_02_mk3_macro" group="group_front_down_right"/>
+              <shields macro="shield_bor_m_standard_02_mk3_macro" group="group_front_up_left"/>
+              <shields macro="shield_bor_m_standard_02_mk3_macro" group="group_front_up_mid" exact="2"/>
+              <shields macro="shield_bor_m_standard_02_mk3_macro" group="group_front_up_right"/>
+              <shields macro="shield_bor_m_standard_02_mk3_macro" group="group_mid_down_left"/>
+              <shields macro="shield_bor_m_standard_02_mk3_macro" group="group_rear_down_mid"/>
+              <turrets macro="turret_bor_m_railgun_02_mk1_macro" group="group_front_down_left" exact="2"/>
+              <turrets macro="turret_bor_l_flak_01_mk1_macro" group="group_front_down_mid"/>
+              <turrets macro="turret_bor_m_railgun_02_mk1_macro" group="group_front_down_right" exact="2"/>
+              <turrets macro="turret_bor_m_railgun_02_mk1_macro" group="group_front_up_left" exact="2"/>
+              <turrets macro="turret_bor_l_disruptor_01_mk1_macro" group="group_front_up_mid"/>
+              <turrets macro="turret_bor_m_railgun_02_mk1_macro" group="group_front_up_right" exact="2"/>
+              <turrets macro="turret_bor_m_railgun_02_mk1_macro" group="group_mid_down_left" exact="2"/>
+              <turrets macro="turret_bor_m_railgun_02_mk1_macro" group="group_rear_down_mid" exact="2"/>
+            </groups>
+            <ammunition>
+              <ammunition macro="countermeasure_flares_01_macro" exact="20"/>
+              <unit macro="ship_gen_xs_cargodrone_empty_01_a_macro"/>
+              <unit macro="ship_gen_s_fightingdrone_01_a_macro" exact="6"/>
+              <unit macro="ship_gen_xs_repairdrone_01_a_macro" exact="3"/>
+            </ammunition>
+            <software>
+              <software ware="software_dockmk2"/>
+              <software ware="software_flightassistmk1"/>
+              <software ware="software_scannerlongrangemk2"/>
+              <software ware="software_scannerobjectmk2"/>
+              <software ware="software_targetmk1"/>
+              <software ware="software_trademk1"/>
+            </software>
+            <virtualmacros>
+              <thruster macro="thruster_gen_l_allround_01_mk2_macro"/>
+            </virtualmacros>
+            <crew>
+              <crew role="marine" exact="12"/>
+              <crew role="service" exact="35"/>
+            </crew>
+          </loadout>
+          <pilot>
+            <skills>
+              <skill type="boarding"/>
+              <skill type="engineering"/>
+              <skill type="management"/>
+              <skill type="morale"/>
+              <skill type="piloting"/>
+            </skills>
+          </pilot>
+          <people people="player_boron_veteran_military_crew" fillpercent="87.037"/>
+        </ship>
+        <ship id="fleet11_1769155271" macro="ship_xen_l_terraformer_01_a_macro">
+          <loadout>
+            <macros>
+              <engine macro="engine_xen_l_allround_02_mk1_macro" path="../con_engine_03"/>
+              <engine macro="engine_xen_l_allround_02_mk1_macro" path="../con_engine_02"/>
+              <engine macro="engine_xen_l_allround_02_mk1_macro" path="../con_engine_01"/>
+              <engine macro="engine_xen_l_allround_02_mk1_macro" path="../con_engine_06"/>
+              <engine macro="engine_xen_l_allround_02_mk1_macro" path="../con_engine_05"/>
+              <engine macro="engine_xen_l_allround_02_mk1_macro" path="../con_engine_04"/>
+              <shield macro="shield_xen_l_standard_02_mk2_macro" path="../con_shield_l_02"/>
+              <shield macro="shield_xen_l_standard_02_mk2_macro" path="../con_shield_l_01"/>
+            </macros>
+            <groups>
+              <shields macro="shield_xen_m_standard_04_mk1_macro" group="group_back_down_left"/>
+              <shields macro="shield_xen_m_standard_04_mk1_macro" group="group_back_down_right"/>
+              <shields macro="shield_xen_m_standard_04_mk1_macro" group="group_back_up_left"/>
+              <shields macro="shield_xen_m_standard_04_mk1_macro" group="group_back_up_right"/>
+              <shields macro="shield_xen_m_standard_04_mk1_macro" group="group_engines" exact="6"/>
+              <shields macro="shield_xen_m_standard_04_mk1_macro" group="group_front_down_mid" exact="2"/>
+              <shields macro="shield_xen_m_standard_04_mk1_macro" group="group_front_up_left"/>
+              <shields macro="shield_xen_m_standard_04_mk1_macro" group="group_front_up_mid" exact="2"/>
+              <shields macro="shield_xen_m_standard_04_mk1_macro" group="group_front_up_right"/>
+              <shields macro="shield_xen_m_standard_04_mk1_macro" group="group_mid_down_back"/>
+              <shields macro="shield_xen_m_standard_04_mk1_macro" group="group_mid_down_mid"/>
+              <turrets macro="turret_xen_m_gatling_02_mk1_macro" group="group_back_down_left" exact="2"/>
+              <turrets macro="turret_xen_m_gatling_02_mk1_macro" group="group_back_down_right" exact="2"/>
+              <turrets macro="turret_xen_m_gatling_02_mk1_macro" group="group_back_up_left" exact="2"/>
+              <turrets macro="turret_xen_m_gatling_02_mk1_macro" group="group_back_up_right" exact="2"/>
+              <turrets macro="turret_xen_l_plasma_01_mk1_macro" group="group_front_down_mid"/>
+              <turrets macro="turret_xen_m_gatling_02_mk1_macro" group="group_front_up_left" exact="2"/>
+              <turrets macro="turret_xen_l_plasma_01_mk1_macro" group="group_front_up_mid"/>
+              <turrets macro="turret_xen_m_gatling_02_mk1_macro" group="group_front_up_right" exact="2"/>
+              <turrets macro="turret_xen_m_gatling_02_mk1_macro" group="group_mid_down_back" exact="2"/>
+              <turrets macro="turret_xen_m_gatling_02_mk1_macro" group="group_mid_down_mid" exact="2"/>
+            </groups>
+            <ammunition>
+              <ammunition macro="countermeasure_flares_01_macro" exact="20"/>
+              <unit macro="ship_gen_s_fightingdrone_01_a_macro" exact="28"/>
+              <unit macro="ship_gen_xs_repairdrone_01_a_macro" exact="14"/>
+            </ammunition>
+            <software>
+              <software ware="software_dockmk2"/>
+              <software ware="software_flightassistmk1"/>
+              <software ware="software_scannerlongrangemk2"/>
+              <software ware="software_scannerobjectmk2"/>
+              <software ware="software_targetmk1"/>
+              <software ware="software_trademk1"/>
+            </software>
+            <virtualmacros>
+              <thruster macro="thruster_gen_l_allround_01_mk2_macro"/>
+            </virtualmacros>
+            <crew>
+              <crew role="marine" exact="0"/>
+              <crew role="service" exact="0"/>
+            </crew>
+          </loadout>
+          <pilot>
+            <skills>
+              <skill type="boarding"/>
+              <skill type="engineering"/>
+              <skill type="management"/>
+              <skill type="morale"/>
+              <skill type="piloting"/>
+            </skills>
+          </pilot>
+          <people people="player_argon_elite_freighter_crew" fillpercent="100"/>
+        </ship>
+        <ship id="fleet12_1769155330" macro="ship_spl_l_destroyer_01_a_macro">
+          <loadout>
+            <macros>
+              <engine macro="engine_spl_l_allround_01_mk1_macro" path="../con_engine_03"/>
+              <engine macro="engine_spl_l_allround_01_mk1_macro" path="../con_engine_02"/>
+              <engine macro="engine_spl_l_allround_01_mk1_macro" path="../con_engine_01"/>
+              <weapon macro="weapon_spl_l_destroyer_01_mk1_macro" path="../con_weapon_04"/>
+              <weapon macro="weapon_spl_l_destroyer_01_mk1_macro" path="../con_weapon_03"/>
+              <weapon macro="weapon_spl_l_destroyer_01_mk1_macro" path="../con_weapon_02"/>
+              <weapon macro="weapon_spl_l_destroyer_01_mk1_macro" path="../con_weapon_01"/>
+              <shield macro="shield_ter_l_standard_01_mk3_macro" path="../con_shieldgenerator_l_01"/>
+            </macros>
+            <groups>
+              <shields macro="shield_ter_m_standard_02_mk3_macro" group="group_back_up_mid"/>
+              <shields macro="shield_ter_m_standard_02_mk3_macro" group="group_down_back_mid"/>
+              <shields macro="shield_ter_m_standard_02_mk3_macro" group="group_down_back_mid_2"/>
+              <shields macro="shield_ter_m_standard_02_mk3_macro" group="group_front_down_mid"/>
+              <shields macro="shield_ter_m_standard_02_mk3_macro" group="group_front_up_mid"/>
+              <shields macro="shield_ter_m_standard_02_mk3_macro" group="group_mid_down_mid" exact="4"/>
+              <shields macro="shield_ter_m_standard_02_mk3_macro" group="group_mid_up_mid" exact="4"/>
+              <shields macro="shield_ter_m_standard_02_mk3_macro" group="group_up_back_mid"/>
+              <shields macro="shield_ter_m_standard_02_mk3_macro" group="group_up_back_mid_2"/>
+              <turrets macro="turret_par_l_plasma_01_mk1_macro" group="group_down_back_mid"/>
+              <turrets macro="turret_arg_m_laser_02_mk1_macro" group="group_down_back_mid_2" exact="2"/>
+              <turrets macro="turret_arg_m_flak_02_mk1_macro" group="group_front_down_mid" exact="4"/>
+              <turrets macro="turret_arg_m_laser_02_mk1_macro" group="group_front_up_mid" exact="4"/>
+              <turrets macro="turret_par_l_plasma_01_mk1_macro" group="group_mid_down_mid" exact="2"/>
+              <turrets macro="turret_par_l_plasma_01_mk1_macro" group="group_mid_up_mid" exact="2"/>
+              <turrets macro="turret_arg_m_gatling_02_mk1_macro" group="group_up_back_mid" exact="2"/>
+              <turrets macro="turret_par_l_plasma_01_mk1_macro" group="group_up_back_mid_2"/>
+            </groups>
+            <ammunition>
+              <ammunition macro="countermeasure_flares_01_macro" exact="20"/>
+              <unit macro="ship_gen_xs_repairdrone_01_a_macro" exact="3"/>
+              <unit macro="ship_gen_s_fightingdrone_01_a_macro" exact="6"/>
+              <unit macro="ship_gen_xs_cargodrone_empty_01_a_macro"/>
+            </ammunition>
+            <software>
+              <software ware="software_dockmk2"/>
+              <software ware="software_flightassistmk1"/>
+              <software ware="software_scannerlongrangemk2"/>
+              <software ware="software_scannerobjectmk2"/>
+              <software ware="software_targetmk1"/>
+              <software ware="software_trademk1"/>
+            </software>
+            <virtualmacros>
+              <thruster macro="thruster_gen_l_allround_01_mk2_macro"/>
+            </virtualmacros>
+            <crew>
+              <crew role="marine" exact="20"/>
+              <crew role="service" exact="72"/>
+            </crew>
+          </loadout>
+          <pilot>
+            <skills>
+              <skill type="boarding"/>
+              <skill type="engineering"/>
+              <skill type="management"/>
+              <skill type="morale"/>
+              <skill type="piloting"/>
+            </skills>
+          </pilot>
+          <people people="player_scavenger_veteran_military_crew" fillpercent="90.2174"/>
+        </ship>
+        <ship id="fleet13_1769155693" macro="ship_pir_l_scavenger_01_a_macro">
+          <loadout>
+            <macros>
+              <engine macro="engine_ter_l_travel_01_mk1_macro" path="../con_engine_03"/>
+              <engine macro="engine_ter_l_travel_01_mk1_macro" path="../con_engine_02"/>
+              <engine macro="engine_ter_l_travel_01_mk1_macro" path="../con_engine_01"/>
+              <engine macro="engine_ter_l_travel_01_mk1_macro" path="../con_engine_04"/>
+              <shield macro="shield_ter_l_standard_01_mk2_macro" path="../con_shieldgenerator_l_01"/>
+            </macros>
+            <groups>
+              <shields macro="shield_ter_m_standard_02_mk2_macro" group="group_back_mid_down" exact="2"/>
+              <shields macro="shield_ter_m_standard_02_mk2_macro" group="group_back_mid_mid" exact="2"/>
+              <shields macro="shield_ter_m_standard_02_mk2_macro" group="group_front_mid_down" exact="2"/>
+              <shields macro="shield_ter_m_standard_02_mk2_macro" group="group_front_mid_right" exact="4"/>
+              <shields macro="shield_ter_m_standard_02_mk2_macro" group="group_front_up_left" exact="2"/>
+              <shields macro="shield_ter_m_standard_02_mk2_macro" group="group_mid_down_mid" exact="2"/>
+              <shields macro="shield_ter_m_standard_02_mk2_macro" group="group_mid_down_right" exact="2"/>
+              <shields macro="shield_ter_m_standard_02_mk2_macro" group="group_mid_mid_left" exact="2"/>
+              <shields macro="shield_ter_m_standard_02_mk2_macro" group="group_mid_up_mid" exact="2"/>
+              <turrets macro="turret_arg_m_gatling_02_mk1_macro" group="group_back_mid_down" exact="2"/>
+              <turrets macro="turret_arg_m_laser_02_mk1_macro" group="group_front_mid_down" exact="2"/>
+              <turrets macro="turret_par_l_plasma_01_mk1_macro" group="group_front_mid_right" exact="2"/>
+              <turrets macro="turret_par_l_plasma_01_mk1_macro" group="group_front_up_left"/>
+              <turrets macro="turret_par_l_plasma_01_mk1_macro" group="group_mid_down_mid"/>
+              <turrets macro="turret_arg_m_gatling_02_mk1_macro" group="group_mid_down_right" exact="2"/>
+              <turrets macro="turret_arg_m_laser_02_mk1_macro" group="group_mid_mid_left" exact="2"/>
+              <turrets macro="turret_arg_m_flak_02_mk1_macro" group="group_mid_up_mid" exact="2"/>
+            </groups>
+            <ammunition>
+              <ammunition macro="countermeasure_flares_01_macro" exact="10"/>
+              <unit macro="ship_gen_xs_repairdrone_01_a_macro" exact="3"/>
+              <unit macro="ship_gen_xs_cargodrone_empty_01_a_macro" exact="3"/>
+              <unit macro="ship_gen_s_fightingdrone_01_a_macro" exact="4"/>
+            </ammunition>
+            <software>
+              <software ware="software_dockmk2"/>
+              <software ware="software_flightassistmk1"/>
+              <software ware="software_scannerlongrangemk2"/>
+              <software ware="software_scannerobjectmk2"/>
+              <software ware="software_targetmk1"/>
+              <software ware="software_trademk1"/>
+            </software>
+            <virtualmacros>
+              <thruster macro="thruster_gen_l_allround_01_mk2_macro"/>
+            </virtualmacros>
+            <crew>
+              <crew role="marine" exact="0"/>
+              <crew role="service" exact="0"/>
+            </crew>
+          </loadout>
+          <pilot>
+            <skills>
+              <skill type="boarding"/>
+              <skill type="engineering"/>
+              <skill type="management"/>
+              <skill type="morale"/>
+              <skill type="piloting"/>
+            </skills>
+          </pilot>
+          <people people="player_loanshark_regular_military_crew" fillpercent="88.0952"/>
+        </ship>
+        <ship id="fleet14_1769155746" commander="fleet13_1769155693" macro="ship_tel_l_miner_liquid_01_a_macro">
+          <loadout>
+            <macros>
+              <engine macro="engine_tel_l_travel_01_mk1_macro" path="../con_engine_03"/>
+              <engine macro="engine_tel_l_travel_01_mk1_macro" path="../con_engine_02"/>
+              <engine macro="engine_tel_l_travel_01_mk1_macro" path="../con_engine_01"/>
+              <shield macro="shield_tel_l_standard_01_mk2_macro" path="../con_shield_l_001"/>
+              <shield macro="shield_tel_l_standard_01_mk2_macro" path="../con_shield_l_003"/>
+              <shield macro="shield_tel_l_standard_01_mk2_macro" path="../con_shield_l_002"/>
+            </macros>
+            <groups>
+              <shields macro="shield_tel_m_standard_02_mk2_macro" group="group_back_bottom_center"/>
+              <shields macro="shield_tel_m_standard_02_mk2_macro" group="group_back_mid_mid" exact="3"/>
+              <shields macro="shield_tel_m_standard_02_mk2_macro" group="group_back_top_left"/>
+              <shields macro="shield_tel_m_standard_02_mk2_macro" group="group_back_top_right"/>
+              <shields macro="shield_tel_m_standard_02_mk2_macro" group="group_front_bottom_left"/>
+              <shields macro="shield_tel_m_standard_02_mk2_macro" group="group_front_bottom_right"/>
+              <shields macro="shield_tel_m_standard_02_mk2_macro" group="group_front_top_center"/>
+              <turrets macro="turret_tel_m_laser_02_mk1_macro" group="group_back_bottom_center"/>
+              <turrets macro="turret_tel_m_gatling_02_mk1_macro" group="group_back_top_left"/>
+              <turrets macro="turret_tel_m_beam_02_mk1_macro" group="group_back_top_right"/>
+              <turrets macro="turret_tel_m_gatling_02_mk1_macro" group="group_front_bottom_left"/>
+              <turrets macro="turret_tel_m_laser_02_mk1_macro" group="group_front_bottom_right"/>
+              <turrets macro="turret_tel_m_plasma_02_mk1_macro" group="group_front_top_center"/>
+            </groups>
+            <ammunition>
+              <ammunition macro="countermeasure_flares_01_macro" exact="20"/>
+              <unit macro="ship_gen_xs_cargodrone_empty_01_a_macro" exact="2"/>
+              <unit macro="ship_gen_xs_repairdrone_01_a_macro"/>
+              <unit macro="ship_gen_s_miningdrone_liquid_01_a_macro" exact="7"/>
+            </ammunition>
+            <software>
+              <software ware="software_dockmk2"/>
+              <software ware="software_flightassistmk1"/>
+              <software ware="software_scannerlongrangemk2"/>
+              <software ware="software_scannerobjectmk2"/>
+              <software ware="software_targetmk1"/>
+              <software ware="software_trademk1"/>
+            </software>
+            <virtualmacros>
+              <thruster macro="thruster_gen_l_allround_01_mk2_macro"/>
+            </virtualmacros>
+            <crew>
+              <crew role="marine" exact="8"/>
+              <crew role="service" exact="22"/>
+            </crew>
+          </loadout>
+          <pilot>
+            <skills>
+              <skill type="boarding"/>
+              <skill type="engineering"/>
+              <skill type="management"/>
+              <skill type="morale"/>
+              <skill type="piloting"/>
+            </skills>
+          </pilot>
+          <people people="player_teladi_veteran_freighter_crew" fillpercent="90"/>
+        </ship>
+        <ship id="fleet15_1769155809" commander="fleet13_1769155693" macro="ship_arg_l_miner_solid_01_b_macro">
+          <loadout>
+            <macros>
+              <engine macro="engine_arg_l_allround_01_mk1_macro" path="../con_engine_02"/>
+              <engine macro="engine_arg_l_allround_01_mk1_macro" path="../con_engine_01"/>
+              <shield macro="shield_tel_l_standard_01_mk2_macro" path="../con_shieldgen_l_02"/>
+              <shield macro="shield_tel_l_standard_01_mk2_macro" path="../con_shieldgen_l_01"/>
+            </macros>
+            <groups>
+              <shields macro="shield_arg_m_standard_02_mk2_macro" group="group_back_mid"/>
+              <shields macro="shield_arg_m_standard_02_mk2_macro" group="group_back_up_mid"/>
+              <shields macro="shield_tel_m_standard_02_mk2_macro" group="group_front_down_mid" exact="2"/>
+              <shields macro="shield_arg_m_standard_02_mk2_macro" group="group_front_left_mid" exact="2"/>
+              <shields macro="shield_arg_m_standard_02_mk2_macro" group="group_front_mid_mid"/>
+              <shields macro="shield_arg_m_standard_02_mk2_macro" group="group_front_up_mid"/>
+              <shields macro="shield_tel_m_standard_02_mk2_macro" group="group_mid_up_mid"/>
+              <turrets macro="turret_arg_m_flak_02_mk1_macro" group="group_back_mid"/>
+              <turrets macro="turret_arg_m_gatling_02_mk1_macro" group="group_back_up_mid"/>
+              <turrets macro="turret_arg_l_mining_01_mk1_macro" group="group_front_down_mid"/>
+              <turrets macro="turret_arg_m_flak_02_mk1_macro" group="group_front_left_mid" exact="2"/>
+              <turrets macro="turret_arg_m_plasma_02_mk1_macro" group="group_front_mid_mid"/>
+              <turrets macro="turret_arg_m_flak_02_mk1_macro" group="group_mid_up_mid"/>
+            </groups>
+            <ammunition>
+              <ammunition macro="countermeasure_flares_01_macro" exact="20"/>
+              <unit macro="ship_gen_xs_cargodrone_empty_01_a_macro" exact="2"/>
+              <unit macro="ship_gen_s_miningdrone_solid_01_a_macro" exact="6"/>
+              <unit macro="ship_gen_s_fightingdrone_01_a_macro" exact="2"/>
+            </ammunition>
+            <software>
+              <software ware="software_dockmk1"/>
+              <software ware="software_flightassistmk1"/>
+              <software ware="software_scannerlongrangemk1"/>
+              <software ware="software_scannerobjectmk1"/>
+              <software ware="software_targetmk1"/>
+              <software ware="software_trademk1"/>
+            </software>
+            <virtualmacros>
+              <thruster macro="thruster_gen_l_allround_01_mk2_macro"/>
+            </virtualmacros>
+            <crew>
+              <crew role="marine" exact="0"/>
+              <crew role="service" exact="0"/>
+            </crew>
+          </loadout>
+          <pilot>
+            <skills>
+              <skill type="boarding"/>
+              <skill type="engineering"/>
+              <skill type="management"/>
+              <skill type="morale"/>
+              <skill type="piloting" value="12"/>
+            </skills>
+          </pilot>
+          <people people="player_argon_veteran_freighter_crew" fillpercent="92.1053"/>
+        </ship>
+        <ship id="fleet16_1769155866" commander="fleet13_1769155693" macro="ship_pir_l_miner_solid_01_a_macro">
+          <loadout>
+            <macros>
+              <engine macro="engine_arg_l_allround_01_mk1_macro" path="../con_engine_02"/>
+              <engine macro="engine_arg_l_allround_01_mk1_macro" path="../con_engine_01"/>
+              <shield macro="shield_arg_l_standard_01_mk2_macro" path="../con_shieldgen_l_01"/>
+            </macros>
+            <groups>
+              <shields macro="shield_arg_m_standard_02_mk2_macro" group="group_front_mid_left" exact="2"/>
+              <shields macro="shield_arg_m_standard_02_mk2_macro" group="group_front_mid_right" exact="2"/>
+              <shields macro="shield_arg_m_standard_02_mk2_macro" group="group_front_mid_top"/>
+              <shields macro="shield_arg_m_standard_02_mk2_macro" group="group_mid_mid_down" exact="2"/>
+              <shields macro="shield_arg_m_standard_02_mk2_macro" group="group_rear_mid_left" exact="2"/>
+              <shields macro="shield_arg_m_standard_02_mk2_macro" group="group_rear_mid_mid"/>
+              <turrets macro="turret_arg_l_mining_01_mk1_macro" group="group_front_mid_left"/>
+              <turrets macro="turret_arg_l_mining_01_mk1_macro" group="group_front_mid_right"/>
+              <turrets macro="turret_arg_m_laser_02_mk1_macro" group="group_front_mid_top" exact="2"/>
+              <turrets macro="turret_arg_m_gatling_02_mk1_macro" group="group_mid_mid_down" exact="2"/>
+              <turrets macro="turret_arg_m_plasma_02_mk1_macro" group="group_rear_mid_mid" exact="2"/>
+            </groups>
+            <ammunition>
+              <ammunition macro="countermeasure_flares_01_macro" exact="20"/>
+              <unit macro="ship_gen_xs_cargodrone_empty_01_a_macro" exact="2"/>
+              <unit macro="ship_gen_xs_repairdrone_01_a_macro"/>
+              <unit macro="ship_gen_s_miningdrone_solid_01_a_macro" exact="7"/>
+            </ammunition>
+            <software>
+              <software ware="software_dockmk2"/>
+              <software ware="software_flightassistmk1"/>
+              <software ware="software_scannerlongrangemk2"/>
+              <software ware="software_scannerobjectmk2"/>
+              <software ware="software_targetmk1"/>
+              <software ware="software_trademk1"/>
+            </software>
+            <virtualmacros>
+              <thruster macro="thruster_gen_l_allround_01_mk2_macro"/>
+            </virtualmacros>
+            <crew>
+              <crew role="marine" exact="7"/>
+              <crew role="service" exact="24"/>
+            </crew>
+          </loadout>
+          <pilot>
+            <skills>
+              <skill type="boarding"/>
+              <skill type="engineering"/>
+              <skill type="management"/>
+              <skill type="morale"/>
+              <skill type="piloting" value="13"/>
+            </skills>
+          </pilot>
+          <people people="player_scavenger_veteran_military_crew" fillpercent="90"/>
+        </ship>
+        <ship id="fleet17_1769155916" commander="fleet13_1769155693" macro="ship_bor_l_miner_liquid_01_a_macro">
+          <loadout>
+            <macros>
+              <engine macro="engine_bor_l_travel_01_mk1_macro" path="../con_engine_03"/>
+              <engine macro="engine_bor_l_travel_01_mk1_macro" path="../con_engine_02"/>
+              <engine macro="engine_bor_l_travel_01_mk1_macro" path="../con_engine_01"/>
+              <engine macro="engine_bor_l_travel_01_mk1_macro" path="../con_engine_04"/>
+              <shield macro="shield_bor_l_standard_01_mk3_macro" path="../con_shield_l_03"/>
+              <shield macro="shield_bor_l_standard_01_mk3_macro" path="../con_shield_l_02"/>
+              <shield macro="shield_bor_l_standard_01_mk3_macro" path="../con_shield_l_01"/>
+            </macros>
+            <groups>
+              <shields macro="shield_bor_m_standard_02_mk3_macro" group="group_engines" exact="4"/>
+              <shields macro="shield_bor_m_standard_02_mk3_macro" group="group_mid_down_mid"/>
+              <shields macro="shield_bor_m_standard_02_mk3_macro" group="group_mid_up_mid"/>
+              <turrets macro="turret_bor_m_railgun_02_mk1_macro" group="group_mid_down_mid" exact="2"/>
+              <turrets macro="turret_bor_m_railgun_02_mk1_macro" group="group_mid_up_mid" exact="2"/>
+            </groups>
+            <ammunition>
+              <ammunition macro="countermeasure_flares_01_macro" exact="20"/>
+              <unit macro="ship_gen_s_fightingdrone_01_a_macro"/>
+              <unit macro="ship_gen_s_miningdrone_liquid_01_a_macro" exact="7"/>
+              <unit macro="ship_gen_xs_repairdrone_01_a_macro"/>
+              <unit macro="ship_gen_xs_cargodrone_empty_01_a_macro"/>
+            </ammunition>
+            <software>
+              <software ware="software_dockmk2"/>
+              <software ware="software_flightassistmk1"/>
+              <software ware="software_scannerlongrangemk2"/>
+              <software ware="software_scannerobjectmk2"/>
+              <software ware="software_targetmk1"/>
+              <software ware="software_trademk1"/>
+            </software>
+            <virtualmacros>
+              <thruster macro="thruster_gen_l_allround_01_mk1_macro"/>
+            </virtualmacros>
+            <crew>
+              <crew role="marine" exact="12"/>
+              <crew role="service" exact="33"/>
+            </crew>
+          </loadout>
+          <pilot>
+            <skills>
+              <skill type="boarding"/>
+              <skill type="engineering"/>
+              <skill type="management"/>
+              <skill type="morale" value="7"/>
+              <skill type="piloting" value="6"/>
+            </skills>
+          </pilot>
+          <people people="player_boron_veteran_military_crew" fillpercent="90"/>
+        </ship>
+        <ship id="fleet18_1769155997" commander="fleet13_1769155693" macro="ship_tel_l_trans_container_03_a_macro">
+          <loadout>
+            <macros>
+              <engine macro="engine_ter_l_travel_01_mk1_macro" path="../con_engine_03"/>
+              <engine macro="engine_ter_l_travel_01_mk1_macro" path="../con_engine_02"/>
+              <engine macro="engine_ter_l_travel_01_mk1_macro" path="../con_engine_01"/>
+              <shield macro="shield_tel_l_standard_01_mk2_macro" path="../con_shield_l_03"/>
+              <shield macro="shield_tel_l_standard_01_mk2_macro" path="../con_shield_l_02"/>
+              <shield macro="shield_tel_l_standard_01_mk2_macro" path="../con_shield_l_01"/>
+            </macros>
+            <groups>
+              <shields macro="shield_tel_m_standard_02_mk2_macro" group="group_engines" exact="3"/>
+              <shields macro="shield_tel_m_standard_02_mk2_macro" group="group_front_up_left"/>
+              <shields macro="shield_tel_m_standard_02_mk2_macro" group="group_front_up_mid"/>
+              <shields macro="shield_tel_m_standard_02_mk2_macro" group="group_front_up_right"/>
+              <shields macro="shield_tel_m_standard_02_mk2_macro" group="group_mid_up_rear"/>
+              <shields macro="shield_tel_m_standard_02_mk2_macro" group="group_rear_left_down"/>
+              <shields macro="shield_tel_m_standard_02_mk2_macro" group="group_rear_right_down"/>
+              <turrets macro="turret_ter_m_gatling_02_mk1_macro" group="group_front_up_left"/>
+              <turrets macro="turret_ter_m_gatling_02_mk1_macro" group="group_front_up_mid"/>
+              <turrets macro="turret_ter_m_gatling_02_mk1_macro" group="group_front_up_right"/>
+              <turrets macro="turret_ter_m_gatling_02_mk1_macro" group="group_mid_up_rear"/>
+              <turrets macro="turret_ter_m_gatling_02_mk1_macro" group="group_rear_left_down"/>
+              <turrets macro="turret_ter_m_gatling_02_mk1_macro" group="group_rear_right_down"/>
+            </groups>
+            <ammunition>
+              <ammunition macro="countermeasure_flares_01_macro" exact="10"/>
+              <unit macro="ship_gen_xs_cargodrone_empty_01_a_macro" exact="2"/>
+              <unit macro="ship_gen_xs_repairdrone_01_a_macro"/>
+            </ammunition>
+            <software>
+              <software ware="software_dockmk2"/>
+              <software ware="software_flightassistmk1"/>
+              <software ware="software_scannerlongrangemk2"/>
+              <software ware="software_scannerobjectmk2"/>
+              <software ware="software_targetmk1"/>
+              <software ware="software_trademk1"/>
+            </software>
+            <virtualmacros>
+              <thruster macro="thruster_gen_l_allround_01_mk2_macro"/>
+            </virtualmacros>
+            <crew>
+              <crew role="marine" exact="0"/>
+              <crew role="service" exact="0"/>
+            </crew>
+          </loadout>
+          <pilot>
+            <skills>
+              <skill type="boarding"/>
+              <skill type="engineering"/>
+              <skill type="management"/>
+              <skill type="morale"/>
+              <skill type="piloting" value="5"/>
+            </skills>
+          </pilot>
+          <people people="player_teladi_regular_freighter_crew" fillpercent="67.7686"/>
+        </ship>
+        <ship id="fleet19_1769156038" commander="fleet13_1769155693" macro="ship_ter_l_trans_container_01_a_macro">
+          <loadout>
+            <macros>
+              <engine macro="engine_ter_l_travel_01_mk1_macro" path="../con_engine_01"/>
+              <shield macro="shield_ter_l_standard_01_mk3_macro" path="../con_shieldgen_l_02"/>
+              <shield macro="shield_ter_l_standard_01_mk3_macro" path="../con_shieldgen_l_01"/>
+            </macros>
+            <groups>
+              <shields macro="shield_ter_m_standard_02_mk2_macro" group="group_01"/>
+              <shields macro="shield_ter_m_standard_02_mk2_macro" group="group_02"/>
+              <shields macro="shield_ter_m_standard_02_mk2_macro" group="group_03"/>
+              <shields macro="shield_ter_m_standard_02_mk2_macro" group="group_05"/>
+              <shields macro="shield_ter_m_standard_02_mk2_macro" group="group_06"/>
+              <shields macro="shield_ter_m_standard_02_mk2_macro" group="group_07"/>
+              <turrets macro="turret_ter_m_guided_02_mk1_macro" group="group_01"/>
+              <turrets macro="turret_ter_m_laser_02_mk1_macro" group="group_02" exact="2"/>
+              <turrets macro="turret_ter_m_laser_02_mk1_macro" group="group_03"/>
+              <turrets macro="turret_ter_m_laser_02_mk1_macro" group="group_05" exact="2"/>
+              <turrets macro="turret_ter_m_laser_02_mk1_macro" group="group_06" exact="2"/>
+            </groups>
+            <ammunition>
+              <ammunition macro="countermeasure_flares_01_macro" exact="20"/>
+              <ammunition macro="missile_smart_heavy_mk1_macro" exact="40"/>
+              <unit macro="ship_gen_xs_repairdrone_01_a_macro"/>
+              <unit macro="ship_gen_xs_cargodrone_empty_01_a_macro" exact="5"/>
+              <unit macro="ship_gen_s_fightingdrone_01_a_macro" exact="4"/>
+            </ammunition>
+            <software>
+              <software ware="software_dockmk2"/>
+              <software ware="software_flightassistmk1"/>
+              <software ware="software_scannerlongrangemk2"/>
+              <software ware="software_scannerobjectmk2"/>
+              <software ware="software_targetmk1"/>
+              <software ware="software_trademk1"/>
+            </software>
+            <virtualmacros>
+              <thruster macro="thruster_gen_l_allround_01_mk2_macro"/>
+            </virtualmacros>
+            <crew>
+              <crew role="marine" exact="11"/>
+              <crew role="service" exact="46"/>
+            </crew>
+          </loadout>
+          <pilot>
+            <skills>
+              <skill type="boarding"/>
+              <skill type="engineering"/>
+              <skill type="management"/>
+              <skill type="morale" value="13"/>
+              <skill type="piloting" value="14"/>
+            </skills>
+          </pilot>
+          <people people="player_pioneers_elite_freighter_crew" fillpercent="80"/>
+        </ship>
+        <ship id="fleet20_1769156078" commander="fleet13_1769155693" count="8" macro="ship_spl_m_miner_liquid_01_a_macro">
+          <loadout>
+            <macros>
+              <engine macro="engine_par_m_combat_01_mk2_macro" path="../con_engine_02"/>
+              <engine macro="engine_par_m_combat_01_mk2_macro" path="../con_engine_01"/>
+              <shield macro="shield_tel_m_standard_01_mk2_macro" path="../con_shield_01"/>
+              <turret macro="turret_arg_m_gatling_01_mk1_macro" path="../con_turret_l"/>
+              <turret macro="turret_arg_m_flak_01_mk1_macro" path="../con_turret_r"/>
+            </macros>
+            <ammunition>
+              <ammunition macro="countermeasure_flares_01_macro" exact="8"/>
+            </ammunition>
+            <software>
+              <software ware="software_dockmk2"/>
+              <software ware="software_flightassistmk1"/>
+              <software ware="software_scannerlongrangemk2"/>
+              <software ware="software_scannerobjectmk2"/>
+              <software ware="software_targetmk1"/>
+              <software ware="software_trademk1"/>
+            </software>
+            <virtualmacros>
+              <thruster macro="thruster_gen_m_combat_01_mk2_macro"/>
+            </virtualmacros>
+            <crew>
+              <crew role="marine" exact="0"/>
+              <crew role="service" exact="0"/>
+            </crew>
+          </loadout>
+          <pilot>
+            <skills>
+              <skill type="boarding"/>
+              <skill type="engineering"/>
+              <skill type="management"/>
+              <skill type="morale"/>
+              <skill type="piloting"/>
+            </skills>
+          </pilot>
+          <people people="player_split_regular_freighter_crew" fillpercent="100"/>
+        </ship>
+        <ship id="fleet21_1769156108" commander="fleet13_1769155693" count="8" macro="ship_arg_m_miner_solid_01_a_macro">
+          <loadout>
+            <macros>
+              <engine macro="engine_arg_m_allround_01_mk2_macro" path="../con_engine_01"/>
+              <weapon macro="weapon_gen_m_mining_01_mk2_macro" path="../con_primaryweapon_01"/>
+              <shield macro="shield_tel_m_standard_01_mk2_macro" path="../con_shield_01"/>
+              <turret macro="turret_arg_m_mining_01_mk1_macro" path="../con_turret_02"/>
+              <turret macro="turret_arg_m_mining_01_mk1_macro" path="../con_turret_01"/>
+            </macros>
+            <ammunition>
+              <ammunition macro="countermeasure_flares_01_macro" exact="8"/>
+            </ammunition>
+            <software>
+              <software ware="software_dockmk2"/>
+              <software ware="software_flightassistmk1"/>
+              <software ware="software_scannerlongrangemk2"/>
+              <software ware="software_scannerobjectmk2"/>
+              <software ware="software_targetmk1"/>
+              <software ware="software_trademk1"/>
+            </software>
+            <virtualmacros>
+              <thruster macro="thruster_gen_m_combat_01_mk2_macro"/>
+            </virtualmacros>
+            <crew>
+              <crew role="marine" exact="0"/>
+              <crew role="service" exact="0"/>
+            </crew>
+          </loadout>
+          <pilot>
+            <skills>
+              <skill type="boarding"/>
+              <skill type="engineering"/>
+              <skill type="management"/>
+              <skill type="morale"/>
+              <skill type="piloting"/>
+            </skills>
+          </pilot>
+          <people people="player_loanshark_regular_freighter_crew" fillpercent="100"/>
+        </ship>
+        <ship id="fleet22_1769156184" commander="fleet13_1769155693" count="10" macro="ship_tel_m_trans_container_01_b_macro">
+          <loadout>
+            <macros>
+              <engine macro="engine_tel_m_allround_01_mk2_macro" path="../con_engine_01"/>
+              <shield macro="shield_tel_m_standard_01_mk2_macro" path="../con_shield_01"/>
+              <shield macro="shield_tel_m_standard_01_mk2_macro" path="../con_shield_002"/>
+              <turret macro="turret_tel_m_laser_01_mk1_macro" path="../con_turret_01"/>
+            </macros>
+            <ammunition>
+              <ammunition macro="countermeasure_flares_01_macro"/>
+            </ammunition>
+            <software>
+              <software ware="software_dockmk1"/>
+              <software ware="software_flightassistmk1"/>
+              <software ware="software_scannerlongrangemk2"/>
+              <software ware="software_scannerobjectmk1"/>
+              <software ware="software_targetmk1"/>
+              <software ware="software_trademk1"/>
+            </software>
+            <virtualmacros>
+              <thruster macro="thruster_gen_m_allround_01_mk2_macro"/>
+            </virtualmacros>
+            <crew>
+              <crew role="marine" exact="0"/>
+              <crew role="service" exact="0"/>
+            </crew>
+          </loadout>
+          <pilot>
+            <skills>
+              <skill type="boarding"/>
+              <skill type="engineering"/>
+              <skill type="management"/>
+              <skill type="morale"/>
+              <skill type="piloting"/>
+            </skills>
+          </pilot>
+          <people people="player_teladi_veteran_freighter_crew" fillpercent="84.6154"/>
+        </ship>
+        <ship id="fleet23_1769156250" commander="fleet13_1769155693" count="20" macro="ship_arg_s_trans_container_01_a_macro">
+          <loadout>
+            <macros>
+              <engine macro="engine_arg_s_combat_01_mk1_macro" path="../con_engine_03"/>
+              <engine macro="engine_arg_s_combat_01_mk1_macro" path="../con_engine_02"/>
+              <engine macro="engine_arg_s_combat_01_mk1_macro" path="../con_engine_01"/>
+              <weapon macro="weapon_gen_s_laser_01_mk1_macro" path="../con_weapon"/>
+              <shield macro="shield_arg_s_standard_01_mk3_macro" path="../con_shield"/>
+            </macros>
+            <ammunition>
+              <ammunition macro="countermeasure_flares_01_macro" exact="2"/>
+            </ammunition>
+            <software>
+              <software ware="software_dockmk2"/>
+              <software ware="software_flightassistmk1"/>
+              <software ware="software_scannerlongrangemk1"/>
+              <software ware="software_scannerobjectmk1"/>
+              <software ware="software_targetmk1"/>
+              <software ware="software_trademk1"/>
+            </software>
+            <virtualmacros>
+              <thruster macro="thruster_gen_s_allround_01_mk1_macro"/>
+            </virtualmacros>
+            <crew>
+              <crew role="marine"/>
+              <crew role="service"/>
+            </crew>
+          </loadout>
+          <pilot>
+            <skills>
+              <skill type="boarding"/>
+              <skill type="engineering"/>
+              <skill type="management"/>
+              <skill type="morale"/>
+              <skill type="piloting"/>
+            </skills>
+          </pilot>
+          <people people="player_scavenger_regular_military_crew" fillpercent="100"/>
+        </ship>
+      </property>
+    </player>
+    <universe>
+      <factions>
+        <relations>
+          <relation faction="player" otherfaction="terran" relation="0.01"/>
+          <relation faction="player" otherfaction="split" relation="-0.0032"/>
+        </relations>
+      </factions>
+    </universe>
+  </gamestart>
 
     </add>
 </diff>
