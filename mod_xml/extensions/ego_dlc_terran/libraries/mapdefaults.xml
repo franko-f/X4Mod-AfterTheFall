@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+  <remove sel="/defaults/dataset[@macro='Cluster_101_Sector001_macro']/properties/access" />
+</diff>
