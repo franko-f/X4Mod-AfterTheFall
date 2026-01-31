@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+  <!-- 
+    Reconfigure Patrol Logic for New Borders:
+    Mars is Neutral. Venus is Outer Core. Mercury is Inner Core.
+  -->
+  <replace sel="/mdscript[@name='Story_Terran_Core']//cue[@name='Start']//cue[@name='Setup']/actions">
+    <actions>
+        <find_sector name="$MoonSector" macro="macro.cluster_104_sector002_macro"/>
+        <find_sector name="$VenusSector" macro="macro.cluster_102_sector001_macro"/>
+        <find_sector name="$AsteroidBeltSector" macro="macro.cluster_100_sector001_macro"/>
+        <find_sector name="$MarsSector" macro="macro.cluster_101_sector001_macro"/>
+        <find_sector name="$EarthSector" macro="macro.cluster_104_sector001_macro"/>
+        <find_sector name="$MercurySector" macro="macro.cluster_106_sector001_macro"/>
+
+        <!-- Find Mars <-> Venus Accelerator -->
+        <find_gate name="this.$Accelerators" space="$MarsSector" accelerator="true" required="true" multiple="true"/>
+        <do_for_each name="$Accelerator" in="this.$Accelerators">
+            <do_if value="$Accelerator.exit.sector == $VenusSector">
+                <set_value name="$MarsVenusAccelerator" exact="$Accelerator"/>
+                <set_value name="$VenusMarsAccelerator" exact="$Accelerator.exit"/>
+            </do_if>
+        </do_for_each>
+
+        <!-- Find Venus <-> Mercury Accelerator -->
+        <find_gate name="this.$Accelerators" space="$VenusSector" accelerator="true" required="true" multiple="true"/>
+        <do_for_each name="$Accelerator" in="this.$Accelerators">
+            <do_if value="$Accelerator.exit.sector == $MercurySector">
+                <set_value name="$VenusMercuryAccelerator" exact="$Accelerator"/>
+                <set_value name="$MercuryVenusAccelerator" exact="$Accelerator.exit"/>
+            </do_if>
+        </do_for_each>
+
+        <!-- 1. Mars (Neutral) -> Venus (Outer Core) -->
+        <!-- Warning when near Venus gate in Mars -->
+        <signal_cue_instantly cue="RestrictedCore" param="[$MarsSector, null, $MarsVenusAccelerator, 2]" comment="license warning"/>
+        <!-- Attack when entered Venus (Outer Core) from Mars -->
+        <signal_cue_instantly cue="RestrictedCore" param="[$VenusSector, 'terran_destroyer_patrol_l_venus', $VenusMarsAccelerator, 1]"/>
+
+        <!-- 2. Venus (Outer Core) -> Mercury (Inner Core) -->
+        <!-- Warning when near Mercury gate in Venus -->
+        <signal_cue_instantly cue="RestrictedCore" param="[$VenusSector, null, $VenusMercuryAccelerator, 2]" comment="license warning"/>
+        <!-- Attack when entered Mercury (Inner Core) from Venus -->
+        <signal_cue_instantly cue="RestrictedCore" param="[$MercurySector, 'terran_battleship_patrol_xl_mercury', $MercuryVenusAccelerator, 1]"/>
+
+    </actions>
+  </replace>
+</diff>
