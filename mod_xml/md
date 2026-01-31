@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+  <replace sel="//cue[@name='TerranFactionLogic_Manager']/param[@name='PreferredHQSpaceMacro']/@value">macro.cluster_101_sector001_macro</replace>
+  <replace sel="//cue[@name='TerranFactionLogic_Manager']/param[@name='PreferredHQTypes']/@value">['shipbuilding', 'wharf', 'tradestation', 'equipmentdock', 'defensestation', 'any']</replace>
+</diff>

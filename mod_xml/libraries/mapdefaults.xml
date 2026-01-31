@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<diff>
+  <!-- mars: remove 'outercore' license requirement -->
+  <remove sel="/defaults/dataset[@macro='Cluster_101_Sector001_macro']/properties/access" />
+  <!-- mercury - switch to inner core, to give at least one innercore: Otherwise scripts break -->
+  <replace sel="/defaults/dataset[@macro='Cluster_106_Sector001_macro']/properties/access"><access licence="innercore_access" /></replace>
+</diff>
