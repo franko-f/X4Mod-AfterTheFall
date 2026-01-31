@@ -133,7 +133,7 @@
 			  <location sector="cluster_18_sector001_macro">
 				<position x="141355.328" z="-129420.43"/>
 			  </location>
-			  <construction ref="player_1709622866"/>
+			  <construction ref="atf_scrap_cross"/>
 			  <manager>
 				<skills>
 				  <skill type="management" value="8"/>
