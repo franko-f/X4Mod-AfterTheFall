@@ -244,5 +244,64 @@ Lets add a little excitement to the terrans day, and stop them steamrolling thro
   </job>
 
 
+
+<!-- Add terran patrols for inner/outer core-->
+
+    <!-- Venus Patrol (Outer Core Enforcement from Mars side) -->
+    <!-- Location: Venus Zone facing Mars Gate (Cluster 102, Sector 001, Zone 005) -->
+    <job id="terran_destroyer_patrol_l_venus" name="{20204,5201}">
+      <modifiers commandeerable="false"/>
+      <orders>
+        <order order="Patrol" default="true">
+          <param name="range" value="class.zone"/>
+          <param name="stayinspace" value="true"/>
+        </order>
+      </orders>
+      <category faction="terran" tags="[military, destroyer]" size="ship_l"/>
+      <quota galaxy="1"/>
+      <location class="zone" macro="zone005_cluster_102_sector001_macro" faction="terran" relation="self" comparison="exact"/>
+      <environment buildatshipyard="true"/>
+      <ship>
+        <select faction="terran" tags="[military, destroyer, atf]" size="ship_l"/>
+        <loadout>
+          <level exact="1"/>
+          <variation exact="0"/>
+        </loadout>
+        <owner exact="terran" overridenpc="true"/>
+      </ship>
+      <subordinates>
+        <subordinate job="terran_frigate_escort_m"/>
+      </subordinates>
+    </job>
+
+    <!-- Mercury Patrol (Inner Core Enforcement from Venus side) -->
+    <!-- Location: Mercury Zone facing Venus Gate (Cluster 106, Sector 001, Zone 003) -->
+    <job id="terran_battleship_patrol_xl_mercury" name="{20204,5201}">
+      <modifiers commandeerable="false"/>
+      <orders>
+        <order order="Patrol" default="true">
+          <param name="range" value="class.zone"/>
+          <param name="stayinspace" value="true"/>
+        </order>
+      </orders>
+      <category faction="terran" tags="[military, battleship]" size="ship_xl"/>
+      <quota galaxy="1"/>
+      <location class="zone" macro="zone003_cluster_106_sector001_macro" faction="terran" relation="self" comparison="exact"/>
+      <environment buildatshipyard="true"/>
+      <ship>
+        <select faction="terran" tags="[military, battleship, atf]" size="ship_xl"/>
+        <loadout>
+          <level exact="1"/>
+          <variation exact="0"/>
+        </loadout>
+        <owner exact="terran" overridenpc="true"/>
+      </ship>
+      <subordinates>
+        <subordinate job="terran_destroyer_escort_l_atf_noescort" assignment="attack" group="1"/>
+        <subordinate job="terran_destroyer_escort_l" assignment="attack" group="2"/>
+      </subordinates>
+    </job>
+
+
 </add>
 </diff>
