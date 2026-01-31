@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <diff xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" >
-	<add sel="/groups">
+	<add sel="/gamestarts/groups">
 		<group id="atf" name="After The Fall" description="Example gamestarts for the After the Fall mod:" />
 	</add>
 
