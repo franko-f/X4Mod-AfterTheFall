@@ -127,7 +127,7 @@ type Territory = {
 let territories = [
     // Add some resources to Xenon dead-end sectors
     { Territory.Default with faction = "xenon";    dlc = Some "terran"; cluster = "Cluster_104_macro"; resources=standardResourcesOres }  // Earth and Moon
-    { Territory.Default with faction = "xenon";                         sectors = ["cluster_42_sector002_macro"] ; resources=standardResourcesOres }  // Hewas Cove IV
+    { Territory.Default with faction = "xenon";    dlc = Some "core";   cluster = "Cluster_42_macro"; sectors = ["cluster_42_sector001_macro"] ; resources=standardResourcesOres }  // Hewas Cove III
 
 
     // core
