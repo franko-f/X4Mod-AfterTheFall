@@ -31,6 +31,12 @@
 			<ware ware="weapon_gen_spacesuit_repairlaser_01_mk1"/>
 			<ware ware="software_scannerobjectmk3"/>
 		  </inventory>
+
+		  <!-- This magic line makes research work; otherwise it's broken if you just copy a default gamestart -->
+		  <encyclopedia>
+			<entry type="warebasket" ref="research_gamestart_common"/>
+		  </encyclopedia>
+
 		  <blueprints>
 			<ware ware="module_arg_dock_m_01_lowtech"/>
 			<ware ware="module_arg_conn_cross_01"/>
@@ -314,6 +320,12 @@
 			<ware ware="weapon_gen_spacesuit_repairlaser_01_mk1"/>
 			<ware ware="software_scannerobjectmk3"/>
 		  </inventory>
+
+		  <!-- This magic line makes research work; otherwise it's broken if you just copy a default gamestart -->
+		  <encyclopedia>
+			<entry type="warebasket" ref="research_gamestart_common"/>
+		  </encyclopedia>
+
 		  <blueprints>
 			<ware ware="module_arg_dock_m_01_lowtech"/>
 			<ware ware="paintmod_0006"/>
@@ -457,6 +469,12 @@
         <ware ware="weapon_gen_spacesuit_repairlaser_01_mk1"/>
         <ware ware="software_scannerobjectmk3"/>
       </inventory>
+
+		  <!-- This magic line makes research work; otherwise it's broken if you just copy a default gamestart -->
+		  <encyclopedia>
+			<entry type="warebasket" ref="research_gamestart_common"/>
+		  </encyclopedia>
+
       <blueprints>
         <ware ware="module_arg_dock_m_01_lowtech"/>
         <ware ware="ship_gen_xs_cargodrone_empty_01_a"/>
