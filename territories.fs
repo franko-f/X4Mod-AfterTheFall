@@ -175,9 +175,9 @@ let territories = [
 
     // cradle of humanity
     // Muchj like ZYA, these sectors have no resources by default. Give a little extra.
-    { Territory.Default with faction = "terran";   cluster = "Cluster_101_macro"; resources= standardResourcesOres }   // Mars - Allows people with lower faction rating visit terran territory.
-    { Territory.Default with faction = "terran";   cluster = "Cluster_102_macro"; resources= List.concat([["minerals"]; standardResourcesGases]) }   // Venus
-    { Territory.Default with faction = "terran";   cluster = "Cluster_106_macro"; resources= ["minerals"; "hydrogen"; "methane"] }   // Mercury
+    { Territory.Default with faction = "terran";   cluster = "Cluster_101_macro"; resources= List.concat([["methane"]; standardResourcesOres]) }   // Mars - Allows people with lower faction rating visit terran territory.
+    { Territory.Default with faction = "terran";   cluster = "Cluster_102_macro"; resources= List.concat([["minerals"; "methane"]; standardResourcesGases]) }   // Venus
+    { Territory.Default with faction = "terran";   cluster = "Cluster_106_macro"; resources= ["minerals"; "hydrogen"; "methane"; "methane"] }   // Mercury
 
     { Territory.Default with faction = "pioneers"; cluster = "Cluster_113_macro" }   // Segaris   - Plenty resources already, and next door to ANT.
     { Territory.Default with faction = "pioneers"; cluster = "Cluster_114_macro" }   // Gaian Prophecy
