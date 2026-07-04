@@ -9,16 +9,10 @@
 
 module X4.Jobs
 
-open System.Xml.Linq
 open X4.Data
 open X4.Types
 open X4.Utilities
 
-
-// This string is the starting point for the output job we'll write.
-// The jobs file also already contains some predefined xenon jobs we're adding to TER territory.
-let X4JobModTemplate =
-    System.IO.File.ReadAllText(__SOURCE_DIRECTORY__ + "/mod_templates/jobs.xml")
 
 // Quotas may or may not exist. This is an easy function to multiply a quota if it's Some quota,
 // or just return None if it's None. ie; a Option aware multiplier. Unlike normal integer math, This rounds UP.
@@ -26,68 +20,6 @@ let maybeMultiply (quota: Option<int>) (multiplier: float) =
     match quota with
     | Some q -> Some(int (ceil (float q * multiplier)))
     | None -> None
-
-
-// Construct an XML element representing a 'replace' tag that will replace the quotas for a given job.
-// Important note: stations and products have a QUOTAS section containing a list of quotas, but JOBS
-// have only a single QUOTA element, and no quotas list.
-// example replace line:
-// <replace sel="/jobs/job[@id='xen_energycells']/@quota">
-//      <quota galaxy="42" cluster="3"/>
-// </replace>
-let replaceQuotaXml (id: string) (galaxy: int) (maxGalaxy: Option<int>) (cluster: Option<int>) (sector: Option<int>) =
-    let quota = [
-        yield new XAttribute("galaxy", galaxy)
-        match maxGalaxy with
-        | Some x -> yield new XAttribute("maxgalaxy", x)
-        | _ -> ()
-        match cluster with
-        | Some x -> yield new XAttribute("cluster", x)
-        | _ -> ()
-        match sector with
-        | Some x -> yield new XAttribute("sector", x)
-        | _ -> ()
-    ]
-
-    let xml =
-        new XElement("replace", new XAttribute("sel", $"//jobs/job[@id='{id}']/quota"), new XElement("quota", quota))
-
-    printfn "     REPLACING JOB QUOTA %s with gal:%A maxGal:%A clust:%A sect:%A" id galaxy maxGalaxy cluster sector
-    xml
-
-
-// Build XML that will replace or add a 'prefer build' tag.
-// We want to force many jobs for factions to be built at shipyards, rather than get spawned in automatically.
-// Means the factions will start weaker, but, given time, will build up their fleets.
-// I had considered the approach of splutting every job in two, one with preferbuild, the other without.
-// this would spawn half of the ships, weakening the faction nicely, but it's more complicated and adds
-// a lot of jobs. Instead, we're jjst going to target L and XL ships, and resupply ships.
-let setPreferBuildXml (job: Job) =
-    let selector = new XAttribute("sel", $"//jobs/job[@id='{job.Id}']/environment")
-
-    match job.Environment with
-    | None ->
-        // no existing line build an entire xml diff 'add' for the option.
-        printfn "  ADDING JOB ENVIRONMENT AND BUILD SETTINGS %s preferbuild" job.Id
-
-        let environment =
-            new XElement(
-                "environment",
-                [
-                    new XAttribute("preferbuilding", true), new XAttribute("buildatshipyard", true)
-                ]
-            )
-
-        new XElement("add", selector, environment)
-
-    | Some environment ->
-        // There's an existing environment, so we'll build and xml REPLACE based on the existing settings.
-        printfn "  REPLACING JOB ENVIRONMENT BUILD SETTINGS %s " job.Id
-        let newEnvironment = new XElement(XmlSource.value environment.Source)
-        newEnvironment.SetAttributeValue("preferbuilding", true)
-        newEnvironment.SetAttributeValue("buildatshipyard", true)
-        let replacement = new XElement("replace", selector, newEnvironment)
-        replacement
 
 
 // Each job has a faction that it belongs to. The fields in the XML seem a bit unreliable
@@ -331,7 +263,7 @@ let processJob (job: Job) =
             quotaMultiply quota multiplier
         // We only need to create a replace tag if we're actually changing something. Check if any quotas are 'Some x'.
         if List.exists Option.isSome [ galaxyQuota; maxGalaxyQuota; clusterQuota; sectorQuota ] then
-            Some(replaceQuotaXml job.Id (galaxyQuota |> Option.defaultValue 0) maxGalaxyQuota clusterQuota sectorQuota)
+            Some(ReplaceJobQuota(job.Id, (galaxyQuota |> Option.defaultValue 0), maxGalaxyQuota, clusterQuota, sectorQuota))
         else
             None
 
@@ -375,7 +307,7 @@ let processJob (job: Job) =
         // without their big cvarrier and destroyer fleets, and must build them slowly as the game progresses.
         not (isPreferBuild job)
     then
-        Some(setPreferBuildXml job)
+        Some(SetPreferBuild job)
     else
         None
 
@@ -386,24 +318,12 @@ let generate_job_file (filename: string) =
     // lets find out some interesting things about jobs:
     printJobCategoryCount allJobs
 
-    // Now process all the jobs, getting a list containing only the changes that we're making.
-    let jobDiff = [|
+    // Now process all the jobs, getting a list containing only the changes that we're
+    // making, and hand the directives to the data layer to write the mod's jobs.xml.
+    [
         for job in allJobs do
             match processJob job with
-            | Some xmldiff -> yield xmldiff
+            | Some directive -> yield directive
             | _ -> ()
-    |]
-
-    // Prepare to write out the XML for the mod. Start by creating an XML DIFF object from the template
-    let outJobFile = X4JobMod.Parse(X4JobModTemplate)
-    let diff = outJobFile.XElement // the root element is actually the 'diff' tag.
-
-    // Now add out job changes, one by one, to the mutable diff element
-    [|
-        for element in jobDiff do
-            diff.Add(element)
-            diff.Add(new XText("\n")) // Add a newline after each element so the output is readible
-    |]
-    |> ignore
-
-    WriteModfiles.write_xml_file "core" filename outJobFile.XElement
+    ]
+    |> writeJobsFile filename

@@ -194,6 +194,15 @@ type SectorResourceGrant = {
     Areas: (string * int) list
 }
 
+/// A change to a vanilla job, decided by the jobs logic and written by the data layer.
+type JobDirective =
+    /// Replace the job's quota (galaxy always written; other scopes only when Some).
+    | ReplaceJobQuota of jobId: string * galaxy: int * maxGalaxy: int option * cluster: int option * sector: int option
+    /// Force the job to be built at shipyards instead of spawning at game start.
+    /// Carries the whole job: the writer clones its existing <environment> (via
+    /// Environment.Source) or adds a fresh one.
+    | SetPreferBuild of job: Job
+
 /// A faction's vanilla defence construction plan: the plan id that bastions are
 /// stacked from, and the DLC (extension id, display name) providing it, if any.
 type DefencePlanSource = {
