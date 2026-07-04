@@ -43,6 +43,97 @@ type Quaternion = {
 
     static member Default = { X = 0.0; Y = 0.0; Z = 0.0; W = 1.0 }
 
+/// How a sector is represented in the vanilla mapdefaults file, which determines the
+/// diff operation needed to add resource areas to it. Each case carries the
+/// canonically cased macro name to use in the selector.
+type MapDefaultsDatasetState =
+    | HasResourceAreas of string // dataset exists and already has a <resourceareas> node
+    // dataset exists with <properties> but no <resourceareas>. The <properties> children
+    // are schema ordered (xs:sequence in libraries.xsd: boundaries, identification,
+    // resources, resourceareas, sounds, area, ...), so a plain append would put our node
+    // after sounds/area/access and fail validation. The second value is the existing
+    // child to insert after (pos="after"), or None to prepend as the first child.
+    | HasProperties of string * string option
+    | NoDataset of string // the sector has no dataset in the file at all
+
+// ==== WRITE-SIDE DIRECTIVES ====
+// Logic modules produce these; the data layer's writers translate them to XML.
+
+/// A faction's vanilla defence construction plan: the plan id that bastions are
+/// stacked from, and the DLC (extension id, display name) providing it, if any.
+type DefencePlanSource = {
+    PlanId: string
+    Dlc: (string * string) option
+}
+
+/// The galaxy-map connection joining a gate to its remote counterpart.
+type GateConnection = {
+    Name: string
+    Path: string option
+    MacroPath: string option
+}
+
+/// A jump gate discovered in the zone files.
+[<StructuredFormatDisplay("{Sector}/{Zone}:{Faction} ({ConnectionType})/{ConnectionName} {GateType} - {Position} rotation{Quarternion}")>]
+type Gate = {
+    Sector: string
+    Zone: string // the zone macro name
+    Faction: string
+    GateType: string // the zone class
+    ConnectionType: string
+    ConnectionName: string
+    Position: Position
+    Quarternion: Quaternion
+    Connection: GateConnection option
+} with
+
+    member gate.asString() =
+        let connection =
+            match gate.Connection with
+            | None -> "Unknown"
+            | Some connection -> connection.Name
+
+        sprintf
+            "%A/%A:%A (%A) %A %A - %A rotation: %A Connection: %A"
+            gate.Sector
+            gate.Zone
+            gate.Faction
+            gate.ConnectionType
+            gate.ConnectionName
+            gate.GateType
+            gate.Position
+            gate.Quarternion
+            connection
+
+/// A station entry from the vanilla god.xml (or a DLC god diff). Field list is
+/// exactly what the logic layer reads; Source is the provider-parsed <station>
+/// element, kept so the writer can clone it byte-identically.
+type GodStation = {
+    Id: string
+    Race: string
+    Owner: string
+    Type: string option // "factory" | "tradingstation" | ...
+    LocationClass: string option // "zone" | "sector" | ...
+    LocationMacro: string option
+    SelectTags: string option // <station><select tags="[defence]"/> - None when there is no <select>
+    ConstructionPlan: string option // <station constructionplan="'ter_defence'">
+    StationMacro: string option // <station macro="..."> - logging only
+    Source: XmlSource
+}
+
+/// A product (factory quota) entry from the vanilla god.xml or a DLC god diff.
+/// The mod's replacement quotas are built from scratch, so no Source is needed.
+type GodProduct = {
+    Id: string
+    Owner: string
+    Ware: string
+    Type: string
+    LocationFaction: string option
+    QuotaGalaxy: int
+    QuotaSector: int option
+    QuotaCluster: int option
+}
+
 /// The quota of a jobs.xml job. Every scope is optional - a job carries only
 /// the scopes the vanilla file sets.
 type JobQuota = {
@@ -123,61 +214,6 @@ type EquipmentInfo = {
     ComponentName: string
 }
 
-/// The galaxy-map connection joining a gate to its remote counterpart.
-type GateConnection = {
-    Name: string
-    Path: string option
-    MacroPath: string option
-}
-
-/// A jump gate discovered in the zone files.
-[<StructuredFormatDisplay("{Sector}/{Zone}:{Faction} ({ConnectionType})/{ConnectionName} {GateType} - {Position} rotation{Quarternion}")>]
-type Gate = {
-    Sector: string
-    Zone: string // the zone macro name
-    Faction: string
-    GateType: string // the zone class
-    ConnectionType: string
-    ConnectionName: string
-    Position: Position
-    Quarternion: Quaternion
-    Connection: GateConnection option
-} with
-
-    member gate.asString() =
-        let connection =
-            match gate.Connection with
-            | None -> "Unknown"
-            | Some connection -> connection.Name
-
-        sprintf
-            "%A/%A:%A (%A) %A %A - %A rotation: %A Connection: %A"
-            gate.Sector
-            gate.Zone
-            gate.Faction
-            gate.ConnectionType
-            gate.ConnectionName
-            gate.GateType
-            gate.Position
-            gate.Quarternion
-            connection
-
-/// How a sector is represented in the vanilla mapdefaults file, which determines the
-/// diff operation needed to add resource areas to it. Each case carries the
-/// canonically cased macro name to use in the selector.
-type MapDefaultsDatasetState =
-    | HasResourceAreas of string // dataset exists and already has a <resourceareas> node
-    // dataset exists with <properties> but no <resourceareas>. The <properties> children
-    // are schema ordered (xs:sequence in libraries.xsd: boundaries, identification,
-    // resources, resourceareas, sounds, area, ...), so a plain append would put our node
-    // after sounds/area/access and fail validation. The second value is the existing
-    // child to insert after (pos="after"), or None to prepend as the first child.
-    | HasProperties of string * string option
-    | NoDataset of string // the sector has no dataset in the file at all
-
-// ==== WRITE-SIDE DIRECTIVES ====
-// Logic modules produce these; the data layer's writers translate them to XML.
-
 /// Place a visual mining field region in a cluster map. The writer derives the
 /// {Name}_connection / {Name}_macro element names from Name.
 type RegionPlacement = {
@@ -192,6 +228,73 @@ type RegionPlacement = {
 type SectorResourceGrant = {
     State: MapDefaultsDatasetState
     Areas: (string * int) list
+}
+
+/// A change to a vanilla job, decided by the jobs logic and written by the data layer.
+type JobDirective =
+    /// Replace the job's quota (galaxy always written; other scopes only when Some).
+    | ReplaceJobQuota of jobId: string * galaxy: int * maxGalaxy: int option * cluster: int option * sector: int option
+    /// Force the job to be built at shipyards instead of spawning at game start.
+    /// Carries the whole job: the writer clones its existing <environment> (via
+    /// Environment.Source) or adds a fresh one.
+    | SetPreferBuild of job: Job
+
+/// The Xenon station templates (mod_templates/object_templates.xml) that vanilla
+/// stations get replaced with.
+type XenonStationKind =
+    | XenonShipyardStation
+    | XenonWharfStation
+    | XenonDefenceStation
+
+/// What happens to a vanilla station the mod doesn't leave alone.
+type StationAction =
+    | RemoveOriginal
+    | MoveOriginalTo of sector: string // emits two <replace> ops retargeting its location
+
+/// The mod's decision for one vanilla god station.
+type StationDirective = {
+    Original: GodStation
+    Replacement: XenonStationKind option // Xenon station placed at the original's location; None in neutral clusters
+    Action: StationAction
+}
+
+/// A gate bastion station: the faction's defence station god entry cloned to a new
+/// id/location, pointed at a stacked bastion construction plan.
+type BastionStation = {
+    BasedOn: GodStation
+    Id: string
+    ZoneClass: string
+    ZoneName: string
+    Position: Position
+    PlanId: string // the atf_bastion_* construction plan to build
+}
+
+/// A new Xenon station placed from a template at a specific location.
+type XenonTemplateStation = {
+    Kind: XenonStationKind
+    LocationClass: string
+    LocationMacro: string
+}
+
+/// A new Xenon solar power plant product at a specific location.
+type XenonSolarProduct = {
+    LocationClass: string
+    LocationMacro: string
+}
+
+/// Replace a vanilla product's quota in god.xml.
+type ProductDirective = {
+    ProductId: string
+    QuotaType: string // "galaxy"
+    Quota: int
+}
+
+/// A stacked bastion construction plan to generate into constructionplans.xml.
+type BastionPlanDirective = {
+    NewId: string
+    SourcePlanId: string
+    SourcePlan: XmlSource // the vanilla defence <plan> element (via X4.Data.Plans.loadDefencePlan)
+    DlcPatch: (string * string) option
 }
 
 /// One <macros> line of a custom loadout: equipment mounted on a named slot.
@@ -226,49 +329,4 @@ type AbandonedShip = {
     PositionKm: int * int * int
     RotationDeg: int * int * int
     Loadout: ShipLoadout option // None = the game generates the loadout itself
-}
-
-/// A change to a vanilla job, decided by the jobs logic and written by the data layer.
-type JobDirective =
-    /// Replace the job's quota (galaxy always written; other scopes only when Some).
-    | ReplaceJobQuota of jobId: string * galaxy: int * maxGalaxy: int option * cluster: int option * sector: int option
-    /// Force the job to be built at shipyards instead of spawning at game start.
-    /// Carries the whole job: the writer clones its existing <environment> (via
-    /// Environment.Source) or adds a fresh one.
-    | SetPreferBuild of job: Job
-
-/// A faction's vanilla defence construction plan: the plan id that bastions are
-/// stacked from, and the DLC (extension id, display name) providing it, if any.
-type DefencePlanSource = {
-    PlanId: string
-    Dlc: (string * string) option
-}
-
-/// A station entry from the vanilla god.xml (or a DLC god diff). Field list is
-/// exactly what the logic layer reads; Source is the provider-parsed <station>
-/// element, kept so the writer can clone it byte-identically.
-type GodStation = {
-    Id: string
-    Race: string
-    Owner: string
-    Type: string option // "factory" | "tradingstation" | ...
-    LocationClass: string option // "zone" | "sector" | ...
-    LocationMacro: string option
-    SelectTags: string option // <station><select tags="[defence]"/> - None when there is no <select>
-    ConstructionPlan: string option // <station constructionplan="'ter_defence'">
-    StationMacro: string option // <station macro="..."> - logging only
-    Source: XmlSource
-}
-
-/// A product (factory quota) entry from the vanilla god.xml or a DLC god diff.
-/// The mod's replacement quotas are built from scratch, so no Source is needed.
-type GodProduct = {
-    Id: string
-    Owner: string
-    Ware: string
-    Type: string
-    LocationFaction: string option
-    QuotaGalaxy: int
-    QuotaSector: int option
-    QuotaCluster: int option
 }
