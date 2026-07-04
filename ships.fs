@@ -346,13 +346,28 @@ let findMatchingEquipmentForTagsImpl (slotTags: Set<String>) =
             //This means that it's not a match.
             false)
 
+// Every tag that appears on at least one piece of equipment. A slot tag outside this
+// set can never contribute to a match. As of 9.0 some ship-specific slot tags no longer
+// exist on the equipment side (e.g. the Asgard slot still has 'atf_battleship_01' but
+// its main gun component lost it), so such tags are dropped as a matching last resort.
+let allKnownEquipmentTags =
+    allShipEquipment |> List.map (fun e -> e.Tags) |> Set.unionMany
+
 let findMatchingEquipmentForTags (tags: Set<String>) =
     // Terran L turrets are flagged with 'hittable', but there are no L turrets with 'hittable'.
     // So if there are no matching tags, remove 'hittable' from tags and try again.
     // In other cases, 'hittable' is important, as there might be two versions of M turrets, for example.
     // One for M ships, where they are not hittable, and one for L ships.
     match findMatchingEquipmentForTagsImpl tags with
-    | [] when tags.Contains "hittable" -> findMatchingEquipmentForTagsImpl (Set.remove "hittable" tags)
+    | [] ->
+        let tags =
+            if tags.Contains "hittable" then Set.remove "hittable" tags else tags
+
+        match findMatchingEquipmentForTagsImpl tags with
+        | [] when not ((Set.intersect tags allKnownEquipmentTags) = tags) ->
+            // Retry without the slot tags that exist on no equipment at all.
+            findMatchingEquipmentForTagsImpl (Set.intersect tags allKnownEquipmentTags)
+        | matches -> matches
     | matches -> matches
 
 
@@ -371,14 +386,23 @@ let findMatchingEquipment (searchTags: Set<String>) (equipment: list<EquipmentIn
 
 
 // Helper to find matching equipment for a set of tags and pick a random one.
-let pickEquipment tags : EquipmentInfo =
-    // Helper to pick a random item from a list. Assumes list is not empty.
-    let pickRandom (items: 'a list) =
-        // printfn "pickRandom: items.Length = %d" items.Length
-        items.[rand.Next(items.Length)]
+// Returns None (with a warning) when nothing matches. As of 9.0 some hardpoints
+// have tag sets that no equipment matches exactly (e.g. dedicated missile launcher
+// slots tagged without 'combat', while all launchers still carry it), so callers
+// for optional slots like weapons should leave the slot empty rather than abort.
+let tryPickEquipment tags : EquipmentInfo option =
+    match findMatchingEquipmentForTags tags with
+    | [] ->
+        printfn "    WARNING: No equipment matches slot tags %A. Leaving slot empty." (Set.toList tags)
+        None
+    | matches -> Some matches.[rand.Next(matches.Length)]
 
-    // printfn "pickEquipment: tags = %A" tags
-    findMatchingEquipmentForTags tags |> pickRandom
+// As tryPickEquipment, but for slots a ship can't function without (engines, shields,
+// thrusters): fail generation loudly instead of leaving them empty.
+let pickEquipment tags : EquipmentInfo =
+    match findMatchingEquipmentForTags tags with
+    | [] -> failwithf "No equipment found matching slot tags: %A" (Set.toList tags)
+    | matches -> matches.[rand.Next(matches.Length)]
 
 let dumpEquipmentInfo (prefix: string) (info: EquipmentInfo) =
     let tags =
@@ -609,12 +633,12 @@ let generateGroupsXml (ship: ShipInfo) =
     ship.EquipmentSlots
     |> shipEquipmentGroups
     |> List.sortBy (fun (groupName, _className) -> groupName)
-    |> List.map (fun ((groupName, className), slots) ->
+    |> List.choose (fun ((groupName, className), slots) ->
         // printfn "GROUP for %s: %s, %s, %A" ship.Name groupName className slots[0].Tags
 
         slots[0].Tags
-        |> pickEquipment
-        |> generateGroupLine groupName className slots.Length)
+        |> tryPickEquipment
+        |> Option.map (generateGroupLine groupName className slots.Length))
     |> generateLoadoutSection "groups"
 
 let generateMacroLine className name (equipment: EquipmentInfo) =
@@ -651,7 +675,9 @@ let generateMacrosXml (ship: ShipInfo) =
     let otherXmlLines =
         otherSlots
         |> List.sortBy (fun x -> x.Name)
-        |> List.map (fun slot -> pickEquipment slot.Tags |> generateMacroLine slot.Class slot.Name)
+        |> List.choose (fun slot ->
+            tryPickEquipment slot.Tags
+            |> Option.map (generateMacroLine slot.Class slot.Name))
 
     List.concat [ engineXmlLines; shieldXmlLines; otherXmlLines ]
     |> generateLoadoutSection "macros"
@@ -659,6 +685,13 @@ let generateMacrosXml (ship: ShipInfo) =
 // Determines if a ship needs a custom loadout (Boron or Terran L/XL Military) and generates it.
 // Loadouts have ammunition and crew sections too (and wares?). We're not setting those currently.
 // see loadouts.xml in various DLC for examples
+//
+// Loadouts are all or nothing per ship: we either hand build the entire loadout, or emit no
+// loadout reference at all and the game generates the whole thing itself.
+// As of X4 9.0, S/M equipment is unified under the 'advanced' compatibility tag, so the game
+// can generate loadouts for any S/M ship natively, including Boron. We therefore only hand
+// build the L/XL cases the game handles poorly: Boron L/XL, and Terran L/XL military (which
+// otherwise couldn't be repaired/modified properly).
 let MaybeCustomLoadout (shipName: string) =
     option {
         let! ship = findShipByMacroName shipName
@@ -670,7 +703,7 @@ let MaybeCustomLoadout (shipName: string) =
 
         // printfn "Ship: %s %s %b %b %b %b" shipName ship.Size isBoron isTerran isLargeOrXL isMilitary
 
-        if isBoron || (isTerran && isLargeOrXL && isMilitary) then
+        if (isBoron && isLargeOrXL) || (isTerran && isLargeOrXL && isMilitary) then
             printfn "    Generating CustomLoadout for %s" shipName
             let id = $"eod_abandoned_ship_loadout_{loadoutUniqueId ()}"
 

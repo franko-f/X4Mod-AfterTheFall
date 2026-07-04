@@ -37,6 +37,8 @@ Some missions might be very hard to complete though, given galaxy state!
 3. Added some new resource fields to new faction home systems, as many of these systems had few, or no,
 resources. It's a few small, moderately dense resource fields to keep the factions economies slowly moving,
 but you'll need to help them get new territory.
+(As of X4 9.0 this comes in two parts: visible asteroid/gas field regions in the cluster maps, plus
+per-sector resource areas in mapdefaults.xml that provide the actual minable yields within them.)
 
 4. Weakened faction economies by reducing the number of starting factories. They can expand to
 build more, but at the start, they're  weakend, with a  stronger xenon.

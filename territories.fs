@@ -5,8 +5,10 @@
 
 module X4.Territories
 
-// lookup map to the resource definitions from the XML that we will use to place extra resources
+// lookup map to the region definitions from the XML that we will use to place extra resources
 // for factions now in sectors without resources.
+// As of X4 9.0 these regions provide only the VISUAL asteroid/gas fields; the minable
+// yields inside them come from the per-sector resource areas in resourceAreaMap below.
 let resourceMap = Map [
     "minerals", "atf_asteroid_field_high";     // ore, silicon and a little bit of nvidium
     "ice",      "atf_ice_field_high";          // ice
@@ -14,6 +16,56 @@ let resourceMap = Map [
     "hydrogen", "atf_hydrogen_highyield_field";
     "helium",   "atf_helium_highyield_field";
     "methane",  "atf_methane_highyield_field"
+]
+
+// One kind of 9.0 'resource area' to add to a sector: composed into a mapdefaults
+// ref of the form sphere_{size}_{ware}_{yieldTier}_{speed}, validated against the
+// vocabulary in libraries/regionyields.xml (see X4.Data.makeResourceAreaRef).
+type ResourceArea = {
+    size: string      // tiny / small / medium / large / huge
+    ware: string      // ore, silicon, ice, nividium, hydrogen, helium, methane, rawscrap, rawkhaakscrap
+    yieldTier: string // verylow / low / medium / high / veryhigh ('yield' is an F# keyword)
+    speed: string     // gather speed: veryslow / slow / average / fast / veryfast
+    amount: int       // how many areas of this kind the sector gets
+}
+
+// X4 9.0: the minable resources each abstract resource name grants to a sector.
+// The mix (a few large, rich, slow areas plus smaller average ones) mirrors what
+// vanilla 9.0 gives resource-rich sectors, sized to keep rough parity with the old
+// high-yield atf_* region definitions.
+// INVARIANT: the wares listed for a resource here must be covered by the visual
+// fields of the region resourceMap assigns for the same name - regions without
+// matching resource areas give empty asteroids, and resource areas without a
+// matching region field have nothing to materialise in.
+let resourceAreaMap: Map<string, ResourceArea list> = Map [
+    "minerals", [
+        { size = "large"; ware = "ore";      yieldTier = "high";   speed = "slow";    amount = 3 }
+        { size = "small"; ware = "ore";      yieldTier = "medium"; speed = "average"; amount = 4 }
+        { size = "large"; ware = "silicon";  yieldTier = "high";   speed = "slow";    amount = 2 }
+        { size = "small"; ware = "silicon";  yieldTier = "medium"; speed = "average"; amount = 3 }
+        { size = "small"; ware = "nividium"; yieldTier = "medium"; speed = "average"; amount = 1 }
+    ]
+    "ice", [
+        { size = "large"; ware = "ice";      yieldTier = "high";   speed = "slow";    amount = 3 }
+        { size = "small"; ware = "ice";      yieldTier = "medium"; speed = "average"; amount = 3 }
+    ]
+    "scrap", [
+        // the old wreckfield gave rawscrap at medhigh yield plus a little hydrogen
+        { size = "medium"; ware = "rawscrap"; yieldTier = "high";   speed = "slow";    amount = 3 }
+        { size = "small";  ware = "hydrogen"; yieldTier = "medium"; speed = "average"; amount = 2 }
+    ]
+    "hydrogen", [
+        { size = "large";  ware = "hydrogen"; yieldTier = "high";   speed = "slow";    amount = 3 }
+        { size = "medium"; ware = "hydrogen"; yieldTier = "medium"; speed = "average"; amount = 3 }
+    ]
+    "helium", [
+        { size = "large";  ware = "helium";   yieldTier = "high";   speed = "slow";    amount = 3 }
+        { size = "medium"; ware = "helium";   yieldTier = "medium"; speed = "average"; amount = 3 }
+    ]
+    "methane", [
+        { size = "large";  ware = "methane";  yieldTier = "high";   speed = "slow";    amount = 3 }
+        { size = "medium"; ware = "methane";  yieldTier = "medium"; speed = "average"; amount = 3 }
+    ]
 ]
 // The standard resources that we'll use to populate the sectors. Two halves, one for each system.
 let standardResourcesGases = ["hydrogen"; "helium"; "methane" ]

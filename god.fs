@@ -276,9 +276,9 @@ let processStation
                 // We're going to move this station to a safe sector, rather than completely replace it with Xenon.
                 // We'll still put a xenon station where they used to be
                 // Select a random safe sector for the station to move to.
+                // Use the shared seeded generator so the output is reproducible run to run.
                 let sectors = X4.Data.getFactionSectors station.Owner
-                let random = System.Random()
-                let randomSector = sectors.[random.Next(sectors.Length)]
+                let randomSector = sectors.[X4.Data.rand.Next(sectors.Length)]
 
                 printfn
                     "  MOVING [%s]:%s :: %A  from  %A:%A to sector:%A"
@@ -368,7 +368,22 @@ let processProduct (product: X4WorldStart.Product) =
     // can spawn all their factories in the slightly less bad .4 sunlight sector.
     //    Some (product_replace_xml product.Id "sector" ( Option.defaultValue 32 product.Quota.Sector * 2) )
     | _ ->
-        let newGalaxyQuota = (float product.Quota.Galaxy) * ProductionRatio |> ceil |> int
+        let reducedQuota = (float product.Quota.Galaxy) * ProductionRatio |> ceil |> int
+        // X4 9.0 added static 'prefab' factories for these factions, which we keep (they
+        // spawn inside the faction's own shrunk territory). They're additive to product
+        // quotas, so subtract the prefab factory count for this ware from the reduced
+        // quota - keeping the faction's factory total at the intended weakened level.
+        // Every faction keeps at least 1 dynamic factory per product.
+        let prefabs =
+            X4.Data.prefabFactoryCounts
+            |> Map.tryFind (product.Owner, product.Ware)
+            |> Option.defaultValue 0
+
+        let newGalaxyQuota = max 1 (reducedQuota - prefabs)
+
+        if prefabs > 0 then
+            printfn "  PREFAB OFFSET %s:%s quota %i -> %i (%i prefab factories)" product.Owner product.Ware reducedQuota newGalaxyQuota prefabs
+
         Some(product_replace_xml product.Id "galaxy" newGalaxyQuota) // Everyone else gets half the quota.
 
 

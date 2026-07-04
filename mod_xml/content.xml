@@ -3,5 +3,8 @@
 name="after the fall"
 description="The war is over. The xenon... won. The galaxy is burning, and we hide behind the Bastions. They are the last fortresses that guard the gates, and are all that stand between us and complete annihiilation at the hands of the Xenon threat."
 author="Franko F"
-version="202" date="2026-02-02" save="0" enabled="1" sync="false">
+version="300" date="2026-07-03" save="0" enabled="1" sync="false">
+  <!-- Requires X4 9.0: resources are granted via mapdefaults <resourcearea> patches,
+       which only work with the 9.0 resource system. -->
+  <dependency version="900" />
 </content>

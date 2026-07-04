@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- NOTE: this file is a SEED, not the final mod file. X4.Resources.generateDLCMapDefaults
+     loads it, appends the generated per-sector <resourcearea> operations (the 9.0 way of
+     granting minable resources), and writes the combined diff over the copy in the mod
+     output directory. Hand written fixes like the access ops below belong here. -->
 <diff>
   <!-- mars: remove 'outercore' license requirement -->
   <remove sel="/defaults/dataset[@macro='Cluster_101_Sector001_macro']/properties/access" />

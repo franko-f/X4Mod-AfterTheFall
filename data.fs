@@ -26,8 +26,14 @@ let ContentDirectories = [
     "ego_dlc_timelines"
 ]
 
+// Game data is unpacked into a subdirectory per game version (e.g. X4_unpacked_data/9.0)
+// so that different versions can be kept side by side and compared. This selects the
+// version the generator (and all XmlProvider compile-time samples) build against.
 [<Literal>]
-let X4UnpackedDataFolder = __SOURCE_DIRECTORY__ + "/X4_unpacked_data"
+let X4DataVersion = "9.0"
+
+[<Literal>]
+let X4UnpackedDataFolder = __SOURCE_DIRECTORY__ + "/X4_unpacked_data/" + X4DataVersion
 
 // The default GOD.xml file, etc, don't have an 'add/replace' XML section, so they can't
 // be used as type providers for our output XML. So we've created a template that has
@@ -156,8 +162,12 @@ let X4GalaxyFileTimelines =
 let X4RegionDefinitionsFile =
     X4UnpackedDataFolder + "/libraries/region_definitions.xml"
 
-[<Literal>]
-let X4RegionYieldsFile = X4UnpackedDataFolder + "/libraries/regionyields.xml"
+// NOTE: 9.0 restructured libraries/regionyields.xml completely: it now defines the
+// vocabularies (boundaries, yield tiers, gather speeds) that compose per-sector
+// 'resource area' refs like sphere_large_ore_high_slow, referenced from mapdefaults.xml.
+// It is parsed with plain XDocument (see resource area code) rather than a type provider,
+// so future schema tweaks fail at runtime with a clear message instead of breaking
+// unrelated code at compile time.
 
 // Ships
 [<Literal>]
@@ -181,7 +191,6 @@ type X4Galaxy = XmlProvider<X4GalaxyFileCore>
 type X4GalaxyDiff = XmlProvider<X4GalaxyFileSplit> // the DLC galaxy files are in DIFF format, so we need a different type provider.
 
 type X4RegionDefinitions = XmlProvider<X4RegionDefinitionsFile>
-type X4RegionYields = XmlProvider<X4RegionYieldsFile>
 
 
 // Ships and loadouts
@@ -369,7 +378,175 @@ let AllIndexMacros = LoadIndexes "macros.xml"
 let AllComponentMacros = LoadIndexes "components.xml"
 
 let allRegionDefinitions = X4RegionDefinitions.Load(X4RegionDefinitionsFile)
-let regionYields = X4RegionYields.Load(X4RegionYieldsFile)
+
+// ===== 9.0 RESOURCE AREAS =====
+// As of X4 9.0, minable resources are no longer defined by <resources> nodes in
+// region definitions. Instead, each sector's <dataset> in libraries/mapdefaults.xml
+// lists <resourcearea> entries, whose 'ref' composes vocabulary defined in
+// libraries/regionyields.xml as sphere_{size}_{ware}_{yield}_{gatherspeed},
+// e.g. 'sphere_large_ore_high_average'.
+// Regions placed in the cluster maps still provide the physical asteroid/gas fields;
+// resource areas roam within them and fill them with minable yield. BOTH halves are
+// required, and their wares must match, or you get empty rocks / invisible yields.
+
+// The vocabularies from regionyields.xml, used to validate the parts we compose
+// resource area refs from. Parsed with plain XDocument rather than a type provider,
+// so any future schema drift fails here with a clear runtime error instead of
+// breaking unrelated code at compile time.
+let resourceAreaVocabulary =
+    let doc =
+        XDocument.Load(X4UnpackedDataFolder + "/libraries/regionyields.xml")
+
+    let ids (parent: string) (child: string) =
+        doc.Root.Element(XName.Get parent).Elements(XName.Get child)
+        |> Seq.map (fun e -> e.Attribute(XName.Get "id").Value)
+        |> Set.ofSeq
+
+    let wares =
+        doc.Root.Element(XName.Get "yields").Elements(XName.Get "yield")
+        |> Seq.collect (fun y -> y.Elements(XName.Get "ware"))
+        |> Seq.map (fun w -> w.Attribute(XName.Get "id").Value)
+        |> Set.ofSeq
+
+    {|
+        Boundaries = ids "boundaries" "boundary" // e.g. "sphere_large"
+        Yields = ids "yields" "yield" // verylow, low, medium, high, veryhigh
+        Wares = wares // ore, silicon, ice, nividium, hydrogen, helium, methane, rawscrap, rawkhaakscrap
+        GatherSpeeds = ids "gatherspeeds" "gatherspeed" // veryslow, slow, average, fast, veryfast
+    |}
+
+// Compose a resource area ref from its parts, validating each part against the
+// regionyields.xml vocabulary so a typo (or a game data change) fails generation
+// loudly instead of producing a silently dead resource area in game.
+let makeResourceAreaRef (size: string) (ware: string) (yieldTier: string) (speed: string) =
+    let v = resourceAreaVocabulary
+    let boundary = "sphere_" + size
+
+    if not (v.Boundaries.Contains boundary) then
+        failwithf "Resource area size '%s' is not a boundary in regionyields.xml: %A" size (Set.toList v.Boundaries)
+
+    if not (v.Wares.Contains ware) then
+        failwithf "Resource area ware '%s' is not in regionyields.xml: %A" ware (Set.toList v.Wares)
+
+    if not (v.Yields.Contains yieldTier) then
+        failwithf "Resource area yield '%s' is not in regionyields.xml: %A" yieldTier (Set.toList v.Yields)
+
+    if not (v.GatherSpeeds.Contains speed) then
+        failwithf "Resource area speed '%s' is not a gatherspeed in regionyields.xml: %A" speed (Set.toList v.GatherSpeeds)
+
+    $"{boundary}_{ware}_{yieldTier}_{speed}"
+
+// The vanilla mapdefaults file for the core game and for each DLC we generate
+// resources for. Diff patches for a DLC's sectors must go in that DLC's own
+// extensions/<dlc>/libraries/mapdefaults.xml so they only load when the DLC exists.
+let mapDefaultsDocs =
+    Map [
+        "core", X4UnpackedDataFolder + "/libraries/mapdefaults.xml"
+        "split", X4UnpackedDataFolder + "/extensions/ego_dlc_split/libraries/mapdefaults.xml"
+        "terran", X4UnpackedDataFolder + "/extensions/ego_dlc_terran/libraries/mapdefaults.xml"
+        "pirate", X4UnpackedDataFolder + "/extensions/ego_dlc_pirate/libraries/mapdefaults.xml"
+        "boron", X4UnpackedDataFolder + "/extensions/ego_dlc_boron/libraries/mapdefaults.xml"
+    ]
+    |> Map.map (fun _ file -> XDocument.Load file)
+
+// Our code works with lowercased sector macro names throughout, but XML diff
+// selectors are CASE SENSITIVE, and mapdefaults/sectors.xml use names like
+// 'Cluster_14_Sector001_macro'. Recover the canonical casing from sectors.xml
+// before interpolating a name into a selector.
+let properCaseSectorName (sector: string) =
+    allSectors
+    |> List.tryFind (fun s -> s.Name =? sector)
+    |> Option.map (fun s -> s.Name)
+    |> Option.defaultWith (fun () -> failwithf "Unknown sector macro: %s" sector)
+
+// How a sector is represented in the vanilla mapdefaults file, which determines the
+// diff operation needed to add resource areas to it. Each case carries the
+// canonically cased macro name to use in the selector.
+type MapDefaultsDatasetState =
+    | HasResourceAreas of string // dataset exists and already has a <resourceareas> node
+    // dataset exists with <properties> but no <resourceareas>. The <properties> children
+    // are schema ordered (xs:sequence in libraries.xsd: boundaries, identification,
+    // resources, resourceareas, sounds, area, ...), so a plain append would put our node
+    // after sounds/area/access and fail validation. The second value is the existing
+    // child to insert after (pos="after"), or None to prepend as the first child.
+    | HasProperties of string * string option
+    | NoDataset of string // the sector has no dataset in the file at all
+
+let getMapDefaultsDatasetState (dlc: string) (sector: string) =
+    let dataset =
+        mapDefaultsDocs.[dlc].Root.Elements(XName.Get "dataset")
+        |> Seq.tryFind (fun d -> d.Attribute(XName.Get "macro").Value =? sector)
+
+    match dataset with
+    | None -> NoDataset(properCaseSectorName sector)
+    | Some dataset ->
+        let macro = dataset.Attribute(XName.Get "macro").Value // use the file's own casing
+
+        match dataset.Element(XName.Get "properties") with
+        | null -> failwithf "mapdefaults dataset '%s' has no <properties> node: unhandled shape" macro
+        | properties when properties.Element(XName.Get "resourceareas") <> null -> HasResourceAreas macro
+        | properties ->
+            // Anchor on the last existing child that the schema allows before <resourceareas>.
+            let preceders = set [ "boundaries"; "identification"; "resources" ]
+
+            let anchor =
+                properties.Elements()
+                |> Seq.filter (fun e -> preceders.Contains e.Name.LocalName)
+                |> Seq.tryLast
+                |> Option.map (fun e -> e.Name.LocalName)
+
+            HasProperties(macro, anchor)
+
+// ===== 9.0 PREFAB FACTORY STATIONS =====
+// X4 9.0 added static 'prefab' factory stations inside <god><products> (101 entries,
+// 174 station instances; commonwealth factions in the core file, split/terran/boron in
+// their DLC god diffs). They are galaxy scoped with relation="self", i.e. they spawn in
+// sectors owned by their own faction, and they are ADDITIVE to the dynamic <product>
+// quotas. The mod keeps them, but offsets each faction's dynamic product quota by the
+// number of prefab factories of that ware (see X4.God.processProduct).
+// Count station instances per (owner, ware), summing each entry's galaxy quota.
+// Parsed with plain XDocument: the DLC god files are diffs, and the prefab stations sit
+// inside their '<add sel="/god/products">' operations.
+let prefabFactoryCounts: Map<string * string, int> =
+    let prefabStationsIn (file: string) (isDiff: bool) =
+        let doc = XDocument.Load file
+
+        let stations =
+            if isDiff then
+                doc.Root.Elements(XName.Get "add")
+                |> Seq.filter (fun add ->
+                    match add.Attribute(XName.Get "sel") with
+                    | null -> false
+                    | sel -> sel.Value = "/god/products")
+                |> Seq.collect (fun add -> add.Elements(XName.Get "station"))
+            else
+                doc.Root.Element(XName.Get "products").Elements(XName.Get "station")
+
+        stations
+        |> Seq.filter (fun s -> s.Attribute(XName.Get "id").Value.Contains "_prefab_")
+        |> Seq.toList
+
+    [
+        yield! prefabStationsIn X4GodFileCore false
+        yield! prefabStationsIn X4GodFileSplit true
+        yield! prefabStationsIn X4GodFileTerran true
+        yield! prefabStationsIn X4GodFilePirate true
+        yield! prefabStationsIn X4GodFileBoron true
+        yield! prefabStationsIn X4GodFileTimelines true
+    ]
+    |> List.map (fun station ->
+        let owner = station.Attribute(XName.Get "owner").Value
+        let ware = station.Attribute(XName.Get "ware").Value
+        // galaxy quota = how many instances of this station are placed at game start
+        let instances =
+            match station.Element(XName.Get "quotas").Element(XName.Get "quota").Attribute(XName.Get "galaxy") with
+            | null -> 1
+            | galaxy -> int galaxy.Value
+
+        (owner, ware), instances)
+    |> List.groupBy fst
+    |> List.map (fun (key, entries) -> key, entries |> List.sumBy snd)
+    |> Map.ofList
 
 // Read all thge stations and products from the core game and the DLCs.
 let allStations, allProducts =
@@ -416,10 +593,14 @@ let allStations, allProducts =
             getStationsFromDiff X4GodTimelines.Adds
         ]
 
-    // Do the same for products
+    // Do the same for products.
+    // 9.0: the <products> block also contains <station> prefab entries (70 faction factories,
+    // new in 9.0), so the provider no longer collapses it to an array — the <product> children
+    // are one level down. The prefab stations are NOT yet processed (see TODO.md): removing or
+    // moving them needs selectors under //god/products/station, unlike regular stations.
     let allProducts =
         List.concat [
-            Array.toList X4GodCore.Products
+            Array.toList X4GodCore.Products.Products
             getProductFromDiff X4GodSplit.Adds
             getProductFromDiff X4GodTerran.Adds
             getProductFromDiff X4GodPirate.Adds
@@ -789,16 +970,3 @@ let dumpRegionDefinitions () =
     for region in allRegionDefinitions.Regions do
         printfn "macro: %s," (region.Name.ToLower())
 
-let dumpRegionYields () =
-    printfn "Discovered Region Yields:"
-
-    for ware in regionYields.Resources do
-        printfn "\nResource: %s:" (ware.Ware.ToLower())
-
-        for ryield in ware.Yields do
-            printfn
-                "   %12s: yield: %6M over %6i minutes = %7.2f/h/km^2"
-                ryield.Name
-                ryield.Resourcedensity
-                ryield.Replenishtime
-                ((float (ryield.Resourcedensity) / float (ryield.Replenishtime)) * 60.0)
