@@ -124,3 +124,134 @@ let getMapDefaultsDatasetState (dlc: string) (sector: string) =
 
 
 
+
+
+// ==== WRITERS ====
+// All the mod's mining-resource XML is produced here from the pure directive records
+// in X4.Types. The interpolated string templates are inherited verbatim from the
+// original logic code, and are parsed with XmlTextReader (rather than XElement.Parse)
+// to preserve their whitespace exactly in the output files.
+
+// One cluster map <add> operation placing a visual mining field region.
+let private regionPlacementXml (placement: RegionPlacement) =
+    let x, y, z = placement.Position
+    let cluster = placement.Cluster
+    let regionName = placement.Name
+    let region = placement.RegionRef
+
+    let xml =
+        $"""
+    <add sel="/macros/macro[@name='%s{cluster}']/connections">
+      <connection name="%s{regionName}_connection" ref="regions">
+        <offset>
+          <position x="{x}" y="{y}" z="{z}" />
+        </offset>
+        <macro name="%s{regionName}_macro">
+          <component connection="cluster" ref="standardregion" />
+          <properties>
+            <region ref="{region}" />
+          </properties>
+        </macro>
+      </connection>
+    </add>
+    """
+
+    let xtr = new System.Xml.XmlTextReader(new System.IO.StringReader(xml))
+    XElement.Load(xtr)
+
+// Write a DLC's cluster map diff placing the visual mining field regions.
+let writeClusterRegions (dlc: string) (filename: string) (placements: RegionPlacement list) =
+    // Create the new XML Diff document to contain our region additions
+    let diff =
+        XElement.Parse(
+            "<?xml version=\"1.0\" encoding=\"utf-8\"?>
+        <diff>
+        </diff>
+        "
+        )
+
+    // Now add the region changes, one by one, to the the xml diff.
+    for placement in placements do
+        diff.Add(regionPlacementXml placement)
+        diff.Add(new XText("\n")) // Add a newline after each element so the output is readible
+
+    X4.WriteModfiles.write_xml_file dlc filename diff
+
+// One mapdefaults <add> operation granting a sector its resource areas. The shape of
+// the operation depends on how the sector appears in the vanilla mapdefaults file:
+// an existing <resourceareas> node gets children appended; a dataset without one gets
+// the whole node; a sector with no dataset at all (rare, e.g. Cluster_714) gets a
+// complete new dataset added to the document root.
+let private sectorResourceAreasXml (grant: SectorResourceGrant) =
+    let areaLines =
+        grant.Areas
+        |> List.map (fun (ref, amount) -> $"""        <resourcearea amount="{amount}" ref="{ref}" />""")
+        |> String.concat "\n"
+
+    let xml =
+        match grant.State with
+        | HasResourceAreas macro ->
+            $"""
+    <add sel="/defaults/dataset[@macro='{macro}']/properties/resourceareas">
+{areaLines}
+    </add>
+    """
+        | HasProperties(macro, Some anchor) ->
+            // insert after the anchor child to respect the schema's element order
+            $"""
+    <add sel="/defaults/dataset[@macro='{macro}']/properties/{anchor}" pos="after">
+      <resourceareas>
+{areaLines}
+      </resourceareas>
+    </add>
+    """
+        | HasProperties(macro, None) ->
+            $"""
+    <add sel="/defaults/dataset[@macro='{macro}']/properties" pos="prepend">
+      <resourceareas>
+{areaLines}
+      </resourceareas>
+    </add>
+    """
+        | NoDataset macro ->
+            $"""
+    <add sel="/defaults">
+      <dataset macro="{macro}">
+        <properties>
+          <resourceareas>
+{areaLines}
+          </resourceareas>
+        </properties>
+      </dataset>
+    </add>
+    """
+
+    // Using the textreader instead of XElement.Parse preserves whitespace and carriage returns in our output.
+    let xtr = new System.Xml.XmlTextReader(new System.IO.StringReader(xml))
+    XElement.Load(xtr)
+
+// Write a DLC's mapdefaults diff granting sectors their resource areas.
+// The core game file already has a hand written template diff with a couple of
+// access licence fixes (mod_xml/libraries/mapdefaults.xml). Program.fs copies the
+// templates into the mod directory before we run, and our write below replaces
+// that copy - so load the template as the seed document and append to it. The
+// DLC files have no template and start from an empty diff.
+let writeMapDefaults (dlc: string) (grants: SectorResourceGrant list) =
+    let diff =
+        match dlc with
+        | "core" ->
+            let xtr = new System.Xml.XmlTextReader(__SOURCE_DIRECTORY__ + "/mod_xml/libraries/mapdefaults.xml")
+            XElement.Load(xtr)
+        | _ ->
+            XElement.Parse(
+                "<?xml version=\"1.0\" encoding=\"utf-8\"?>
+        <diff>
+        </diff>
+        "
+            )
+
+    for grant in grants do
+        diff.Add(sectorResourceAreasXml grant)
+        diff.Add(new XText("\n"))
+
+    X4.WriteModfiles.write_xml_file dlc "libraries/mapdefaults.xml" diff

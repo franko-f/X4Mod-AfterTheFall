@@ -175,6 +175,25 @@ type MapDefaultsDatasetState =
     | HasProperties of string * string option
     | NoDataset of string // the sector has no dataset in the file at all
 
+// ==== WRITE-SIDE DIRECTIVES ====
+// Logic modules produce these; the data layer's writers translate them to XML.
+
+/// Place a visual mining field region in a cluster map. The writer derives the
+/// {Name}_connection / {Name}_macro element names from Name.
+type RegionPlacement = {
+    Name: string
+    Cluster: string
+    RegionRef: string
+    Position: int * int * int
+}
+
+/// Grant one sector its X4 9.0 resource areas (the minable yields). State selects
+/// which diff operation the writer emits; Areas are (composed sphere_* ref, amount).
+type SectorResourceGrant = {
+    State: MapDefaultsDatasetState
+    Areas: (string * int) list
+}
+
 /// A faction's vanilla defence construction plan: the plan id that bastions are
 /// stacked from, and the DLC (extension id, display name) providing it, if any.
 type DefencePlanSource = {
