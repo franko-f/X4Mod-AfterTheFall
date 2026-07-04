@@ -94,7 +94,7 @@ let find_add_selector sel xml =
 let stationSectorName (station: X4WorldStart.Station) =
     match station.Location.Class with
     | Some "zone" ->
-        X4.Data.findSectorFromZone (station.Location.Macro |> Option.defaultValue "")
+        findSectorFromZone (station.Location.Macro |> Option.defaultValue "")
         |> Option.defaultValue "none"
     | Some "sector" -> station.Location.Macro |> Option.defaultValue "none"
     | _ -> "none"
@@ -251,7 +251,7 @@ let processStation
             let locationMacro = Option.defaultValue "none" station.Location.Macro
 
             let cluster =
-                X4.Data.findClusterFromLocation locationClass locationMacro
+                findClusterFromLocation locationClass locationMacro
                 |> Option.defaultValue "none" // Find out which cluster this location is in.
 
             let replacement =
@@ -277,8 +277,8 @@ let processStation
                 // We'll still put a xenon station where they used to be
                 // Select a random safe sector for the station to move to.
                 // Use the shared seeded generator so the output is reproducible run to run.
-                let sectors = X4.Data.getFactionSectors station.Owner
-                let randomSector = sectors.[X4.Data.rand.Next(sectors.Length)]
+                let sectors = getFactionSectors station.Owner
+                let randomSector = sectors.[rand.Next(sectors.Length)]
 
                 printfn
                     "  MOVING [%s]:%s :: %A  from  %A:%A to sector:%A"
@@ -375,7 +375,7 @@ let processProduct (product: X4WorldStart.Product) =
         // quotas, so subtract the prefab factory count for this ware from the reduced
         // quota - keeping the faction's factory total at the intended weakened level.
         let prefabs =
-            X4.Data.prefabFactoryCounts
+            prefabFactoryCounts
             |> Map.tryFind (product.Owner, product.Ware)
             |> Option.defaultValue 0
 

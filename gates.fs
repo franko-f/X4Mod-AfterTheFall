@@ -4,43 +4,26 @@ open System
 open MathNet.Numerics.LinearAlgebra.Double
 
 open X4.Data
+open X4.Types
 
 // Data on gates is scattered in a two primary places.
 // 1. The ZONES file that creates a zone, then places a gate within it.
 // 2. The GALAXY file that holds the information on the connections between two gates.
 
 
-[<StructuredFormatDisplay("({X}, {Y}, {Z})")>]
-type Position = {
-    X: float
-    Y: float
-    Z: float
-} with
+// Adapters from the zone-file provider types to the pure geometry records in X4.Types.
+let positionFromOffset (position: X4Zone.Position) : Position = {
+    X = float (position.X)
+    Y = float (position.Y)
+    Z = float (position.Z)
+}
 
-    static member Default = { X = 0; Y = 0; Z = 0 }
-
-    static member FromOffset(position: X4Zone.Position) = {
-        X = float (position.X)
-        Y = float (position.Y)
-        Z = float (position.Z)
-    }
-
-[<StructuredFormatDisplay("({X}, {Y}, {Z}, {W})")>]
-type Quaternion = {
-    X: float
-    Y: float
-    Z: float
-    W: float
-} with
-
-    static member Default = { X = 0; Y = 0; Z = 0; W = 1 }
-
-    static member FromQuaternion(quaternion: X4Zone.Quaternion) = {
-        X = quaternion.Qx
-        Y = quaternion.Qy
-        Z = float (quaternion.Qz)
-        W = quaternion.Qw
-    } // Qz as been determined to be a decimal by the type provider for some reason.
+let quaternionFromOffset (quaternion: X4Zone.Quaternion) : Quaternion = {
+    X = quaternion.Qx
+    Y = quaternion.Qy
+    Z = float (quaternion.Qz) // Qz has been determined to be a decimal by the type provider for some reason.
+    W = quaternion.Qw
+}
 
 
 // Given a zone connection, does it represent a gate?
@@ -91,12 +74,12 @@ type Gate = {
         let connectionMacro = connection.Macro.Value // the caller of FromZone must make sure this is always present: ie, this is a valid gate zone
         let sector = findSectorFromZone zone.Name |> Option.defaultValue "Unknown"
         let faction = findFactionFromZone zone.Name |> Option.defaultValue "Unknown"
-        let position = Position.FromOffset connection.Offset.Value.Position
+        let position = positionFromOffset connection.Offset.Value.Position
 
         let quaternion = // Quarternians are almost, but not always, set
             match connection.Offset.Value.Quaternion with
             | None -> Quaternion.Default
-            | Some q -> Quaternion.FromQuaternion q
+            | Some q -> quaternionFromOffset q
 
         let connectionName = connection.Name.Value // safe, as connection name always exists for gate connections.
         let connection = findConnectionByDestination connectionName allGalaxy
@@ -138,7 +121,7 @@ type Gate = {
 
 // Generate a list of all the gates in the game across base and DLC
 let allGates =
-    X4.Data.allZones
+    allZones
     |> List.collect (fun zone ->
         zone.Connections
         |> Option.map (fun x -> Array.toList x.Connections) // IF there is a connections array in the zone Option<connections>, convert to a list

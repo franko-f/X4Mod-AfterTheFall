@@ -4,6 +4,7 @@
     <TargetFramework>net7.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup><Compile Include="tuning.fs" />
+    <Compile Include="types.fs" />
     <Compile Include="territories.fs" />
     <Content Include="mod_templates/content.xml" />
     <Content Include="mod_templates\factionlogic_stations.xml" />
@@ -11,6 +12,7 @@
     <Compile Include="utilities.fs" />
     <Content Include="mod_templates\god.xml" />
     <Compile Include="writeModfiles.fs" />
+    <Compile Include="dataXml.fs" />
     <Compile Include="data.fs" />
     <Compile Include="ships.fs" />
     <Compile Include="resources.fs" />

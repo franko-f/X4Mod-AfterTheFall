@@ -97,7 +97,7 @@ let cycle (data: string list) =
 // mapdefaults resource area diffs, so the visible fields and the minable resource
 // areas always land in the same sectors.
 let computeResourceAssignments (dlc: string) = [
-    for territory in (X4.Data.dlcTerritories dlc) do
+    for territory in (dlcTerritories dlc) do
         // extract each cluster and list of resource definition from territories, then look up the sectors in the cluster
         // 'sectors' is an infinite sequence that will start again at the first sector in the cluster when it reaches the end
         let sectors =
@@ -166,19 +166,19 @@ let processSectorResourceAreas (dlc: string) (sector: string) (resources: string
     let areaLines =
         mergeResourceAreas resources
         |> List.map (fun area ->
-            let ref = X4.Data.makeResourceAreaRef area.size area.ware area.yieldTier area.speed
+            let ref = makeResourceAreaRef area.size area.ware area.yieldTier area.speed
             $"""        <resourcearea amount="{area.amount}" ref="{ref}" />""")
         |> String.concat "\n"
 
     let xml =
-        match X4.Data.getMapDefaultsDatasetState dlc sector with
-        | X4.Data.HasResourceAreas macro ->
+        match getMapDefaultsDatasetState dlc sector with
+        | HasResourceAreas macro ->
             $"""
     <add sel="/defaults/dataset[@macro='{macro}']/properties/resourceareas">
 {areaLines}
     </add>
     """
-        | X4.Data.HasProperties(macro, Some anchor) ->
+        | HasProperties(macro, Some anchor) ->
             // insert after the anchor child to respect the schema's element order
             $"""
     <add sel="/defaults/dataset[@macro='{macro}']/properties/{anchor}" pos="after">
@@ -187,7 +187,7 @@ let processSectorResourceAreas (dlc: string) (sector: string) (resources: string
       </resourceareas>
     </add>
     """
-        | X4.Data.HasProperties(macro, None) ->
+        | HasProperties(macro, None) ->
             $"""
     <add sel="/defaults/dataset[@macro='{macro}']/properties" pos="prepend">
       <resourceareas>
@@ -195,7 +195,7 @@ let processSectorResourceAreas (dlc: string) (sector: string) (resources: string
       </resourceareas>
     </add>
     """
-        | X4.Data.NoDataset macro ->
+        | NoDataset macro ->
             $"""
     <add sel="/defaults">
       <dataset macro="{macro}">
