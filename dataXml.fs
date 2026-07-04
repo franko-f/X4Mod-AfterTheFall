@@ -234,18 +234,6 @@ type Asset = {
     Asset: X4Equipment.Component // In the future, this might be a more generic type if we become interested in more assets than just equipment.
 }
 
-type EquipmentInfo = {
-    Name: String
-    MacroName: String // Same as name with _macro suffix
-    Class: String
-    Size: String
-    //    DLC: String
-    Tags: String Set
-    ComponentName: String
-    ComponentConnection: X4Equipment.Connection
-    Connections: X4Equipment.Connection array
-}
-
 // ====== LOAD DATA FROM XML FILES ======
 
 // Generate a path to a sub directory for either base game of specific DLC

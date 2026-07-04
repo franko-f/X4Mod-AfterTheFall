@@ -43,6 +43,39 @@ type Quaternion = {
 
     static member Default = { X = 0.0; Y = 0.0; Z = 0.0; W = 1.0 }
 
+/// One equipment hardpoint on a ship hull, parsed from the ship's component
+/// connections at load time.
+type ShipEquipmentSlot = {
+    Name: string
+    Class: string // "weapon" | "turret" | "shield" | "engine" | "thruster"
+    Size: string // small / medium / large / extralarge
+    Group: string option
+    Tags: Set<string>
+}
+
+/// A ship hull with its parsed equipment slots.
+type ShipInfo = {
+    Name: string
+    MacroName: string
+    Size: string // ship_s / ship_m / ship_l / ship_xl
+    DLC: string
+    Type: string
+    Thruster: string // the thruster tag class the hull requires
+    ComponentRef: string
+    ComponentFile: string
+    EquipmentSlots: ShipEquipmentSlot list
+}
+
+/// A piece of ship equipment (engine, shield, weapon, turret...).
+type EquipmentInfo = {
+    Name: string
+    MacroName: string
+    Class: string
+    Size: string
+    Tags: Set<string>
+    ComponentName: string
+}
+
 /// The galaxy-map connection joining a gate to its remote counterpart.
 type GateConnection = {
     Name: string

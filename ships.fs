@@ -11,6 +11,7 @@ open System.Xml
 open System.Xml.Linq
 
 open X4.Data
+open X4.Types
 open X4.Utilities
 
 // All the abandoned-ship balance values (counts, battlefields, scatter ranges) live in tuning.fs.
@@ -23,27 +24,6 @@ type Position = int * int * int
 type Rotation = int * int * int
 type ShipLocation = string * string * Position * Rotation // Ship name, sector name, position, rotation. Should probably use a record type here.
 
-type ShipEquipmentSlot = {
-    Name: String
-    Class: String
-    Size: String
-    Group: Option<String>
-    Tags: String Set
-}
-
-type ShipInfo = {
-    Name: String
-    MacroName: String
-    Size: String
-    DLC: String
-    Type: String
-    Thruster: String
-    ComponentRef: String
-    ComponentFile: String
-    Macro: X4ShipsMacro.Macro
-    Connections: X4Ships.Connection array
-    EquipmentSlots: ShipEquipmentSlot list
-}
 
 // Extracts the groups from a list of ship equipment slots.
 let shipEquipmentGroups (allSlots: ShipEquipmentSlot list) =
@@ -54,187 +34,6 @@ let shipEquipmentGroups (allSlots: ShipEquipmentSlot list) =
     |> List.filter (fun ((_, className), _) -> className <> "engine") // While engines are listed with a group for L ships, they should always be specified in the macros section.
     |> List.sortBy fst
 
-// Some tags are not relevant for selection/slot match
-let tagsToIgnore =
-    set [
-        "component"
-        "symmetry"
-        "symmetry_1"
-        "symmetry_2"
-        "symmetry_3"
-        "symmetry_right"
-        "symmetry_left"
-        "platformcollision"
-        "mandatory"
-        "notupgradeable"
-        "envmap_cockpit"
-    // the following are important after all
-    // Seem to be used to identify things line internal shield generators vs external.
-    // eg: medium shields can be external for components, or internal for M ships
-
-    //"hittable"
-    //"unhittable"
-    ]
-
-let componentSizeClasses = set [ "small"; "medium"; "large"; "extralarge" ] // I really wish there was some kind of consistency when it comes to referring to sizes.
-
-let shipEquipmentClasses = [
-    // Allow us to filter down all assets to the ship equipment we're interested in.
-    // Ship mounted equipment
-    "engine"
-    "shieldgenerator"
-    "weapon"
-    "missileturret"
-    "missilelauncher"
-    "turret"
-    // Ship deployables.
-    "missile"
-    "resource_probe"
-    "satellite"
-]
-
-let shipEquipmentConnectionTags =
-    set [ "weapon"; "turret"; "shield"; "engine"; "thruster" ]
-
-
-// Checks to see if the ship connection is an equipment slot connection,
-// and if so, parses it to return the relevant information about the equipment slot.
-let parseConnectionForEquipmentSlot (connection: X4Ships.Connection) =
-    // We determine whether the connection is an equipment slot by checking the tags.
-    // If the tags contains one of the special equipment slot tags defined in
-    // ShipEquipmentConnectionTag, then it's an equipment slot.
-
-    // split the tag string in to a set of tags, and trim excess whitespace
-    let tags = Set.difference (tagStringToSet connection.Tags) tagsToIgnore
-
-    // find the first tag that matches one of the equipment slot tags. ie, the element, if any,
-    // that appears both in the tags set and in the ShipEquipmentConnectionTag set.
-    let equipmentTag = Set.intersect tags shipEquipmentConnectionTags |> Seq.tryHead
-
-    match equipmentTag with
-    | None -> None // Not an equipment slot, so return None
-    | Some tag ->
-        Some {
-            Name = connection.Name.Trim()
-            Class = tag
-            Size =
-                Set.intersect tags componentSizeClasses
-                |> Seq.tryHead
-                |> Option.defaultValue "unknown"
-            Group =
-                connection.Group
-                |> Option.map (fun group -> group.Trim())
-                |> Option.filter (fun group -> group.Length > 0)
-            Tags = tags
-        }
-
-
-// Given a ship identified by 'index', and it's data in 'macro', this function will look up which
-// file contains it's component information, then load and process the data contained therein.
-// Returns a 'ShipInfo' record containing the detailed information on tghe ship, along with what
-// constitutes a valid loadout.
-let LoadShipComponents (entry: Index) (macro: X4ShipsMacro.Macros) =
-    let componentEntry =
-        Array.Find(AllComponentMacros, (fun componentEntry -> componentEntry.Name =? macro.Macro.Component.Ref))
-
-    let componentFilename =
-        X4UnpackedDataFolder + "/" + componentEntry.File.Replace("\\", "/")
-
-    // Lets load the compoenent file and parse it.
-    try
-        let parsed = X4Ships.Load(componentFilename)
-        let name = parsed.Component.Name
-        let size = parsed.Component.Class
-        let connections = parsed.Component.Connections
-
-        // Not all macro files include the 'type' property, so we need to check if it exists.
-        let shiptype =
-            try
-                macro.Macro.Properties.Ship.Type
-            with _ex ->
-                "unknown"
-
-        let thruster =
-            try
-                macro.Macro.Properties.Thruster.Tags
-            with _ex ->
-                "unknown"
-
-        // printfn "Loaded ship: %-35s %-35s from %s" name macro.Macro.Component.Ref componentFilename
-
-        Some {
-            Name = name
-            Size = size
-            Type = shiptype
-            Thruster = thruster
-            DLC = entry.DLC
-            MacroName = entry.Name
-            Macro = macro.Macro
-            ComponentRef = macro.Macro.Component.Ref
-            ComponentFile = componentFilename
-            Connections = connections
-            EquipmentSlots = connections |> Array.choose parseConnectionForEquipmentSlot |> Array.toList
-        }
-    with ex ->
-        printfn $"Error loading ship:  {componentFilename}: {ex.Message}"
-        None
-
-// Pull all the information about all the ships in the game by filtering down to the ship macros in the index macros,
-// then loading those files; finding the name of relevant ship component reference, then using that reference to find
-// the component file from the component index to get the file that contains the actual ship definition we're interested in.
-// This will replace the 'allShipMacros' function.
-let allShips =
-    // 1. Get all the ship macros from the index macros, and filter them to only those that start with "ship_"
-    AllIndexMacros
-    |> Array.filter (fun entry -> entry.Name.StartsWith "ship_")
-    |> Array.filter (fun entry -> not (entry.Name.Contains "_xs_")) // we don't wan't xs ships - plus they have no thruster entry, breaking our template file parser.
-    // 2. For each ship macro, find the file it points to, and load it.
-    // Ships are actually defined in two files. the macro file, and the 'component' file.
-    // The macro file contains the ship definition, and the component file contains the ship component definition
-    |> Array.choose (fun entry ->
-        try
-            // Get the file name from the entry, and load it.
-            let fileName = X4UnpackedDataFolder + "/" + entry.File
-
-            if File.Exists fileName then
-                Some(entry, X4ShipsMacro.Load fileName)
-            else
-                printfn "Warning: Ship macro file %s not found." fileName
-                None
-        with ex ->
-            printfn $"Error loading ship macro: {entry.Name}: {ex.Message}"
-            None)
-    // 3. From the loaded macro file, pull out the reference to the ship asset/component file,
-    // and look up the ship asset file in the component index.
-    |> Array.choose (fun (entry, macro) -> LoadShipComponents entry macro)
-    |> Array.toList
-    |> List.map (fun ship ->
-        // Boron ships are only allowed to equip boron components in their equipment slots.
-        // So, for any ship with the boron DLC, add a unique 'boron' tag to it's equipment slot tags.
-        // we do the same for the boron ship slots when loading those.
-        match ship.DLC with
-        | "ego_dlc_boron" ->
-            let slots =
-                ship.EquipmentSlots
-                |> List.map (fun slot -> {
-                    slot with
-                        Tags = slot.Tags |> Set.add "boron"
-                })
-
-            { ship with EquipmentSlots = slots }
-
-        // Same for terran in order to try resolve issues with ATF L/XL loadouts not being able to be repaired/modified.
-        | "ego_dlc_terran" ->
-            let slots =
-                ship.EquipmentSlots
-                |> List.map (fun slot -> {
-                    slot with
-                        Tags = slot.Tags |> Set.add "terran"
-                })
-
-            { ship with EquipmentSlots = slots }
-
-        | _ -> ship)
 
 
 let findShipByName (shipName: string) =
@@ -245,64 +44,6 @@ let findShipByMacroName (macroName: string) =
     // Find a ship by its macro name, case insensitive.
     allShips |> List.tryFind (fun ship -> ship.MacroName =? macroName)
 
-// Get all the assets, and filter them down to only the classes that are ship
-// equipment we need to generation ship loadouts.
-// Convert the xmln asset to a simplified ShipEquipment type, which gives us easy access
-//  to the name, macro, class, tags, size and component connection.
-let allShipEquipment =
-    // There are some assets that are not valid for loadouts, even if their tags match.
-    let assetsToIgnore = [
-        "weapon_gen_lasertower_01_mk2"
-        "weapon_gen_lasertower_01_mk1"
-        "shield_arg_s_combattutorial_01_mk1"
-        "_virtual_"
-        "_story_" // some equipment showing up as 'story'. I assume it's special, so avoid using it.
-        "_xen_"
-        "_kha_"
-        "generic_"
-    ]
-
-    // Find out all the different unique classes of assests
-    allAssets
-    |> List.filter (fun asset -> shipEquipmentClasses |> List.contains asset.Class)
-    |> List.filter (fun asset -> not (assetsToIgnore |> List.exists (fun ignore -> asset.Name.Contains ignore)))
-    |> List.map (fun asset ->
-        option {
-            // Find the connection in the assets list of connections that has 'compononent' in its tags.
-            // let! will early return if the result is None here. ie, the asset has no component connections.
-            let! componentConnection =
-                asset.Asset.Connections
-                |> Array.tryFind (fun connection -> tagStringToList connection.Tags |> List.contains "component")
-
-            // Parse the tags string, stripping out  the tags we want to ignore.
-            let tags = Set.difference (tagStringToSet componentConnection.Tags) tagsToIgnore
-
-            let size =
-                // one of the tags is the size class, so we try find any of the valid size tags in the tag list.
-                tags
-                |> Set.intersect componentSizeClasses
-                |> Seq.tryHead
-                |> Option.defaultValue "none"
-
-            // If it's a boron or terran ship, add a tag to help with loadout generation.
-            let tags =
-                match asset.DLC with
-                | "ego_dlc_boron" -> tags.Add "boron"
-                | "ego_dlc_terran" -> tags.Add "terran"
-                | _ -> tags
-
-            return {
-                Name = asset.Name
-                MacroName = asset.Name // Asset name is the macro. Need to clean up name field later.
-                Class = asset.Class
-                Tags = tags
-                Size = size
-                ComponentName = componentConnection.Name
-                ComponentConnection = componentConnection
-                Connections = asset.Asset.Connections
-            }
-        })
-    |> List.choose id
 
 
 // Searches though all ship equipment for the items that 'match' the given tags.
