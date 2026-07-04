@@ -32,9 +32,9 @@ module Economy =
 // Multipliers applied to the vanilla job quotas in jobs.xml.
 module Jobs =
     // Xenon quota multipliers by ship class.
-    let XenonMilitaryXLMultiplier = 2.0 // battleships and carriers
-    let XenonMilitaryLMultiplier = 2.0 // destroyers: of which Xenon should have none in vanilla
-    let XenonMilitarySMMultiplier = 3.8 // S and M military ships
+    let XenonMilitaryXLMultiplier = 2.4 // battleships and carriers
+    let XenonMilitaryLMultiplier = 2.4 // destroyers: of which Xenon should have none in vanilla
+    let XenonMilitarySMMultiplier = 3.5 // S and M military ships
     let XenonCivilianMultiplier = 5.0 // s & m civilian ships - High number cranks up the Xenon economy. We want them printing ships.
 
     // Reduce the number of pirates, as they're much more dangerous to the weakened economies.
@@ -125,6 +125,19 @@ module GateDefence =
     let StationsPerGate = 6
     // Distance from the gate in metres. Give them almost overlapping fields of fire for long range plasma.
     let StationDistance = 15000
+
+    // Bastions used to be plain copies of each faction's standard defence station, but
+    // 9.0's more dangerous Xenon capital ships were pummelling them. Each bastion is now
+    // this many copies of the faction's defence station stacked into a single
+    // construction plan (2 = twice the modules: twice the turrets, shields and hull).
+    let BastionStrengthMultiplier = 2
+    // Vertical clearance in metres between the physical hulls of stacked copies. The
+    // lift applied to each copy is the plan's physical vertical span (module anchor
+    // positions extended by each module's body, measured from its hull hardpoint
+    // geometry) plus this value, so plans of any height get the same daylight between
+    // decks. The hardpoint-derived extents are a lower bound on the real meshes, so
+    // keep this generous.
+    let BastionCopyClearance = 1000.0
 
 
 // ===== ABANDONED SHIPS =====
