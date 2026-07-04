@@ -32,8 +32,8 @@ module Economy =
 // Multipliers applied to the vanilla job quotas in jobs.xml.
 module Jobs =
     // Xenon quota multipliers by ship class.
-    let XenonMilitaryXLMultiplier = 2.8 // battleships and carriers
-    let XenonMilitaryLMultiplier = 2.8 // destroyers: of which Xenon should have none in vanilla
+    let XenonMilitaryXLMultiplier = 2.0 // battleships and carriers
+    let XenonMilitaryLMultiplier = 2.0 // destroyers: of which Xenon should have none in vanilla
     let XenonMilitarySMMultiplier = 3.8 // S and M military ships
     let XenonCivilianMultiplier = 5.0 // s & m civilian ships - High number cranks up the Xenon economy. We want them printing ships.
 
