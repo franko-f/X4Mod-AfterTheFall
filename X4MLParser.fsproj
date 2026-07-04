@@ -17,6 +17,7 @@
     <Compile Include="data.fs" />
     <Compile Include="dataEconomy.fs" />
     <Compile Include="dataShips.fs" />
+    <Compile Include="dataJobs.fs" />
     <Compile Include="ships.fs" />
     <Compile Include="resources.fs" />
     <Compile Include="gates.fs" />

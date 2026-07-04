@@ -10,51 +10,15 @@
 module X4.Jobs
 
 open System.Xml.Linq
-open FSharp.Data
 open X4.Data
+open X4.Types
 open X4.Utilities
 
-
-let X4JobFileCore = X4UnpackedDataFolder + "/libraries/jobs.xml"
-
-let X4JobFileTerran =
-    X4UnpackedDataFolder + "/extensions/ego_dlc_terran/libraries/jobs.xml"
-
-let X4JobFilePirate =
-    X4UnpackedDataFolder + "/extensions/ego_dlc_pirate/libraries/jobs.xml"
-
-[<Literal>] // split will be the template for normal job files, as the core game file doesn't use some tags (eg, 'preferbuilding')
-let X4JobFileSplit =
-    X4UnpackedDataFolder + "/extensions/ego_dlc_split/libraries/jobs.xml"
-
-[<Literal>] // We're going to use the boron as a template for diff/Add Job format file. Not all DLC use this format (eg, split, above).
-let X4JobFileBoron =
-    X4UnpackedDataFolder + "/extensions/ego_dlc_boron/libraries/jobs.xml"
-
-// two job file formats to parse:
-// One normal game XML file, and the other is a DIFF file with jobs inside an 'add' selector tag.
-type X4Job = XmlProvider<X4JobFileSplit>
-type X4JobMod = XmlProvider<X4JobFileBoron> // Use this as a sample file so we can parse the DLC jobs files that use the DIFF format.
 
 // This string is the starting point for the output job we'll write.
 // The jobs file also already contains some predefined xenon jobs we're adding to TER territory.
 let X4JobModTemplate =
     System.IO.File.ReadAllText(__SOURCE_DIRECTORY__ + "/mod_templates/jobs.xml")
-
-// Since we're dealing with different job file formats between the base game and different mods, we need
-// to convert them all to one canonical format for processing. We cheat a little, knowing that the type
-// provider just puts a loose wrapping on top of the underlying XElement. IT's not strictly typesafe
-// but it's safe within the scope of the data we're reading, and saves us writing something more complicated.
-let getJobsFromDiff (diff: X4JobMod.Add[]) =
-    let jobsAdd = Array.filter (fun (add: X4JobMod.Add) -> add.Sel = "/jobs") diff
-
-    [|
-        for jobs in jobsAdd do
-            for job in jobs.Jobs do
-                yield new X4Job.Job(job.XElement)
-    |]
-
-
 
 // Quotas may or may not exist. This is an easy function to multiply a quota if it's Some quota,
 // or just return None if it's None. ie; a Option aware multiplier. Unlike normal integer math, This rounds UP.
@@ -92,34 +56,13 @@ let replaceQuotaXml (id: string) (galaxy: int) (maxGalaxy: Option<int>) (cluster
     xml
 
 
-// Some jobs are given a specific sector or zone or cluster to spawn in. We want to move
-// these to their new sectors if the old sector is no longer set as their primary territory.
-// This function takes a job, and updates the 'location' property to the new sector.
-let moveJobToSectorXml (id: string) (sector: string) (job: X4Job.Job) =
-    // Load the existing location element
-    let location = job.Location.XElement
-    // Store the old macro value
-    let oldMacro = location.Attribute("macro").Value
-
-    // Update the class and macro attributes
-    location.SetAttributeValue("class", "sector")
-    location.SetAttributeValue("macro", sector)
-
-    // Replace the old location element with the updated one
-    let xml =
-        new XElement("replace", new XAttribute("sel", $"//jobs/job[@id='{id}']/location"), location)
-
-    printfn "  MOVING JOB %s from %s to sector %s " id oldMacro sector
-    xml
-
-
 // Build XML that will replace or add a 'prefer build' tag.
 // We want to force many jobs for factions to be built at shipyards, rather than get spawned in automatically.
 // Means the factions will start weaker, but, given time, will build up their fleets.
 // I had considered the approach of splutting every job in two, one with preferbuild, the other without.
 // this would spawn half of the ships, weakening the faction nicely, but it's more complicated and adds
 // a lot of jobs. Instead, we're jjst going to target L and XL ships, and resupply ships.
-let setPreferBuildXml (job: X4Job.Job) =
+let setPreferBuildXml (job: Job) =
     let selector = new XAttribute("sel", $"//jobs/job[@id='{job.Id}']/environment")
 
     match job.Environment with
@@ -140,7 +83,7 @@ let setPreferBuildXml (job: X4Job.Job) =
     | Some environment ->
         // There's an existing environment, so we'll build and xml REPLACE based on the existing settings.
         printfn "  REPLACING JOB ENVIRONMENT BUILD SETTINGS %s " job.Id
-        let newEnvironment = new XElement(environment.XElement)
+        let newEnvironment = new XElement(XmlSource.value environment.Source)
         newEnvironment.SetAttributeValue("preferbuilding", true)
         newEnvironment.SetAttributeValue("buildatshipyard", true)
         let replacement = new XElement("replace", selector, newEnvironment)
@@ -150,13 +93,13 @@ let setPreferBuildXml (job: X4Job.Job) =
 // Each job has a faction that it belongs to. The fields in the XML seem a bit unreliable
 // USUALLY it seems to be dictated by the category.faction, but this doesn't always exist.
 // If not, best guess seems to be look at the ship specified in the job, and use it's faction.
-let getFaction (job: X4Job.Job) =
+let getFaction (job: Job) =
     // Category should give us the faction
     match job.Category with
     | Some category -> category.Faction
     | None ->
-        match job.Ship with
-        | Some ship -> ship.Select.Faction
+        match job.ShipSelectFaction with
+        | Some faction -> faction
         | None ->
             // According to the debug dump, this never actually happens, but we'll Leave
             // the code here in case it does in a future DLC
@@ -168,7 +111,7 @@ let isFaction (job, faction) = getFaction job = faction
 
 // kind of the opposite of getJobFaction - We discover in which factions sectors
 // this job is allowed. I assume it's associated with Galaxy class
-let getLocationFaction (job: X4Job.Job) =
+let getLocationFaction (job: Job) =
     match job.Location.Faction with
     | None ->
         // if location faction is not specified, then we assume it's the same as 'category'
@@ -192,7 +135,7 @@ let getLocationFaction (job: X4Job.Job) =
 //    xenon (ge) ally
 // I'm guessing this means xenon or neutral sectors.
 // This function extracts that data for writing an informational line
-let getLocationFactionRelation (job: X4Job.Job) =
+let getLocationFactionRelation (job: Job) =
     let faction = getLocationFaction job |> Option.defaultValue "NONE"
 
     match job.Location.Comparison, job.Location.Relation with
@@ -203,54 +146,53 @@ let getLocationFactionRelation (job: X4Job.Job) =
 // Checks if it's a police job, or lacks a faction, or something else
 // that makes it sa non standard faction job that were not interested in.
 // Returns None if we should ignore it, or Some FactionName
-let isMinorTask (job: X4Job.Job) =
+let isMinorTask (job: Job) =
     job.Task
-    |> Option.exists (fun task -> task.Task = "masstraffic.generic" || task.Task = "masstraffic.police")
+    |> Option.exists (fun task -> task = "masstraffic.generic" || task = "masstraffic.police")
 
 // Subordinate jobs are things like escorts or 'subordinate' ships.
 // They're wings of fighters on carriers, etc. We want to ignore these,
 // as it would be easy to overtune the xenon by accidentally exponentially
 // increasing the number of ships in a fleet.
-let isSubordinate (job: X4Job.Job) =
-    job.Modifiers
-    |> Option.exists (fun modifiers -> Option.isSome modifiers.Subordinate)
+let isSubordinate (job: Job) =
+    job.HasSubordinateModifier
 
 // Does this ship have subordinates? ie, is it a carrier? Destroyer group?
-let hasSubordinate (job: X4Job.Job) = Option.isSome job.Subordinates
+let hasSubordinate (job: Job) = Option.isSome job.SubordinateJobs
 
-let subordinateIds (job: X4Job.Job) =
-    match job.Subordinates with
+let subordinateIds (job: Job) =
+    match job.SubordinateJobs with
     | None -> [| "" |]
-    | Some subordinates -> subordinates.Subordinates |> Array.map (fun subordinate -> subordinate.Job)
+    | Some subordinates -> subordinates
 
 // Some jobs are flagged to start immediately when the game begins.
 // Other jobs only activate on a given trigger. We want to ignore those.
 // defaults to true when not set
-let isStartActive (job: X4Job.Job) =
+let isStartActive (job: Job) =
     job.Startactive |> Option.defaultValue true
 
-let getTagList (job: X4Job.Job) =
+let getTagList (job: Job) =
     match job.Category with
     | None -> []
     | Some category -> Utilities.parseStringList category.Tags
 
-let isMilitaryJob (job: X4Job.Job) =
+let isMilitaryJob (job: Job) =
     getTagList job
     |> List.exists (fun tag -> List.contains tag [ "military"; "plunderer" ])
 
 // 'preferbuilding' means that the ships won't be autospawned. In theory, they
 // will get queued to build at shipyards instead.
-let isPreferBuild (job: X4Job.Job) =
+let isPreferBuild (job: Job) =
     match job.Environment with
     | None -> false
     | Some environment -> environment.Preferbuilding |> Option.defaultValue false
 
-let buildAtShipyard (job: X4Job.Job) =
+let buildAtShipyard (job: Job) =
     match job.Environment with
     | None -> false
     | Some environment -> environment.Buildatshipyard
 
-let isJobInFactionTerritory (job: X4Job.Job) =
+let isJobInFactionTerritory (job: Job) =
     let faction = getFaction job // Will never return "NONE" as we ignore minor tasks.
 
     let location =
@@ -264,7 +206,7 @@ let isJobInFactionTerritory (job: X4Job.Job) =
 // Write some useful data about a job to the console. We use this purely to understand what jobs are
 // doing, so we can make meaningful choices on how to change the economy and balance.
 // This is not part of the mod generation, instead it helps us write the mod.
-let printJobInfo (job: X4Job.Job) =
+let printJobInfo (job: Job) =
     let tags = "[" + (getTagList job |> String.concat ", ") + "]"
 
     match isMinorTask job with
@@ -337,7 +279,7 @@ let printJobCategoryCount allJobs =
     let categoryTags =
         allJobs
         |> List.fold
-            (fun (tags: Map<string list, int>) (job: X4Job.Job) ->
+            (fun (tags: Map<string list, int>) (job: Job) ->
                 let jobtags = getTagList job
 
                 match Map.tryFind jobtags tags with
@@ -370,12 +312,12 @@ let printJobCategoryCount allJobs =
 // new sectors, but I've decided to leave them where they are. I want to encourage the AI
 // to be a bit agressive and try reclaim their territory once they build these fleets.
 // The station gate defense should be enough to keep the xenon at bay without these.
-let processJob (job: X4Job.Job) =
+let processJob (job: Job) =
     printJobInfo job
 
     // Given a quota and a multiplier, apply the multiplier to any quota element that is actually set for the job.
     // A quota that is None is still None. Some quota will become Some quota*multiplier, for each cluster/sector/etc quota
-    let quotaMultiply (quota: X4Job.Quota) multiplier =
+    let quotaMultiply (quota: JobQuota) multiplier =
         let galaxyQuota = maybeMultiply quota.Galaxy multiplier
         let maxGalaxyQuota = maybeMultiply quota.Maxgalaxy multiplier
         let clusterQuota = maybeMultiply quota.Cluster multiplier
@@ -383,7 +325,7 @@ let processJob (job: X4Job.Job) =
         galaxyQuota, maxGalaxyQuota, clusterQuota, sectorQuota
 
     // If the job has any non-None quotas, multiply it, then create the new quota replacement XML
-    let maybeGenerateQuotaReplacementXML (quota: X4Job.Quota) multiplier =
+    let maybeGenerateQuotaReplacementXML (quota: JobQuota) multiplier =
         // Calculate the new quotas.
         let galaxyQuota, maxGalaxyQuota, clusterQuota, sectorQuota =
             quotaMultiply quota multiplier
@@ -441,23 +383,6 @@ let processJob (job: X4Job.Job) =
 // Kick off the work of generating the job file for the mod, and write out the
 // XML diff to the given filename
 let generate_job_file (filename: string) =
-    // Load all the job data from the core game and expansions, and merge in to one list.
-    let X4JobsCore = X4Job.Load(X4JobFileCore)
-    let X4JobsSplit = X4Job.Load(X4JobFileSplit) // Split don't use a diff file.
-    let X4JobsPirate = X4Job.Load(X4JobFilePirate) // same for pirate.
-    let X4JobsBoron = X4JobMod.Load(X4JobFileBoron)
-    let X4JobsTerran = X4JobMod.Load(X4JobFileTerran)
-
-    let allJobs =
-        Array.toList
-        <| Array.concat [
-            X4JobsCore.Jobs
-            X4JobsSplit.Jobs
-            X4JobsPirate.Jobs
-            getJobsFromDiff X4JobsTerran.Adds
-            getJobsFromDiff X4JobsBoron.Adds
-        ]
-
     // lets find out some interesting things about jobs:
     printJobCategoryCount allJobs
 

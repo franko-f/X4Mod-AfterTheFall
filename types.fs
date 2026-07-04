@@ -43,6 +43,53 @@ type Quaternion = {
 
     static member Default = { X = 0.0; Y = 0.0; Z = 0.0; W = 1.0 }
 
+/// The quota of a jobs.xml job. Every scope is optional - a job carries only
+/// the scopes the vanilla file sets.
+type JobQuota = {
+    Galaxy: int option
+    Maxgalaxy: int option
+    Cluster: int option
+    Sector: int option
+    Wing: int option
+}
+
+type JobCategory = {
+    Faction: string
+    Tags: string // raw bracketed tag list, parsed on demand by Utilities.parseStringList
+    Size: string option // ship_xl etc.
+}
+
+type JobLocation = {
+    Class: string
+    Macro: string option
+    Faction: string option
+    Relation: string option
+    Comparison: string option
+}
+
+/// The <environment> element of a job. Source is the provider-parsed element:
+/// the preferbuild rewrite clones it to preserve any other attributes byte-for-byte.
+type JobEnvironment = {
+    Preferbuilding: bool option
+    Buildatshipyard: bool
+    Source: XmlSource
+}
+
+/// A jobs.xml job entry (vanilla, core or DLC), flattened to the facts the job
+/// processing logic reads.
+type Job = {
+    Id: string
+    Category: JobCategory option
+    Quota: JobQuota
+    Location: JobLocation
+    Environment: JobEnvironment option
+    ShipSelectFaction: string option // flattens job.Ship.Select.Faction
+    Task: string option // flattens job.Task.Task
+    HasSubordinateModifier: bool // the job itself is an escort/subordinate
+    SubordinateJobs: string[] option // the jobs of this job's escorts, if any
+    Startactive: bool option
+}
+
 /// One equipment hardpoint on a ship hull, parsed from the ship's component
 /// connections at load time.
 type ShipEquipmentSlot = {
