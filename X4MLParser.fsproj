@@ -14,10 +14,11 @@
     <Compile Include="writeModfiles.fs" />
     <Compile Include="dataXml.fs" />
     <Compile Include="dataUniverse.fs" />
-    <Compile Include="data.fs" />
+    <Compile Include="dataRegions.fs" />
     <Compile Include="dataEconomy.fs" />
     <Compile Include="dataShips.fs" />
     <Compile Include="dataJobs.fs" />
+    <Compile Include="dataPlans.fs" />
     <Compile Include="ships.fs" />
     <Compile Include="resources.fs" />
     <Compile Include="gates.fs" />

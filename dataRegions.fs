@@ -1,24 +1,17 @@
 /// <summary>
-/// This module contains data around factions, sectors and rules we'll use to
-/// generate our new universe.
+/// The mining-resource side of the data layer: the X4 9.0 regionyields.xml
+/// vocabulary used to compose resource area refs, and the vanilla mapdefaults
+/// datasets that determine what diff operation each sector needs.
+/// (Phase G of the refactor will also move the WRITING of the mod's mapdefaults
+/// and cluster region diffs here.)
 /// </summary>
-
 [<AutoOpen>]
-module X4.Data.Core
+module X4.Data.Regions
 
-open Microsoft.FSharp.Core
-open FSharp.Data
-open X4.Utilities
-open System
-open System.IO
-open System.Xml
 open System.Xml.Linq
-
-open X4.Territories
+open X4.Types
+open X4.Utilities
 open X4.Data.Xml
-
-
-let allRegionDefinitions = X4RegionDefinitions.Load(X4RegionDefinitionsFile)
 
 // ===== 9.0 RESOURCE AREAS =====
 // As of X4 9.0, minable resources are no longer defined by <resources> nodes in
@@ -34,7 +27,7 @@ let allRegionDefinitions = X4RegionDefinitions.Load(X4RegionDefinitionsFile)
 // resource area refs from. Parsed with plain XDocument rather than a type provider,
 // so any future schema drift fails here with a clear runtime error instead of
 // breaking unrelated code at compile time.
-let resourceAreaVocabulary =
+let private resourceAreaVocabulary =
     let doc =
         XDocument.Load(X4UnpackedDataFolder + "/libraries/regionyields.xml")
 
@@ -80,7 +73,7 @@ let makeResourceAreaRef (size: string) (ware: string) (yieldTier: string) (speed
 // The vanilla mapdefaults file for the core game and for each DLC we generate
 // resources for. Diff patches for a DLC's sectors must go in that DLC's own
 // extensions/<dlc>/libraries/mapdefaults.xml so they only load when the DLC exists.
-let mapDefaultsDocs =
+let private mapDefaultsDocs =
     Map [
         "core", X4UnpackedDataFolder + "/libraries/mapdefaults.xml"
         "split", X4UnpackedDataFolder + "/extensions/ego_dlc_split/libraries/mapdefaults.xml"
@@ -94,24 +87,11 @@ let mapDefaultsDocs =
 // selectors are CASE SENSITIVE, and mapdefaults/sectors.xml use names like
 // 'Cluster_14_Sector001_macro'. Recover the canonical casing from sectors.xml
 // before interpolating a name into a selector.
-let properCaseSectorName (sector: string) =
+let private properCaseSectorName (sector: string) =
     allSectors
     |> List.tryFind (fun s -> s.Name =? sector)
     |> Option.map (fun s -> s.Name)
     |> Option.defaultWith (fun () -> failwithf "Unknown sector macro: %s" sector)
-
-// How a sector is represented in the vanilla mapdefaults file, which determines the
-// diff operation needed to add resource areas to it. Each case carries the
-// canonically cased macro name to use in the selector.
-type MapDefaultsDatasetState =
-    | HasResourceAreas of string // dataset exists and already has a <resourceareas> node
-    // dataset exists with <properties> but no <resourceareas>. The <properties> children
-    // are schema ordered (xs:sequence in libraries.xsd: boundaries, identification,
-    // resources, resourceareas, sounds, area, ...), so a plain append would put our node
-    // after sounds/area/access and fail validation. The second value is the existing
-    // child to insert after (pos="after"), or None to prepend as the first child.
-    | HasProperties of string * string option
-    | NoDataset of string // the sector has no dataset in the file at all
 
 let getMapDefaultsDatasetState (dlc: string) (sector: string) =
     let dataset =
@@ -143,12 +123,4 @@ let getMapDefaultsDatasetState (dlc: string) (sector: string) =
 
 
 
-
-let dump_sectors (sectors: X4Sector.Macro list) =
-    for sector in sectors do
-        printfn "macro: %s," (sector.Name.ToLower())
-
-let dumpRegionDefinitions () =
-    for region in allRegionDefinitions.Regions do
-        printfn "macro: %s," (region.Name.ToLower())
 

@@ -16,6 +16,7 @@ module X4.Resources
 open System.Xml.Linq
 open X4.Tuning.Resources // resourceMap, resourceAreaMap and field placement offsets
 open X4.Territories
+open X4.Types
 open X4.Data
 open System
 open System.Xml

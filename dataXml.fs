@@ -153,11 +153,6 @@ let X4GalaxyFileTimelines =
     X4UnpackedDataFolder
     + "/extensions/ego_dlc_timelines/maps/xu_ep2_universe/galaxy.xml"
 
-// Regions for mining fields
-[<Literal>]
-let X4RegionDefinitionsFile =
-    X4UnpackedDataFolder + "/libraries/region_definitions.xml"
-
 // NOTE: 9.0 restructured libraries/regionyields.xml completely: it now defines the
 // vocabularies (boundaries, yield tiers, gather speeds) that compose per-sector
 // 'resource area' refs like sphere_large_ore_high_slow, referenced from mapdefaults.xml.
@@ -186,7 +181,6 @@ type X4Zone = XmlProvider<X4ZoneFileCore>
 type X4Galaxy = XmlProvider<X4GalaxyFileCore>
 type X4GalaxyDiff = XmlProvider<X4GalaxyFileSplit> // the DLC galaxy files are in DIFF format, so we need a different type provider.
 
-type X4RegionDefinitions = XmlProvider<X4RegionDefinitionsFile>
 
 
 // Ships and loadouts

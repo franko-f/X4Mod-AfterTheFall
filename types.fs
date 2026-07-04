@@ -162,6 +162,26 @@ type Gate = {
             gate.Quarternion
             connection
 
+/// How a sector is represented in the vanilla mapdefaults file, which determines the
+/// diff operation needed to add resource areas to it. Each case carries the
+/// canonically cased macro name to use in the selector.
+type MapDefaultsDatasetState =
+    | HasResourceAreas of string // dataset exists and already has a <resourceareas> node
+    // dataset exists with <properties> but no <resourceareas>. The <properties> children
+    // are schema ordered (xs:sequence in libraries.xsd: boundaries, identification,
+    // resources, resourceareas, sounds, area, ...), so a plain append would put our node
+    // after sounds/area/access and fail validation. The second value is the existing
+    // child to insert after (pos="after"), or None to prepend as the first child.
+    | HasProperties of string * string option
+    | NoDataset of string // the sector has no dataset in the file at all
+
+/// A faction's vanilla defence construction plan: the plan id that bastions are
+/// stacked from, and the DLC (extension id, display name) providing it, if any.
+type DefencePlanSource = {
+    PlanId: string
+    Dlc: (string * string) option
+}
+
 /// A station entry from the vanilla god.xml (or a DLC god diff). Field list is
 /// exactly what the logic layer reads; Source is the provider-parsed <station>
 /// element, kept so the writer can clone it byte-identically.

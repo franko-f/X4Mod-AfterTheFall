@@ -401,91 +401,32 @@ let processProduct (product: GodProduct) =
 // copies of the faction's vanilla defence plan stacked vertically into one station.
 
 // The vanilla defence construction plan each faction's god '<select>' would resolve to
-// (via stations.xml -> stationgroups.xml), the constructionplans file that defines it,
-// and the DLC (extension id, name) providing it, if any.
+// (via stations.xml -> stationgroups.xml), and the DLC (extension id, name) providing
+// it, if any. The data layer (X4.Data.Plans.loadDefencePlan) resolves the actual file.
 let bastionPlanSources =
-    let core = X4UnpackedDataFolder + "/libraries/constructionplans.xml"
-
-    let dlc (extension: string) =
-        X4UnpackedDataFolder + "/extensions/" + extension + "/libraries/constructionplans.xml"
-
     Map [
-        "argon", ("arg_defence", core, None)
-        "antigone", ("arg_defence", core, None)
-        "hatikvah", ("arg_defence", core, None)
-        "paranid", ("par_defence", core, None)
-        "holyorder", ("par_defence", core, None)
-        "teladi", ("tel_defence", core, None)
-        "ministry", ("tel_defence", core, None)
-        "split", ("spl_defence", dlc "ego_dlc_split", Some("ego_dlc_split", "Split Vendetta"))
-        "freesplit", ("spl_defence", dlc "ego_dlc_split", Some("ego_dlc_split", "Split Vendetta"))
-        "terran", ("ter_defence", dlc "ego_dlc_terran", Some("ego_dlc_terran", "Cradle of Humanity"))
-        "pioneers", ("pio_defence", dlc "ego_dlc_terran", Some("ego_dlc_terran", "Cradle of Humanity"))
-        "boron", ("bor_defence", dlc "ego_dlc_boron", Some("ego_dlc_boron", "Kingdom End"))
-        "loanshark", ("vig_defence", dlc "ego_dlc_pirate", Some("ego_dlc_pirate", "Tides of Avarice"))
-        "scavenger", ("rip_defence", dlc "ego_dlc_pirate", Some("ego_dlc_pirate", "Tides of Avarice"))
+        "argon", { PlanId = "arg_defence"; Dlc = None }
+        "antigone", { PlanId = "arg_defence"; Dlc = None }
+        "hatikvah", { PlanId = "arg_defence"; Dlc = None }
+        "paranid", { PlanId = "par_defence"; Dlc = None }
+        "holyorder", { PlanId = "par_defence"; Dlc = None }
+        "teladi", { PlanId = "tel_defence"; Dlc = None }
+        "ministry", { PlanId = "tel_defence"; Dlc = None }
+        "split", { PlanId = "spl_defence"; Dlc = Some("ego_dlc_split", "Split Vendetta") }
+        "freesplit", { PlanId = "spl_defence"; Dlc = Some("ego_dlc_split", "Split Vendetta") }
+        "terran", { PlanId = "ter_defence"; Dlc = Some("ego_dlc_terran", "Cradle of Humanity") }
+        "pioneers", { PlanId = "pio_defence"; Dlc = Some("ego_dlc_terran", "Cradle of Humanity") }
+        "boron", { PlanId = "bor_defence"; Dlc = Some("ego_dlc_boron", "Kingdom End") }
+        "loanshark", { PlanId = "vig_defence"; Dlc = Some("ego_dlc_pirate", "Tides of Avarice") }
+        "scavenger", { PlanId = "rip_defence"; Dlc = Some("ego_dlc_pirate", "Tides of Avarice") }
     ]
 
 // The id of the generated bastion plan a faction's gate stations will reference.
 // Shared between factions that use the same vanilla defence plan.
 let bastionPlanId (faction: string) =
     match bastionPlanSources |> Map.tryFind faction with
-    | Some(planId, _, _) -> $"atf_bastion_{planId}"
+    | Some source -> $"atf_bastion_{source.PlanId}"
     | None -> failwithf "No defence construction plan mapping for faction '%s': add it to bastionPlanSources in god.fs" faction
-
-// The physical vertical extent of a station module, in metres (below anchor, above
-// anchor). A plan entry's offset position is only the module's ANCHOR point - the
-// module body extends beyond it (e.g. the argon claim module reaches 586m below and
-// 708m above its anchor). We bound the body using every connection offset on the
-// module's component: turrets, shields and docks sit on the hull surface, so they give
-// a good lower bound on the real mesh extent (which lives in binary files we can't read).
-let moduleVerticalExtent =
-    let cache = System.Collections.Generic.Dictionary<string, float * float>()
-
-    fun (macroName: string) ->
-        match cache.TryGetValue macroName with
-        | true, extent -> extent
-        | _ ->
-            let entry =
-                match AllIndexMacros |> Array.tryFind (fun e -> e.Name =? macroName) with
-                | Some entry -> entry
-                | None -> failwithf "Bastion plan module macro '%s' not found in the macro index" macroName
-
-            let macroDoc =
-                XDocument.Load(X4UnpackedDataFolder + "/" + entry.File.Replace("\\", "/"))
-
-            let componentRef =
-                (macroDoc.Descendants(XName.Get "component") |> Seq.head)
-                    .Attribute(XName.Get "ref")
-                    .Value
-
-            let componentEntry =
-                match AllComponentMacros |> Array.tryFind (fun e -> e.Name =? componentRef) with
-                | Some entry -> entry
-                | None -> failwithf "Component '%s' of module '%s' not found in the component index" componentRef macroName
-
-            let componentDoc =
-                XDocument.Load(X4UnpackedDataFolder + "/" + componentEntry.File.Replace("\\", "/"))
-
-            // NOTE: because this list uses an explicit 'yield' in the loop, the first
-            // element must be explicitly yielded too - a bare '0.0' would be discarded.
-            let connectionYs = [
-                yield 0.0 // the anchor itself, so a module with no offset connections gets extent (0,0)
-                for connection in componentDoc.Descendants(XName.Get "connection") do
-                    match connection.Element(XName.Get "offset") with
-                    | null -> ()
-                    | offset ->
-                        match offset.Element(XName.Get "position") with
-                        | null -> ()
-                        | position ->
-                            match position.Attribute(XName.Get "y") with
-                            | null -> ()
-                            | y -> yield float y.Value
-            ]
-
-            let extent = (-(List.min connectionYs), List.max connectionYs)
-            cache.[macroName] <- extent
-            extent
 
 // Build a stacked bastion plan from a vanilla defence plan: duplicate the full entry
 // list for each extra copy, remapping the entry indices and predecessor references of
@@ -602,15 +543,12 @@ let generateBastionConstructionPlans (factions: string list) =
         match bastionPlanSources |> Map.tryFind faction with
         | Some source -> source
         | None -> failwithf "No defence construction plan mapping for faction '%s': add it to bastionPlanSources in god.fs" faction)
-    |> List.distinct
-    |> List.iter (fun (planId, file, dlcPatch) ->
-        let sourcePlan =
-            XDocument.Load(file).Descendants(XName.Get "plan") // DLC files may be diffs, so search all descendants
-            |> Seq.tryFind (fun p -> p.Attribute(XName.Get "id").Value = planId)
-            |> Option.defaultWith (fun () -> failwithf "Defence construction plan '%s' not found in %s" planId file)
+    |> List.distinct // pure record distinct: factions sharing a defence plan produce it once
+    |> List.iter (fun source ->
+        let sourcePlan = loadDefencePlan source |> XmlSource.value
 
-        printfn "  BASTION PLAN atf_bastion_%s (%ix %s)" planId GateDefence.BastionStrengthMultiplier planId
-        plansOut.Add(makeBastionPlan sourcePlan $"atf_bastion_{planId}" dlcPatch)
+        printfn "  BASTION PLAN atf_bastion_%s (%ix %s)" source.PlanId GateDefence.BastionStrengthMultiplier source.PlanId
+        plansOut.Add(makeBastionPlan sourcePlan $"atf_bastion_{source.PlanId}" source.Dlc)
         plansOut.Add(new XText("\n")))
 
     WriteModfiles.write_xml_file "core" "libraries/constructionplans.xml" plansOut
