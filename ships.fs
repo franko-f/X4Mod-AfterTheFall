@@ -338,46 +338,9 @@ let generateBattlefield (countXL: int) (countL: int) (countM: int) (countS: int)
 // Some ships have custom loadouts, so we need a unique ID for them. Used by ProcessShip.
 let loadoutUniqueId = makeIdGenerator ()
 
-// Generate a section of XML with a wrapper tag. used for groups and macros.
-// Could use XML classes, but loadouts are so simple that string manipulation is just easier.
-let generateLoadoutSection sectionTag (lines: string list) =
-    $"""
-            <{sectionTag}>
-                {lines |> String.concat "\n                "}
-            </{sectionTag}>"""
-
-let generateSoftwareXml () =
-    $"""
-            <software>
-                <software ware="software_dockmk2"/>
-                <software ware="software_flightassistmk1"/>
-                <software ware="software_scannerlongrangemk2"/>
-                <software ware="software_scannerobjectmk1"/>
-                <software ware="software_targetmk1"/>
-            </software>"""
-
-// Selects a random thruster compatible with the ship's size and thruster tags.
-let generateThrusterXml (ship: ShipInfo) =
-    let thruster = pickEquipment (Set.ofList [ "thruster"; ship.Thruster ])
-
-    $"""
-            <virtualmacros>
-                <thruster macro="{thruster.MacroName}"/>
-            </virtualmacros>"""
-
-let generateGroupLine groupName className count (equipment: EquipmentInfo) =
-    let tagName =
-        if className = "shieldgenerator" then
-            "shields"
-        else
-            className + "s"
-
-    let exactAttr = if count > 1 then $" exact=\"{count}\"" else ""
-    $"""<{tagName} macro="{equipment.MacroName}" path=".." group="{groupName}"{exactAttr}/>"""
-
-// Generates XML for grouped equipment (turrets, shields).
+// Pick the equipment for grouped slots (turrets, shields): one pick per group.
 // Assumes all slots in a group have identical tags, so picks equipment based on the first slot.
-let generateGroupsXml (ship: ShipInfo) =
+let loadoutGroups (ship: ShipInfo) =
     ship.EquipmentSlots
     |> shipEquipmentGroups
     |> List.sortBy (fun (groupName, _className) -> groupName)
@@ -386,13 +349,22 @@ let generateGroupsXml (ship: ShipInfo) =
 
         slots[0].Tags
         |> tryPickEquipment
-        |> Option.map (generateGroupLine groupName className slots.Length))
-    |> generateLoadoutSection "groups"
+        |> Option.map (fun equipment -> {
+            TagName = (if className = "shieldgenerator" then "shields" else className + "s")
+            Macro = equipment.MacroName
+            Group = groupName
+            Exact = (if slots.Length > 1 then Some slots.Length else None)
+        }))
 
-let generateMacroLine className name (equipment: EquipmentInfo) =
-    $"""<{className} macro="{equipment.MacroName}" path="../{name}"/>"""
+let private macroLine (slot: ShipEquipmentSlot) (equipment: EquipmentInfo) = {
+    Class = slot.Class
+    SlotName = slot.Name
+    Macro = equipment.MacroName
+}
 
-let generateSynchronizedMacroLines (slots: ShipEquipmentSlot list) =
+// Pick ONE piece of equipment shared by all the given slots (engines and shields of a
+// ship should match, rather than being a random mix).
+let private synchronizedMacroLines (slots: ShipEquipmentSlot list) =
     match slots with
     | [] -> []
     | first :: _ ->
@@ -400,11 +372,11 @@ let generateSynchronizedMacroLines (slots: ShipEquipmentSlot list) =
 
         slots
         |> List.sortBy (fun x -> x.Name)
-        |> List.map (fun slot -> generateMacroLine slot.Class slot.Name equipment)
+        |> List.map (fun slot -> macroLine slot equipment)
 
-// Generates XML for ungrouped equipment (main guns, etc.). Picks equipment for each slot independently.
-// EXCEPT for engines and shields - if there's more than one slot of them, ensure they're the same.
-let generateMacrosXml (ship: ShipInfo) =
+// Pick equipment for the ungrouped slots (main guns, etc.), each slot independently -
+// EXCEPT for engines and shields: if there's more than one slot of them, ensure they're the same.
+let loadoutMacros (ship: ShipInfo) =
     let ungroupedSlots =
         ship.EquipmentSlots
         |> List.filter (fun slot -> slot.Group.IsNone || slot.Class = "engine")
@@ -417,20 +389,17 @@ let generateMacrosXml (ship: ShipInfo) =
         ungroupedSlots
         |> List.filter (fun s -> s.Class <> "engine" && s.Class <> "shield")
 
-    let engineXmlLines = generateSynchronizedMacroLines engineSlots
-    let shieldXmlLines = generateSynchronizedMacroLines shieldSlots
+    let engineLines = synchronizedMacroLines engineSlots
+    let shieldLines = synchronizedMacroLines shieldSlots
 
-    let otherXmlLines =
+    let otherLines =
         otherSlots
         |> List.sortBy (fun x -> x.Name)
-        |> List.choose (fun slot ->
-            tryPickEquipment slot.Tags
-            |> Option.map (generateMacroLine slot.Class slot.Name))
+        |> List.choose (fun slot -> tryPickEquipment slot.Tags |> Option.map (macroLine slot))
 
-    List.concat [ engineXmlLines; shieldXmlLines; otherXmlLines ]
-    |> generateLoadoutSection "macros"
+    List.concat [ engineLines; shieldLines; otherLines ]
 
-// Determines if a ship needs a custom loadout (Boron or Terran L/XL Military) and generates it.
+// Determines if a ship needs a custom loadout (Boron or Terran L/XL Military) and composes it.
 // Loadouts have ammunition and crew sections too (and wares?). We're not setting those currently.
 // see loadouts.xml in various DLC for examples
 //
@@ -455,23 +424,20 @@ let MaybeCustomLoadout (shipName: string) =
             printfn "    Generating CustomLoadout for %s" shipName
             let id = $"eod_abandoned_ship_loadout_{loadoutUniqueId ()}"
 
-            return
-                (id,
-                 $"""
-        <add sel="/loadouts">
-            <loadout id="{id}" macro="{ship.MacroName}">
-                {generateMacrosXml ship}
-                {generateGroupsXml ship}
-                {generateThrusterXml ship}
-                {generateSoftwareXml ()}
-            </loadout>
-        </add>
-        """)
+            // NOTE: field order matters - it is the seeded-random draw order
+            // (macros, then groups, then the thruster), inherited from the old code.
+            return {
+                Id = id
+                ShipMacro = ship.MacroName
+                Macros = loadoutMacros ship
+                Groups = loadoutGroups ship
+                ThrusterMacro = (pickEquipment (Set.ofList [ "thruster"; ship.Thruster ])).MacroName
+            }
     }
 
-// Generate the XML diff for placing an abandoned ship in the game based
-// on the ship, sector, position and rotation given as parameters.
-let ProcessShip ((ship, sector, (x, y, z), (yaw, pitch, roll)): ShipLocation) =
+// Decide the details of an abandoned ship placement from the ship, sector, position
+// and rotation given as parameters. The data layer writes the actual XML.
+let ProcessShip ((ship, sector, (x, y, z), (yaw, pitch, roll)): ShipLocation) : AbandonedShip =
     // Interestingly, the units of KM and deg are specified in the XML attribute fields for abandoned ships.
     // I've not seen this elsewhere, and don't know if it's necessary, but for safety I'll duplicate it.
     printfn
@@ -481,37 +447,13 @@ let ProcessShip ((ship, sector, (x, y, z), (yaw, pitch, roll)): ShipLocation) =
         (x, y, z)
         (yaw, pitch, roll)
 
-    // If a custom loadout is needed for this ship, 'MaybeCustomLoadout' returns it's ID, and
-    // the loadout XML itself. We refer to the loadout in the placedObject XML, and return the
-    // loadout XML as a separate element to write out to the loadouts file.
-    let loadoutReference, loadout =
-        match MaybeCustomLoadout ship with
-        | Some(id, xml) -> $"""<loadout ref="{id}" />""", Some xml
-        | None -> "", None
-
-    let xml =
-        $"""
-    <add sel="/mdscript[@name='PlacedObjects']/cues/cue[@name='Place_Claimable_Ships']/actions">
-        <find_sector name="$sector" macro="macro.{sector}"/>
-        <do_if value="$sector.exists">
-          <create_ship name="$ship" macro="macro.{ship}" sector="$sector">
-            <owner exact="faction.ownerless"/>
-            <position x="{x}km" y="{y}km" z="{z}km"/>
-            <rotation yaw="{yaw}deg" pitch="{pitch}deg" roll="{roll}deg"/>
-            {loadoutReference}
-          </create_ship>
-        </do_if>
-    </add>
-    """
-
-    // Using the textreader instead of XElement.Parse preserves whitespace and carriage returns in our output.
-    let shipXML = XElement.Load(new XmlTextReader(new System.IO.StringReader(xml)))
-
-    let loadoutXML =
-        loadout
-        |> Option.map (fun x -> XElement.Load(new XmlTextReader(new System.IO.StringReader(x))))
-
-    shipXML, loadoutXML
+    {
+        Macro = ship
+        Sector = sector
+        PositionKm = (x, y, z)
+        RotationDeg = (yaw, pitch, roll)
+        Loadout = MaybeCustomLoadout ship
+    }
 
 // Create a list of random ships, assign them to random sectors, then generate XML that will place
 // them as abandoned ships in the game.
@@ -519,7 +461,7 @@ let ProcessShip ((ship, sector, (x, y, z), (yaw, pitch, roll)): ShipLocation) =
 // We lean slighly towards generated economy ships vs military, though there's plenty of both.
 // there should be, on average, one or two ships per sector.
 let generate_abandoned_ships_file (placedObjectsFilename: string) (loadoutFilename: string) =
-    let ships, loadouts =
+    let shipDirectives =
         [
 
             // A bunch of ships in unsafe space to begin
@@ -631,29 +573,5 @@ let generate_abandoned_ships_file (placedObjectsFilename: string) (loadoutFilena
 
         ]
         |> List.concat
-        |> List.unzip
 
-    // Create the new XML Diff documents to contain our loadouts and placed ships
-    let xmlTemplate =
-        XElement.Parse(
-            """<?xml version="1.0" encoding="utf-8"?>
-        <diff xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" >
-        </diff>"""
-        )
-
-    let placedXML = XElement(xmlTemplate)
-    let loadoutXML = XElement(xmlTemplate)
-
-    let addElementsToDiff (diff: XElement) (elements: XElement list) =
-        elements
-        |> List.iter (fun element ->
-            diff.Add(element)
-            diff.Add(new XText("\n")) // Add a newline after each element so the output is readible
-        )
-
-    // Now add the abandoned ships, one by one, to the the xml diff.
-    addElementsToDiff placedXML ships
-    addElementsToDiff loadoutXML (loadouts |> List.choose id)
-
-    WriteModfiles.write_xml_file "core" placedObjectsFilename placedXML
-    WriteModfiles.write_xml_file "core" loadoutFilename loadoutXML
+    writeAbandonedShips placedObjectsFilename loadoutFilename shipDirectives

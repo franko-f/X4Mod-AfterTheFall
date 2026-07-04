@@ -194,6 +194,40 @@ type SectorResourceGrant = {
     Areas: (string * int) list
 }
 
+/// One <macros> line of a custom loadout: equipment mounted on a named slot.
+type LoadoutMacroLine = {
+    Class: string // element name: engine / shield / weapon / ...
+    SlotName: string // the hardpoint connection name (path="../{SlotName}")
+    Macro: string // the equipment macro to mount
+}
+
+/// One <groups> line of a custom loadout: equipment applied to a slot group.
+type LoadoutGroupLine = {
+    TagName: string // element name: turrets / shields / ...
+    Macro: string
+    Group: string
+    Exact: int option // exact="{n}" attribute when the group has more than one slot
+}
+
+/// A complete hand-built ship loadout (Boron/Terran L-XL cases the game can't
+/// generate well itself).
+type ShipLoadout = {
+    Id: string
+    ShipMacro: string
+    Macros: LoadoutMacroLine list
+    Groups: LoadoutGroupLine list
+    ThrusterMacro: string
+}
+
+/// An abandoned (claimable) ship to place in the galaxy.
+type AbandonedShip = {
+    Macro: string
+    Sector: string
+    PositionKm: int * int * int
+    RotationDeg: int * int * int
+    Loadout: ShipLoadout option // None = the game generates the loadout itself
+}
+
 /// A change to a vanilla job, decided by the jobs logic and written by the data layer.
 type JobDirective =
     /// Replace the job's quota (galaxy always written; other scopes only when Some).
