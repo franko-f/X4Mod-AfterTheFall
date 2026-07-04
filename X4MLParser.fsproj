@@ -13,6 +13,7 @@
     <Content Include="mod_templates\god.xml" />
     <Compile Include="writeModfiles.fs" />
     <Compile Include="dataXml.fs" />
+    <Compile Include="dataUniverse.fs" />
     <Compile Include="data.fs" />
     <Compile Include="dataEconomy.fs" />
     <Compile Include="ships.fs" />

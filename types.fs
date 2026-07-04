@@ -43,6 +43,45 @@ type Quaternion = {
 
     static member Default = { X = 0.0; Y = 0.0; Z = 0.0; W = 1.0 }
 
+/// The galaxy-map connection joining a gate to its remote counterpart.
+type GateConnection = {
+    Name: string
+    Path: string option
+    MacroPath: string option
+}
+
+/// A jump gate discovered in the zone files.
+[<StructuredFormatDisplay("{Sector}/{Zone}:{Faction} ({ConnectionType})/{ConnectionName} {GateType} - {Position} rotation{Quarternion}")>]
+type Gate = {
+    Sector: string
+    Zone: string // the zone macro name
+    Faction: string
+    GateType: string // the zone class
+    ConnectionType: string
+    ConnectionName: string
+    Position: Position
+    Quarternion: Quaternion
+    Connection: GateConnection option
+} with
+
+    member gate.asString() =
+        let connection =
+            match gate.Connection with
+            | None -> "Unknown"
+            | Some connection -> connection.Name
+
+        sprintf
+            "%A/%A:%A (%A) %A %A - %A rotation: %A Connection: %A"
+            gate.Sector
+            gate.Zone
+            gate.Faction
+            gate.ConnectionType
+            gate.ConnectionName
+            gate.GateType
+            gate.Position
+            gate.Quarternion
+            connection
+
 /// A station entry from the vanilla god.xml (or a DLC god diff). Field list is
 /// exactly what the logic layer reads; Source is the provider-parsed <station>
 /// element, kept so the writer can clone it byte-identically.

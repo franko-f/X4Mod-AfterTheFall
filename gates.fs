@@ -1,3 +1,9 @@
+/// <summary>
+/// Gate defence policy and geometry: which gates border hostile territory, and where
+/// the ring of bastion stations should be placed around each of them.
+/// Gate DISCOVERY (parsing zones/galaxy XML) lives in the data layer
+/// (X4.Data.Universe.allGates); this module is pure logic over the Gate records.
+/// </summary>
 module X4.Gates
 
 open System
@@ -6,144 +12,20 @@ open MathNet.Numerics.LinearAlgebra.Double
 open X4.Data
 open X4.Types
 
-// Data on gates is scattered in a two primary places.
-// 1. The ZONES file that creates a zone, then places a gate within it.
-// 2. The GALAXY file that holds the information on the connections between two gates.
-
-
-// Adapters from the zone-file provider types to the pure geometry records in X4.Types.
-let positionFromOffset (position: X4Zone.Position) : Position = {
-    X = float (position.X)
-    Y = float (position.Y)
-    Z = float (position.Z)
-}
-
-let quaternionFromOffset (quaternion: X4Zone.Quaternion) : Quaternion = {
-    X = quaternion.Qx
-    Y = quaternion.Qy
-    Z = float (quaternion.Qz) // Qz has been determined to be a decimal by the type provider for some reason.
-    W = quaternion.Qw
-}
-
-
-// Given a zone connection, does it represent a gate?
-let isZoneConnectionAGate (connection: X4Zone.Connection) = connection.Ref = "gates"
-
-// Given the array of connections in a zone, return Some connection if theres a gate, or None if it's not.
-// While we might have an array as input, it seems there's only ever a single gate in a zone.
-let findGatesInConnections (connections: X4Zone.Connection list) =
-    connections |> List.filter isZoneConnectionAGate
-
-
-let findConnectionByDestination (destination: string) (connections: X4Galaxy.Connection list) =
-    let containsDestination (connection: X4Galaxy.Connection) =
-        let matchPath =
-            match connection.Path with
-            | None -> false
-            | Some path -> path.EndsWith(destination)
-
-        let macroPath =
-            match connection.Macro.Path with
-            | None -> false
-            | Some macro -> macro.EndsWith(destination)
-
-        macroPath || matchPath
-
-    connections |> List.tryFind containsDestination
-
-// A record that represents a gate and the zone it's in, along with code to
-// extract the data from a the type provider zone type. We do this to simplify
-// handling, but also store the full zone, in case we need it to write some XML out.
-[<StructuredFormatDisplay("{Sector}/{Zone}:{Faction} ({ConnectionType})/{ConnectionName} {GateType} - {Position} rotation{Quarternion}")>]
-type Gate = {
-    Sector: string
-    Zone: string
-    Faction: string
-    GateType: string
-    ConnectionType: string
-    ConnectionName: string
-    Position: Position
-    Quarternion: Quaternion
-
-    connection: Option<X4Galaxy.Connection>
-    X4Zone: X4Zone.Macro // Store the full record for later use.
-} with
-    // Create a 'gate' record from a zone and a connection. While the zone already contains the connection, a zone may have
-    // multiple gate connections, so we need to be specific about the connection we want.
-    static member FromZone (zone: X4Zone.Macro) (connection: X4Zone.Connection) =
-        let connectionMacro = connection.Macro.Value // the caller of FromZone must make sure this is always present: ie, this is a valid gate zone
-        let sector = findSectorFromZone zone.Name |> Option.defaultValue "Unknown"
-        let faction = findFactionFromZone zone.Name |> Option.defaultValue "Unknown"
-        let position = positionFromOffset connection.Offset.Value.Position
-
-        let quaternion = // Quarternians are almost, but not always, set
-            match connection.Offset.Value.Quaternion with
-            | None -> Quaternion.Default
-            | Some q -> quaternionFromOffset q
-
-        let connectionName = connection.Name.Value // safe, as connection name always exists for gate connections.
-        let connection = findConnectionByDestination connectionName allGalaxy
-
-        {
-            Sector = sector
-            Zone = zone.Name
-            Faction = faction
-            GateType = zone.Class
-            ConnectionType = connectionMacro.Ref
-            ConnectionName = connectionName
-            Position = position
-            Quarternion = quaternion
-
-            connection = connection
-            X4Zone = zone
-        }
-
-    member gate.asString() =
-        let connection =
-            if gate.connection.IsNone then
-                "Unknown"
-            else
-                gate.connection.Value.Name
-
-        sprintf
-            "%A/%A:%A (%A) %A %A - %A rotation: %A Connection: %A"
-            gate.Sector
-            gate.Zone
-            gate.Faction
-            gate.ConnectionType
-            gate.ConnectionName
-            gate.GateType
-            gate.Position
-            gate.Quarternion
-            connection
-
-
-
-// Generate a list of all the gates in the game across base and DLC
-let allGates =
-    allZones
-    |> List.collect (fun zone ->
-        zone.Connections
-        |> Option.map (fun x -> Array.toList x.Connections) // IF there is a connections array in the zone Option<connections>, convert to a list
-        |> Option.defaultValue [] // convert the None result to an empty list
-        |> findGatesInConnections // Find any connections that represent a gate in the connections list for the zone.
-        |> List.map (fun connection -> Gate.FromZone zone connection) // And convert these connections to a Gate record.
-    )
-
 
 // Given the name of a connection, find the gate that it refers to.
 let findGateByConnectionName (connectionName: string) =
     allGates |> List.tryFind (fun gate -> gate.ConnectionName = connectionName)
 
 let findConnectedGate (gate: Gate) =
-    match gate.connection with
+    match gate.Connection with
     | None -> None
     | Some connection ->
         // Ok, we've got a connection, so first thing to do is find the gate at the other end.
         // A connection refers to two gates by connection name, so we need to ignore the one
         // that's the same as the gate we're looking at.
         let srcConnectionName = System.IO.Path.GetFileName(connection.Path.Value)
-        let destConnectionName = System.IO.Path.GetFileName(connection.Macro.Path.Value)
+        let destConnectionName = System.IO.Path.GetFileName(connection.MacroPath.Value)
         // discard the connectio name that matches the gate we're looking at.
         let remoteConnectionName =
             match srcConnectionName = gate.ConnectionName with

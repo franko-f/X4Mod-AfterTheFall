@@ -543,7 +543,7 @@ let generateRandomAbandonedShipFromListInSector (sector: string) (shipList: stri
 // unsafe sectors in the game.
 let generateRandomAbandonedShipFromList (shipList: string list) =
     let sector = selectRandomUnsafeSector () // We don't want these wrecks to be in the faction sectors.
-    generateRandomAbandonedShipFromListInSector sector.Name shipList
+    generateRandomAbandonedShipFromListInSector sector shipList
 
 // Generate COUNT random abandoned military ships of the given size in a random unsafe sector.
 // 'size' is one of 'XL', 'L', 'm', 's'. - the standard X4 ship size classes.
@@ -802,29 +802,29 @@ let generate_abandoned_ships_file (placedObjectsFilename: string) (loadoutFilena
                 for i in 1 .. Tune.SafeMilitaryM ->
                     militaryShips
                     |> filterListBy [ "m" ]
-                    |> (generateRandomAbandonedShipFromListInSector (selectRandomSafeSector().Name))
+                    |> (generateRandomAbandonedShipFromListInSector (selectRandomSafeSector()))
                     |> ProcessShip
                 for i in 1 .. Tune.SafeEconomyM ->
                     economyShips
                     |> filterListBy [ "m" ]
-                    |> (generateRandomAbandonedShipFromListInSector (selectRandomSafeSector().Name))
+                    |> (generateRandomAbandonedShipFromListInSector (selectRandomSafeSector()))
                     |> ProcessShip
                 for i in 1 .. Tune.SafeMilitaryS ->
                     militaryShips
                     |> filterListBy [ "s" ]
-                    |> (generateRandomAbandonedShipFromListInSector (selectRandomSafeSector().Name))
+                    |> (generateRandomAbandonedShipFromListInSector (selectRandomSafeSector()))
                     |> ProcessShip
                 for i in 1 .. Tune.SafeEconomyS ->
                     economyShips
                     |> filterListBy [ "s" ]
-                    |> (generateRandomAbandonedShipFromListInSector (selectRandomSafeSector().Name))
+                    |> (generateRandomAbandonedShipFromListInSector (selectRandomSafeSector()))
                     |> ProcessShip
 
                 // ok, a couple large l economy ship.
                 for i in 1 .. Tune.SafeEconomyL ->
                     economyShips
                     |> filterListBy [ "l" ]
-                    |> (generateRandomAbandonedShipFromListInSector (selectRandomSafeSector().Name))
+                    |> (generateRandomAbandonedShipFromListInSector (selectRandomSafeSector()))
                     |> ProcessShip
 
             ]

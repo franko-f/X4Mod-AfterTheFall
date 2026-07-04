@@ -660,9 +660,8 @@ let generateGateDefenseStations () =
             stationSpec.SetAttributeValue(XName.Get "constructionplan", bastionPlanId gate.Faction)
 
             // update location and set the location of the station copy to be the zone of the gate,
-            let zone = gate.X4Zone
-            defenseStation.Location.XElement.SetAttributeValue(XName.Get("class"), zone.Class)
-            defenseStation.Location.XElement.SetAttributeValue(XName.Get("macro"), zone.Name)
+            defenseStation.Location.XElement.SetAttributeValue(XName.Get("class"), gate.GateType)
+            defenseStation.Location.XElement.SetAttributeValue(XName.Get("macro"), gate.Zone)
             defenseStation.Location.XElement.SetAttributeValue(XName.Get("matchextension"), "false") // without this, game ignores mods touching things outside their scope
             defenseStation.Location.XElement.SetAttributeValue("solitary", null) // VIG faction has this attribute set that may cause station placement to fail
 
