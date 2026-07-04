@@ -95,9 +95,9 @@ let printTable () =
             Faction = product.Owner
             FactoryID = product.Id
             Product = product.Ware
-            QuotaGalaxy = product.Quota.Galaxy
-            QuotaCluster = Option.defaultValue 0 product.Quota.Cluster
-            QuotaSector = Option.defaultValue 0 product.Quota.Sector
+            QuotaGalaxy = product.QuotaGalaxy
+            QuotaCluster = Option.defaultValue 0 product.QuotaCluster
+            QuotaSector = Option.defaultValue 0 product.QuotaSector
         })
         |> List.fold
             (fun (factionProducts: FactionProductMap) (quota: Quota) -> addFactionProduct quota factionProducts)

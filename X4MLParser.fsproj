@@ -14,6 +14,7 @@
     <Compile Include="writeModfiles.fs" />
     <Compile Include="dataXml.fs" />
     <Compile Include="data.fs" />
+    <Compile Include="dataEconomy.fs" />
     <Compile Include="ships.fs" />
     <Compile Include="resources.fs" />
     <Compile Include="gates.fs" />

@@ -30,6 +30,7 @@ module X4.God
 
 open System.Xml
 open System.Xml.Linq
+open X4.Types
 open X4.Utilities
 open X4.Data
 open X4.Territories
@@ -39,11 +40,8 @@ open X4.Tuning // Economy ratios and gate defence values live in tuning.fs
 
 // the 'log' functions just extract a bit of data about a station, and log it
 // to the terminal for debugging and tracking purposes.
-let logStation (action: string) (station: X4WorldStart.Station) =
-    let tags =
-        match station.Station.Select with
-        | Some tag -> tag.Tags
-        | _ -> "[none]"
+let logStation (action: string) (station: GodStation) =
+    let tags = station.SelectTags |> Option.defaultValue "[none]"
 
     printfn
         "%s STATION %s race: %A, owner: %A, type: %A, location: %A:%A, id: %A, station: %A   "
@@ -52,10 +50,10 @@ let logStation (action: string) (station: X4WorldStart.Station) =
         station.Race
         station.Owner
         station.Type
-        station.Location.Class
-        station.Location.Macro
+        station.LocationClass
+        station.LocationMacro
         station.Id
-        station.Station.Macro
+        station.StationMacro
 
 let logAddStation (action: string) (station: X4GodMod.Station) =
     let tags =
@@ -74,15 +72,15 @@ let logAddStation (action: string) (station: X4GodMod.Station) =
         station.Location.Macro
         station.Id
 
-let logProduct (product: X4WorldStart.Product) =
+let logProduct (product: GodProduct) =
     printfn
         "PROCESSING PRODUCT [%s:%s] %s/%s with quotas %i/%i"
         product.Owner
-        (product.Location.Faction |> Option.defaultValue "UNKNOWN")
+        (product.LocationFaction |> Option.defaultValue "UNKNOWN")
         product.Type
         product.Ware
-        product.Quota.Galaxy
-        (product.Quota.Sector |> Option.defaultValue -1)
+        product.QuotaGalaxy
+        (product.QuotaSector |> Option.defaultValue -1)
 
 
 // Given a selector ID, search an instance of a GodMod xml file for the 'ADD' section
@@ -91,17 +89,17 @@ let find_add_selector sel xml =
     Array.find (fun (elem: X4GodMod.Add) -> elem.Sel = sel) xml
 
 
-let stationSectorName (station: X4WorldStart.Station) =
-    match station.Location.Class with
+let stationSectorName (station: GodStation) =
+    match station.LocationClass with
     | Some "zone" ->
-        findSectorFromZone (station.Location.Macro |> Option.defaultValue "")
+        findSectorFromZone (station.LocationMacro |> Option.defaultValue "")
         |> Option.defaultValue "none"
-    | Some "sector" -> station.Location.Macro |> Option.defaultValue "none"
+    | Some "sector" -> station.LocationMacro |> Option.defaultValue "none"
     | _ -> "none"
 
 // Is this station in a sector we're going to leave alone? ie, in the territory of the owning faction
 // or a faction we're ignoring and not changing?
-let ignoreStation (station: X4WorldStart.Station) =
+let ignoreStation (station: GodStation) =
     let sector = stationSectorName station
     let inTerritory = isFactionInSector station.Owner sector // Station already in the territory of the owning faction
 
@@ -131,7 +129,7 @@ let ignoreStation (station: X4WorldStart.Station) =
         ]
 
     let isPirateBase =
-        station.Station.Select |> Option.exists (fun s -> s.Tags = "[piratebase]")
+        station.SelectTags |> Option.exists (fun tags -> tags = "[piratebase]")
 
     inTerritory || isIgnored || isPirateBase || inFriendlyTerritory
 
@@ -142,38 +140,34 @@ let ignoreStation (station: X4WorldStart.Station) =
 // Sometimes the station type is determined by the value of 'station.type', but other times,
 // station.type is set to 'factory', and you must look to the 'tags' field to determine the
 // type of station.
-let findStation (faction: string) (stationType: string) (stations: X4WorldStart.Station list) =
+let findStation (faction: string) (stationType: string) (stations: GodStation list) =
     match
         List.tryFind
-            (fun (station: X4WorldStart.Station) -> station.Owner = faction && station.Type = Some stationType)
+            (fun (station: GodStation) -> station.Owner = faction && station.Type = Some stationType)
             stations
     with
     | Some station -> Some station
     | None ->
-        // Ok, this might be a case where station type is 'factory', and we need to look at station.station.select.tags
+        // Ok, this might be a case where station type is 'factory', and we need to look at the select tags
         match
             List.tryFind
-                (fun (station: X4WorldStart.Station) ->
-                    // if the station is owned by the correct faction, then attempt to extract the tags by working through
-                    // the list of option types stored in station.station.select.tags to get to the actual tags (if they exist)
-                    // then finally check if the tags (a comma separated string) contain the stationType we're looking for.
+                (fun (station: GodStation) ->
+                    // check if the tags (a comma separated string) contain the stationType we're looking for.
                     station.Owner = faction
-                    && station.Station.Select
-                       |> Option.map (fun x -> x.Tags)
+                    && station.SelectTags
                        |> (Option.defaultValue "")
                        |> fun tags -> tags.Contains stationType)
                 stations
         with
         | Some station -> Some station
         | None ->
-            // And some terran/PIO defence stations don't have trags either. They use station.constructionplan
+            // And some terran/PIO defence stations don't have tags either. They use station.constructionplan
             List.tryFind
-                (fun (station: X4WorldStart.Station) ->
+                (fun (station: GodStation) ->
                     station.Owner = faction
-                    && station.Station.Constructionplan
-                       |> Option.map (fun x -> x)
+                    && station.ConstructionPlan
                        |> (Option.defaultValue "")
-                       |> fun tags -> tags.Contains stationType)
+                       |> fun plan -> plan.Contains stationType)
                 stations
 
 
@@ -184,7 +178,7 @@ let findStation (faction: string) (stationType: string) (stations: X4WorldStart.
 // stationsToMove are the IDs of stations that we're going to move to a safe sector, rather than
 // completely replace by a Xenon one. We'll still put a xenon station where they used to be
 let processStation
-    (station: X4WorldStart.Station)
+    (station: GodStation)
     (stationsToMove: string list)
     (xenonShipyard: XElement)
     (xenonWharf: XElement)
@@ -204,16 +198,16 @@ let processStation
         printfn "  LEAVING [%s]:%s :: %A" station.Owner (stationSectorName station) station.Id
         (None, None, None)
     | _ ->
-        // 'Select' contains the tags that describe whether this is a defence station, wharf or shipyard.
+        // 'SelectTags' describe whether this is a defence station, wharf or shipyard.
         let stationClone =
-            match station.Station.Select, station.Type with
+            match station.SelectTags, station.Type with
             | (None, Some "tradingstation") ->
                 // These seem to be teladi tranding stations. Replace with something more... interesting
                 Some(new XElement(xenonWharf))
             | (None, Some "factory") ->
                 // MOST examples in the logs without a tag all seem to be scenarios we weren't going to replace. Khaak, xenon, etc.
                 // But TERRAN/SEG has a few defence stations without tags. We'll check their construction plan instead.
-                match station.Station.Constructionplan with
+                match station.ConstructionPlan with
                 | Some "'ter_defence'" -> Some(new XElement(xenonDefence))
                 | Some "'ter_defenceplatform'" -> Some(new XElement(xenonDefence))
                 | Some "'pio_defence'" -> Some(new XElement(xenonDefence))
@@ -222,10 +216,10 @@ let processStation
             | (None, _) ->
                 // the other examples in the logs without a tag all seem to be scenarios we weren't going to replace. Khaak, xenon, etc.
                 None
-            | (Some select, _) ->
+            | (Some tags, _) ->
                 // create the new xelement clone so we can edit it later as part of the replacement station.
                 // We're going to replace different types of NPC buildings with different Xenon stations.
-                match select.Tags with
+                match tags with
                 | "[shipyard]" -> Some(new XElement(xenonShipyard))
                 | "[wharf]"
                 | "[equipmentdock]" -> Some(new XElement(xenonWharf))
@@ -247,8 +241,8 @@ let processStation
             // 2. Create some XML that will remove the old station from the game. Later, we're toing to check the list of
             //   remove stations and actually move a few of them to a new location instead.
             let id = station.Id
-            let locationClass = Option.defaultValue "none" station.Location.Class
-            let locationMacro = Option.defaultValue "none" station.Location.Macro
+            let locationClass = Option.defaultValue "none" station.LocationClass
+            let locationMacro = Option.defaultValue "none" station.LocationMacro
 
             let cluster =
                 findClusterFromLocation locationClass locationMacro
@@ -316,23 +310,29 @@ let processStation
 
 // with the shifting around of valid territory, the various races have lost some of their critical wharfs and shipyards.
 // We need to re-add some, but not all. Just make sure each faction has at least one of each type.
-let findStationsThatNeedMoving (stations: X4WorldStart.Station list) =
+let findStationsThatNeedMoving (stations: GodStation list) =
     stations
     // We're looking for the station we did NOT ignore earlier: ie, the ones that may have been replaced.
-    |> List.filter (fun (station: X4WorldStart.Station) -> ignoreStation station = false)
+    |> List.filter (fun (station: GodStation) -> ignoreStation station = false)
     // But they may have been ignored because they belong to a faction we're not touching
     |> List.filter (fun station ->
         not (List.contains station.Owner [ "khaak"; "xenon"; "yaki"; "scaleplate"; "buccaneers"; "player" ]))
     // And we're only interested in the ones that are shipyards, wharfs, trading stations, etc.
     |> List.filter (fun station ->
         // most special stations are identified by tags in the optional 'select' field.
-        station.Station.Select
-        |> Option.exists (fun s ->
-            List.contains (s.Tags) [ "[shipyard]"; "[wharf]"; "[equipmentdock]"; "[tradestation]" ])
+        station.SelectTags
+        |> Option.exists (fun tags ->
+            List.contains tags [ "[shipyard]"; "[wharf]"; "[equipmentdock]"; "[tradestation]" ])
         || station.Type = Some "tradingstation" // Teladi trading stations are identified differently, by using type.
     )
     // BUT, we only want to move the first instance of each type of station per fection, so lets drop duplicates.
-    |> List.distinctBy (fun station -> (station.Owner, station.Type, station.Station.Select))
+    // BYTE-COMPAT (T1): the old code deduped on the provider Select VALUE, which compares by
+    // reference - so stations WITH a <select> never actually deduped; only selectless stations
+    // deduped by (Owner, Type). Mapping the option to the (unique) Source element reproduces
+    // that behaviour exactly. Fix properly (dedup on SelectTags) as a deliberate balance
+    // change after the refactor's byte-lock is lifted.
+    |> List.distinctBy (fun station ->
+        (station.Owner, station.Type, station.SelectTags |> Option.map (fun _ -> XmlSource.value station.Source)))
 
 
 
@@ -352,11 +352,11 @@ let product_replace_xml (id: string) (quota_type: string) (quota: int) =
 
 // "products" define the number of production modules that will be created for a faction, scattered
 // between their factories. We're going tp increase it for Xenon, and reduce it for other major factions.
-let processProduct (product: X4WorldStart.Product) =
+let processProduct (product: GodProduct) =
     logProduct product
 
     match product.Owner, product.Ware with
-    | "xenon", _ -> Some(product_replace_xml product.Id "galaxy" (product.Quota.Galaxy * Economy.XenonProductionRatio))
+    | "xenon", _ -> Some(product_replace_xml product.Id "galaxy" (product.QuotaGalaxy * Economy.XenonProductionRatio))
     | "khaak", _
     | "yaki", _
     | "scaleplate", _
@@ -369,7 +369,7 @@ let processProduct (product: X4WorldStart.Product) =
     //    Some (product_replace_xml product.Id "sector" ( Option.defaultValue 32 product.Quota.Sector * 2) )
     | _ ->
         let reducedQuota =
-            (float product.Quota.Galaxy) * Economy.ProductionRatio |> ceil |> int
+            (float product.QuotaGalaxy) * Economy.ProductionRatio |> ceil |> int
         // X4 9.0 added static 'prefab' factories for these factions, which we keep (they
         // spawn inside the faction's own shrunk territory). They're additive to product
         // quotas, so subtract the prefab factory count for this ware from the reduced
@@ -639,7 +639,7 @@ let generateGateDefenseStations () =
 
             printfn "  FOUND DEFENSE STATION %s owner:%s" station.Id station.Owner
 
-            let stationClone = new XElement(station.XElement)
+            let stationClone = new XElement(XmlSource.value station.Source)
             let defenseStation = new X4GodMod.Station(stationClone)
             defenseStation.XElement.SetAttributeValue(XName.Get("id"), gate.ConnectionName + "_bastion_" + n.ToString()) // Give it a new unique ID
 

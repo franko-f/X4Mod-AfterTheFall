@@ -42,3 +42,32 @@ type Quaternion = {
 } with
 
     static member Default = { X = 0.0; Y = 0.0; Z = 0.0; W = 1.0 }
+
+/// A station entry from the vanilla god.xml (or a DLC god diff). Field list is
+/// exactly what the logic layer reads; Source is the provider-parsed <station>
+/// element, kept so the writer can clone it byte-identically.
+type GodStation = {
+    Id: string
+    Race: string
+    Owner: string
+    Type: string option // "factory" | "tradingstation" | ...
+    LocationClass: string option // "zone" | "sector" | ...
+    LocationMacro: string option
+    SelectTags: string option // <station><select tags="[defence]"/> - None when there is no <select>
+    ConstructionPlan: string option // <station constructionplan="'ter_defence'">
+    StationMacro: string option // <station macro="..."> - logging only
+    Source: XmlSource
+}
+
+/// A product (factory quota) entry from the vanilla god.xml or a DLC god diff.
+/// The mod's replacement quotas are built from scratch, so no Source is needed.
+type GodProduct = {
+    Id: string
+    Owner: string
+    Ware: string
+    Type: string
+    LocationFaction: string option
+    QuotaGalaxy: int
+    QuotaSector: int option
+    QuotaCluster: int option
+}
