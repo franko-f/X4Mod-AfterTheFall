@@ -3,7 +3,8 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>net7.0</TargetFramework>
   </PropertyGroup>
-  <ItemGroup><Compile Include="territories.fs" />
+  <ItemGroup><Compile Include="tuning.fs" />
+    <Compile Include="territories.fs" />
     <Content Include="mod_templates/content.xml" />
     <Content Include="mod_templates\factionlogic_stations.xml" />
     <Content Include="mod_templates\gamestarts.xml" />

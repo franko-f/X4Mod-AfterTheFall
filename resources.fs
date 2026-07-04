@@ -14,6 +14,7 @@
 module X4.Resources
 
 open System.Xml.Linq
+open X4.Tuning.Resources // resourceMap, resourceAreaMap and field placement offsets
 open X4.Territories
 open X4.Data
 open System
@@ -56,7 +57,9 @@ let processRegion cluster sector resource (count: int) =
     let x, y, z = getSectorPosition sector
 
     let x, y, z =
-        x + rand.Next(-80000, 80000), y + rand.Next(-5000, 5000), z + rand.Next(-80000, 80000)
+        x + rand.Next(-FieldPlacementOffsetXZ, FieldPlacementOffsetXZ),
+        y + rand.Next(-FieldPlacementOffsetY, FieldPlacementOffsetY),
+        z + rand.Next(-FieldPlacementOffsetXZ, FieldPlacementOffsetXZ)
 
     let region = resourceMap.[resource]
     let regionName = $"{sector}_region_{resource}_{count}" //%s_%s_Region00" cluster sector

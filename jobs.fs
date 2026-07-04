@@ -408,10 +408,10 @@ let processJob (job: X4Job.Job) =
         // XENON: Determine the quota mupliplier based on ship size and military/civilian
         let multiplier =
             match isMilitaryJob job, size with
-            | true, "ship_xl" -> 2.8 // battleships and carriers
-            | true, "ship_l" -> 2.8 // destroyers: of which Xenon should have none in vanilla
-            | true, _ -> 3.8 // S and M military ships
-            | false, _ -> 5.0 // s & m civilian ships - High number cranks up the Xenon economy. We want them printing ships.
+            | true, "ship_xl" -> X4.Tuning.Jobs.XenonMilitaryXLMultiplier // battleships and carriers
+            | true, "ship_l" -> X4.Tuning.Jobs.XenonMilitaryLMultiplier // destroyers
+            | true, _ -> X4.Tuning.Jobs.XenonMilitarySMMultiplier // S and M military ships
+            | false, _ -> X4.Tuning.Jobs.XenonCivilianMultiplier // s & m civilian ships
 
         maybeGenerateQuotaReplacementXML job.Quota multiplier
 
@@ -424,8 +424,7 @@ let processJob (job: X4Job.Job) =
         || isFaction (job, "fallensplit")
         || isFaction (job, "yaki")
     then
-        let multiplier = 0.4
-        maybeGenerateQuotaReplacementXML job.Quota multiplier
+        maybeGenerateQuotaReplacementXML job.Quota X4.Tuning.Jobs.PirateMilitaryMultiplier
 
     else if List.contains size [ "ship_s"; "ship_m" ] then
         None // We don't care about small ships, just the big ones:

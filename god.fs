@@ -33,8 +33,7 @@ open X4.Utilities
 open X4.Data
 open X4.Territories
 
-let ProductionRatio = 0.20 // only about a quarter of the faction's production factories will be left
-let XenonProductionRatio = 3 // Xenon get 3 times as many solar factories as vanilla. So can, in theory, build much faster than before
+open X4.Tuning // Economy ratios and gate defence values live in tuning.fs
 
 
 // the 'log' functions just extract a bit of data about a station, and log it
@@ -356,7 +355,7 @@ let processProduct (product: X4WorldStart.Product) =
     logProduct product
 
     match product.Owner, product.Ware with
-    | "xenon", _ -> Some(product_replace_xml product.Id "galaxy" (product.Quota.Galaxy * XenonProductionRatio)) // Xenon get a 4x quota
+    | "xenon", _ -> Some(product_replace_xml product.Id "galaxy" (product.Quota.Galaxy * Economy.XenonProductionRatio))
     | "khaak", _
     | "yaki", _
     | "scaleplate", _
@@ -368,18 +367,18 @@ let processProduct (product: X4WorldStart.Product) =
     // can spawn all their factories in the slightly less bad .4 sunlight sector.
     //    Some (product_replace_xml product.Id "sector" ( Option.defaultValue 32 product.Quota.Sector * 2) )
     | _ ->
-        let reducedQuota = (float product.Quota.Galaxy) * ProductionRatio |> ceil |> int
+        let reducedQuota =
+            (float product.Quota.Galaxy) * Economy.ProductionRatio |> ceil |> int
         // X4 9.0 added static 'prefab' factories for these factions, which we keep (they
         // spawn inside the faction's own shrunk territory). They're additive to product
         // quotas, so subtract the prefab factory count for this ware from the reduced
         // quota - keeping the faction's factory total at the intended weakened level.
-        // Every faction keeps at least 1 dynamic factory per product.
         let prefabs =
             X4.Data.prefabFactoryCounts
             |> Map.tryFind (product.Owner, product.Ware)
             |> Option.defaultValue 0
 
-        let newGalaxyQuota = max 1 (reducedQuota - prefabs)
+        let newGalaxyQuota = max Economy.MinimumProductQuota (reducedQuota - prefabs)
 
         if prefabs > 0 then
             printfn "  PREFAB OFFSET %s:%s quota %i -> %i (%i prefab factories)" product.Owner product.Ware reducedQuota newGalaxyQuota prefabs
@@ -396,7 +395,8 @@ let processProduct (product: X4WorldStart.Product) =
 // and then updating the location to the new coordinates, and finally renaming the station to be
 // '(gate.name).defense_[id]' so that it's unique.
 let generateGateDefenseStations () =
-    let gateStations = X4.Gates.getRequiredDefenseStationLocations 6 15000 // 5 stations per gate, 10000m from the gate. Give them almost overlapping fields of fire for long range plasma
+    let gateStations =
+        X4.Gates.getRequiredDefenseStationLocations GateDefence.StationsPerGate GateDefence.StationDistance
 
     [
         for gate, n, location in gateStations do

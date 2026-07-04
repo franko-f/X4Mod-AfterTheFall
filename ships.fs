@@ -13,6 +13,9 @@ open System.Xml.Linq
 open X4.Data
 open X4.Utilities
 
+// All the abandoned-ship balance values (counts, battlefields, scatter ranges) live in tuning.fs.
+module Tune = X4.Tuning.AbandonedShips
+
 let rand = new Random(12345) // Seed the random number generator so we get the same results each time, as long as we're not adding new regions or changing territory order.
 
 // Define a few types for ship location that we'll use when we place an abandoned ship
@@ -526,7 +529,10 @@ let economyShips =
 let generateRandomAbandonedShipFromListInSector (sector: string) (shipList: string list) : ShipLocation =
     let ship = shipList.[rand.Next(shipList.Length)]
     // generate random coordinates within the sector, in KM offset from sector center (different from other coordinates)
-    let x, y, z = rand.Next(-160, 160), rand.Next(-10, 10), rand.Next(-180, 180)
+    let x, y, z =
+        rand.Next(-Tune.SectorScatterX, Tune.SectorScatterX),
+        rand.Next(-Tune.SectorScatterY, Tune.SectorScatterY),
+        rand.Next(-Tune.SectorScatterZ, Tune.SectorScatterZ)
     // generate random yaw and pitch
     let yaw, pitch, roll =
         rand.Next(-180, 180), rand.Next(-180, 180), rand.Next(-180, 180)
@@ -551,10 +557,11 @@ let generateRandomEconomyAbandonedShips (count: int) (size: string) =
     [ for i in 1..count -> generateRandomAbandonedShipFromList ships ]
 
 // This function generates a bunch of abandoned ships near each other, as if a major battle occurred.
-// The parameters determine how many of each class are in the field. Ships are clustered within 5km of a point
-// in a random unsafe sector.
+// The parameters determine how many of each class are in the field. Ships are clustered within
+// Tuning.AbandonedShips.BattlefieldSpread km of a point in a random unsafe sector.
 let generateBattlefield (countXL: int) (countL: int) (countM: int) (countS: int) =
     printfn "GENERATING BATTLEFIELD: XL: %i, L: %i, M: %i, S: %i" countXL countL countM countS
+    let spread = Tune.BattlefieldSpread
     // First generate the ships for each class.
     let xl, l, m, s =
         generateRandomMilitaryAbandonedShips countXL "xl",
@@ -570,19 +577,19 @@ let generateBattlefield (countXL: int) (countL: int) (countM: int) (countS: int)
     List.concat [
         [
             for (ship, _sector, _, rotation) in xl ->
-                (ship, sector, (x + rand.Next(-5, 5), y + rand.Next(-5, 5), z + rand.Next(-5, 5)), rotation)
+                (ship, sector, (x + rand.Next(-spread, spread), y + rand.Next(-spread, spread), z + rand.Next(-spread, spread)), rotation)
         ]
         [
             for (ship, _sector, _, rotation) in l ->
-                (ship, sector, (x + rand.Next(-5, 5), y + rand.Next(-5, 5), z + rand.Next(-5, 5)), rotation)
+                (ship, sector, (x + rand.Next(-spread, spread), y + rand.Next(-spread, spread), z + rand.Next(-spread, spread)), rotation)
         ]
         [
             for (ship, _sector, _, rotation) in m ->
-                (ship, sector, (x + rand.Next(-5, 5), y + rand.Next(-5, 5), z + rand.Next(-5, 5)), rotation)
+                (ship, sector, (x + rand.Next(-spread, spread), y + rand.Next(-spread, spread), z + rand.Next(-spread, spread)), rotation)
         ]
         [
             for (ship, _sector, _, rotation) in s ->
-                (ship, sector, (x + rand.Next(-5, 5), y + rand.Next(-5, 5), z + rand.Next(-5, 5)), rotation)
+                (ship, sector, (x + rand.Next(-spread, spread), y + rand.Next(-spread, spread), z + rand.Next(-spread, spread)), rotation)
         ]
     ]
 
@@ -775,48 +782,46 @@ let generate_abandoned_ships_file (placedObjectsFilename: string) (loadoutFilena
         [
 
             // A bunch of ships in unsafe space to begin
-            generateRandomMilitaryAbandonedShips 4 "xl" |> List.map ProcessShip
-            generateRandomMilitaryAbandonedShips 6 "l" |> List.map ProcessShip
-            generateRandomMilitaryAbandonedShips 6 "m" |> List.map ProcessShip
-            generateRandomMilitaryAbandonedShips 6 "s" |> List.map ProcessShip
-            generateRandomEconomyAbandonedShips 3 "xl" |> List.map ProcessShip
-            generateRandomEconomyAbandonedShips 12 "l" |> List.map ProcessShip
-            generateRandomEconomyAbandonedShips 8 "m" |> List.map ProcessShip
-            generateRandomEconomyAbandonedShips 6 "s" |> List.map ProcessShip
+            generateRandomMilitaryAbandonedShips Tune.UnsafeMilitaryXL "xl" |> List.map ProcessShip
+            generateRandomMilitaryAbandonedShips Tune.UnsafeMilitaryL "l" |> List.map ProcessShip
+            generateRandomMilitaryAbandonedShips Tune.UnsafeMilitaryM "m" |> List.map ProcessShip
+            generateRandomMilitaryAbandonedShips Tune.UnsafeMilitaryS "s" |> List.map ProcessShip
+            generateRandomEconomyAbandonedShips Tune.UnsafeEconomyXL "xl" |> List.map ProcessShip
+            generateRandomEconomyAbandonedShips Tune.UnsafeEconomyL "l" |> List.map ProcessShip
+            generateRandomEconomyAbandonedShips Tune.UnsafeEconomyM "m" |> List.map ProcessShip
+            generateRandomEconomyAbandonedShips Tune.UnsafeEconomyS "s" |> List.map ProcessShip
 
 
             // Lets generate a few battlefields of varying sizes
-            generateBattlefield 1 3 2 2 |> List.map ProcessShip
-            generateBattlefield 0 3 3 0 |> List.map ProcessShip
-            generateBattlefield 0 1 3 4 |> List.map ProcessShip
-            generateBattlefield 0 0 3 6 |> List.map ProcessShip
-            generateBattlefield 0 0 6 3 |> List.map ProcessShip
+            Tune.Battlefields
+            |> List.collect (fun (countXL, countL, countM, countS) ->
+                generateBattlefield countXL countL countM countS |> List.map ProcessShip)
 
             // followed by a bunch of M & S in safe space.
             [
-                for i in 1..5 ->
+                for i in 1 .. Tune.SafeMilitaryM ->
                     militaryShips
                     |> filterListBy [ "m" ]
                     |> (generateRandomAbandonedShipFromListInSector (X4.Data.selectRandomSafeSector().Name))
                     |> ProcessShip
-                for i in 1..6 ->
+                for i in 1 .. Tune.SafeEconomyM ->
                     economyShips
                     |> filterListBy [ "m" ]
                     |> (generateRandomAbandonedShipFromListInSector (X4.Data.selectRandomSafeSector().Name))
                     |> ProcessShip
-                for i in 1..6 ->
+                for i in 1 .. Tune.SafeMilitaryS ->
                     militaryShips
                     |> filterListBy [ "s" ]
                     |> (generateRandomAbandonedShipFromListInSector (X4.Data.selectRandomSafeSector().Name))
                     |> ProcessShip
-                for i in 1..8 ->
+                for i in 1 .. Tune.SafeEconomyS ->
                     economyShips
                     |> filterListBy [ "s" ]
                     |> (generateRandomAbandonedShipFromListInSector (X4.Data.selectRandomSafeSector().Name))
                     |> ProcessShip
 
                 // ok, a couple large l economy ship.
-                for i in 1..2 ->
+                for i in 1 .. Tune.SafeEconomyL ->
                     economyShips
                     |> filterListBy [ "l" ]
                     |> (generateRandomAbandonedShipFromListInSector (X4.Data.selectRandomSafeSector().Name))
