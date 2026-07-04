@@ -6,9 +6,6 @@
 module X4.Ships
 
 open System
-open System.IO
-open System.Xml
-open System.Xml.Linq
 
 open X4.Data
 open X4.Types

@@ -15,24 +15,6 @@ open X4.Types
 open X4.Utilities
 open X4.Data.Xml
 
-// Each DLC is in a separate directory; and the different types of files describing ships
-// and equipment are in a different set of subdirs off of that base of subtype.
-// Quick helper function with some common code to pull in all the files from these
-// subdirs from each DLC and merge in.
-let getDlcXmlFiles dataDir =
-    getDlcDirectories dataDir
-    |> List.toArray
-    |> Array.collect (fun dir ->
-        try
-            printfn $"Loading XML files from {dir}"
-            // Recursively get all XML files in directory and subdirectories
-            Directory.GetFiles(dir, "*.xml", SearchOption.AllDirectories)
-        with ex ->
-            printfn $"Failed to load files from {dir}. Directory may not exist."
-            [||])
-
-
-
 // Get all the assets defined in the core game and the DLCs. This includes
 // equipment for ships, as well as miscellaneous assets like wares, adsigns, etc
 let (allAssets: Asset list) =
@@ -103,18 +85,6 @@ let (allAssets: Asset list) =
 
             None)
     |> List.choose id
-
-
-let allAssetsByClass =
-    // Group all the assets by their class, so we can easily find them later.
-    allAssets |> List.groupBy (fun asset -> asset.Class) |> Map.ofList // Convert to a map for easy lookup
-
-let allAssetClasses =
-    // Get all the unique classes of assets, sorted alphabetically.
-    allAssets
-    |> List.distinctBy (fun asset -> asset.Class)
-    |> List.map (fun asset -> asset.Class)
-    |> List.sort
 
 
 // Some tags are not relevant for selection/slot match

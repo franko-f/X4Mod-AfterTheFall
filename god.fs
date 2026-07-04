@@ -28,8 +28,6 @@
 
 module X4.God
 
-open System.Xml
-open System.Xml.Linq
 open X4.Types
 open X4.Utilities
 open X4.Data
@@ -269,11 +267,11 @@ let findStationsThatNeedMoving (stations: GodStation list) =
     // BUT, we only want to move the first instance of each type of station per fection, so lets drop duplicates.
     // BYTE-COMPAT (T1): the old code deduped on the provider Select VALUE, which compares by
     // reference - so stations WITH a <select> never actually deduped; only selectless stations
-    // deduped by (Owner, Type). Mapping the option to the (unique) Source element reproduces
-    // that behaviour exactly. Fix properly (dedup on SelectTags) as a deliberate balance
-    // change after the refactor's byte-lock is lifted.
+    // deduped by (Owner, Type). An XmlSource compares by the identity of its wrapped element
+    // (unique per station), reproducing that behaviour exactly. Fix properly (dedup on
+    // SelectTags) as a deliberate balance change after the refactor's byte-lock is lifted.
     |> List.distinctBy (fun station ->
-        (station.Owner, station.Type, station.SelectTags |> Option.map (fun _ -> XmlSource.value station.Source)))
+        (station.Owner, station.Type, station.SelectTags |> Option.map (fun _ -> station.Source)))
 
 
 

@@ -108,14 +108,6 @@ let allGalaxy =
 
 // ===== FINISHED LOADING DATA FROM XML FILES =====
 
-// Gates are linked to a zone by using one of the following as a reference. So by looking
-// for these references in the zone file, we can find the gates in a zone.
-// I don't think we actually need this. More investigation seems to suggest that a gate is
-// identified by a zone connection ref="gates" instead. If correct, we can remove this.
-let gateMacros = [
-    "props_gates_orb_accelerator_01_macro", "props_gates_anc_gate_macro", "props_ter_gate_01_macro"
-]
-
 
 
 // Get all the factions defined in the speficied DLC
@@ -153,14 +145,6 @@ let findSectorsInCluster (cluster: string) =
     getClusterConnectionsByType "sectors" cluster
     |> List.map (fun connection -> Option.defaultValue "no_sector_name" connection.Macro.Ref)
     |> List.map (fun sector -> sector.ToLower()) // Lower case for consistency
-
-let getFactionClusters (faction: string) =
-    territories
-    |> List.filter (fun record -> record.faction = faction)
-    |> List.map (fun record -> record.cluster)
-
-let getTerritoryFromClusterName (clusterName: string) =
-    territories |> List.tryFind (fun record -> record.cluster =? clusterName)
 
 // Given a faction and a territory record (encapsulating a cluster and the faction that owns it), return all the sectors in that territory that belong to the faction. Empty list if none.
 let getFactionSectorsInTerritory (faction: string) (territory: Territory) =
@@ -282,17 +266,6 @@ let findFactionFromZone (zone: string) =
     | None -> None
     | Some sector -> findFactionFromSector sector
 
-
-// Get the X, Y, Z position of a cluster, offset from galactic center.
-let getClusterPosition (clusterName: string) =
-    // Cluster positions are stored as a connection in the galaxy file, not the cluster file.
-    allGalaxy
-    |> List.tryFind (fun connection -> connection.Ref = "clusters" && connection.Macro.Ref =?? clusterName)
-    // Now that we've found the connection, we can get the position from it.
-    // This will raise an exception if there's no offset. We want it to fail if the schema has changed.
-    |> Option.map (fun connection ->
-        connection.Offset.Value.Position.X, connection.Offset.Value.Position.Y, connection.Offset.Value.Position.Z)
-    |> Option.get
 
 // this function wil take an XElement, and return the integer version of the value.
 // It will handle both decimals and floating point strings in scientific notation.

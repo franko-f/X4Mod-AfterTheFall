@@ -4,8 +4,9 @@
 /// map entity names to their definition files.
 /// All XmlProvider types live here; by the end of the refactor nothing outside
 /// the X4.Data modules should reference them.
+/// Deliberately NOT [<AutoOpen>]: only the X4.Data.* modules open this explicitly,
+/// so `open X4.Data` in a logic module cannot see any provider types.
 /// </summary>
-[<AutoOpen>]
 module X4.Data.Xml
 
 open Microsoft.FSharp.Core

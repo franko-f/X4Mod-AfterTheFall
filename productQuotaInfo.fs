@@ -1,7 +1,5 @@
 module X4.ProductQuotaInfo
 
-open System.Xml.Linq
-open FSharp.Data
 open X4.Utilities
 open X4.Data
 
