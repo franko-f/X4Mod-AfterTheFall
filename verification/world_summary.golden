@@ -1,0 +1,1235 @@
+== extensions/ego_dlc_boron/libraries/mapdefaults.xml (4) ==
+resources Cluster_606_Sector001_macro: sphere_large_hydrogen_high_slow=3, sphere_large_ore_high_slow=3, sphere_large_silicon_high_slow=2, sphere_medium_hydrogen_medium_average=3, sphere_small_nividium_medium_average=1, sphere_small_ore_medium_average=4, sphere_small_silicon_medium_average=3
+resources Cluster_606_Sector002_macro: sphere_large_helium_high_slow=3, sphere_large_ice_high_slow=3, sphere_medium_helium_medium_average=3, sphere_small_ice_medium_average=3
+resources Cluster_606_Sector003_macro: sphere_large_methane_high_slow=3, sphere_medium_methane_medium_average=3
+resources Cluster_607_Sector001_macro: sphere_medium_rawscrap_high_slow=3, sphere_small_hydrogen_medium_average=2
+
+== extensions/ego_dlc_boron/maps/xu_ep2_universe/dlc_boron_clusters.xml (6) ==
+region Cluster_606_macro: atf_asteroid_field_high @ (-64863,3588,50600)
+region Cluster_606_macro: atf_helium_highyield_field @ (-637859,-3762,-41818073)
+region Cluster_606_macro: atf_hydrogen_highyield_field @ (-41428,-3348,-15948)
+region Cluster_606_macro: atf_ice_field_high @ (-558338,-3341,-41756182)
+region Cluster_606_macro: atf_methane_highyield_field @ (59152847,-1377,-1969300)
+region Cluster_607_macro: atf_wreckfield_xenon_battle @ (20149,-516,4094)
+
+== extensions/ego_dlc_pirate/libraries/mapdefaults.xml (1) ==
+resources Cluster_502_Sector001_macro: sphere_medium_rawscrap_high_slow=3, sphere_small_hydrogen_medium_average=2
+
+== extensions/ego_dlc_pirate/maps/xu_ep2_universe/dlc_pirate_clusters.xml (1) ==
+region Cluster_502_macro: atf_wreckfield_xenon_battle @ (-66241,-3294,-61550)
+
+== extensions/ego_dlc_split/libraries/mapdefaults.xml (6) ==
+resources Cluster_405_Sector001_macro: sphere_large_helium_high_slow=3, sphere_large_hydrogen_high_slow=3, sphere_large_methane_high_slow=3, sphere_large_ore_high_slow=3, sphere_large_silicon_high_slow=2, sphere_medium_helium_medium_average=3, sphere_medium_hydrogen_medium_average=3, sphere_medium_methane_medium_average=3, sphere_small_nividium_medium_average=1, sphere_small_ore_medium_average=4, sphere_small_silicon_medium_average=3
+resources Cluster_406_Sector001_macro: sphere_large_ice_high_slow=3, sphere_large_ore_high_slow=6, sphere_large_silicon_high_slow=4, sphere_medium_rawscrap_high_slow=3, sphere_small_hydrogen_medium_average=2, sphere_small_ice_medium_average=3, sphere_small_nividium_medium_average=2, sphere_small_ore_medium_average=8, sphere_small_silicon_medium_average=6
+resources Cluster_409_Sector001_macro: sphere_large_methane_high_slow=3, sphere_large_ore_high_slow=3, sphere_large_silicon_high_slow=2, sphere_medium_methane_medium_average=3, sphere_small_nividium_medium_average=1, sphere_small_ore_medium_average=4, sphere_small_silicon_medium_average=3
+resources Cluster_410_Sector001_macro: sphere_large_helium_high_slow=3, sphere_large_ore_high_slow=3, sphere_large_silicon_high_slow=2, sphere_medium_helium_medium_average=3, sphere_medium_rawscrap_high_slow=3, sphere_small_hydrogen_medium_average=2, sphere_small_nividium_medium_average=1, sphere_small_ore_medium_average=4, sphere_small_silicon_medium_average=3
+resources Cluster_411_Sector001_macro: sphere_large_helium_high_slow=3, sphere_large_hydrogen_high_slow=3, sphere_large_methane_high_slow=3, sphere_medium_helium_medium_average=3, sphere_medium_hydrogen_medium_average=3, sphere_medium_methane_medium_average=3
+resources Cluster_417_Sector001_macro: sphere_large_helium_high_slow=3, sphere_large_hydrogen_high_slow=3, sphere_large_methane_high_slow=3, sphere_large_ore_high_slow=3, sphere_large_silicon_high_slow=2, sphere_medium_helium_medium_average=3, sphere_medium_hydrogen_medium_average=3, sphere_medium_methane_medium_average=3, sphere_small_nividium_medium_average=1, sphere_small_ore_medium_average=4, sphere_small_silicon_medium_average=3
+
+== extensions/ego_dlc_split/maps/xu_ep2_universe/dlc4_clusters.xml (20) ==
+region Cluster_405_macro: atf_asteroid_field_high @ (-50287,-2225,14316)
+region Cluster_405_macro: atf_helium_highyield_field @ (-8591,3,-69532)
+region Cluster_405_macro: atf_hydrogen_highyield_field @ (17762,-3909,-59960)
+region Cluster_405_macro: atf_methane_highyield_field @ (25124,3315,-40538)
+region Cluster_406_macro: atf_asteroid_field_high @ (-79757,4565,-8154)
+region Cluster_406_macro: atf_asteroid_field_high @ (56615,4703,68848)
+region Cluster_406_macro: atf_ice_field_high @ (-3094,-395,-59869)
+region Cluster_406_macro: atf_wreckfield_xenon_battle @ (46679,-4505,7000)
+region Cluster_409_macro: atf_asteroid_field_high @ (-66188,1300,-71038)
+region Cluster_409_macro: atf_methane_highyield_field @ (-35989,4557,19758)
+region Cluster_410_macro: atf_asteroid_field_high @ (74528,-4003,4930)
+region Cluster_410_macro: atf_helium_highyield_field @ (61752,3975,-46498)
+region Cluster_410_macro: atf_wreckfield_xenon_battle @ (32507,-2593,62164)
+region Cluster_411_macro: atf_helium_highyield_field @ (75042,-3548,78059)
+region Cluster_411_macro: atf_hydrogen_highyield_field @ (-72684,-1648,-73584)
+region Cluster_411_macro: atf_methane_highyield_field @ (-16037,-1061,-43519)
+region Cluster_417_macro: atf_asteroid_field_high @ (-35883,-4310,-73719)
+region Cluster_417_macro: atf_helium_highyield_field @ (-35891,-1150,-66808)
+region Cluster_417_macro: atf_hydrogen_highyield_field @ (-24837,1277,27309)
+region Cluster_417_macro: atf_methane_highyield_field @ (-21298,1993,-25488)
+
+== extensions/ego_dlc_terran/libraries/mapdefaults.xml (6) ==
+resources Cluster_101_Sector001_macro: sphere_large_ice_high_slow=3, sphere_large_methane_high_slow=3, sphere_large_ore_high_slow=6, sphere_large_silicon_high_slow=4, sphere_medium_methane_medium_average=3, sphere_medium_rawscrap_high_slow=3, sphere_small_hydrogen_medium_average=2, sphere_small_ice_medium_average=3, sphere_small_nividium_medium_average=2, sphere_small_ore_medium_average=8, sphere_small_silicon_medium_average=6
+resources Cluster_102_Sector001_macro: sphere_large_helium_high_slow=3, sphere_large_hydrogen_high_slow=3, sphere_large_methane_high_slow=6, sphere_large_ore_high_slow=3, sphere_large_silicon_high_slow=2, sphere_medium_helium_medium_average=3, sphere_medium_hydrogen_medium_average=3, sphere_medium_methane_medium_average=6, sphere_small_nividium_medium_average=1, sphere_small_ore_medium_average=4, sphere_small_silicon_medium_average=3
+resources Cluster_104_Sector001_macro: sphere_large_ice_high_slow=3, sphere_large_ore_high_slow=3, sphere_large_silicon_high_slow=2, sphere_small_ice_medium_average=3, sphere_small_nividium_medium_average=1, sphere_small_ore_medium_average=4, sphere_small_silicon_medium_average=3
+resources Cluster_104_Sector002_macro: sphere_large_ore_high_slow=3, sphere_large_silicon_high_slow=2, sphere_medium_rawscrap_high_slow=3, sphere_small_hydrogen_medium_average=2, sphere_small_nividium_medium_average=1, sphere_small_ore_medium_average=4, sphere_small_silicon_medium_average=3
+resources Cluster_106_Sector001_macro: sphere_large_hydrogen_high_slow=3, sphere_large_methane_high_slow=6, sphere_large_ore_high_slow=3, sphere_large_silicon_high_slow=2, sphere_medium_hydrogen_medium_average=3, sphere_medium_methane_medium_average=6, sphere_small_nividium_medium_average=1, sphere_small_ore_medium_average=4, sphere_small_silicon_medium_average=3
+resources Cluster_115_Sector001_macro: sphere_large_helium_high_slow=3, sphere_large_ore_high_slow=3, sphere_large_silicon_high_slow=2, sphere_medium_helium_medium_average=3, sphere_small_nividium_medium_average=1, sphere_small_ore_medium_average=4, sphere_small_silicon_medium_average=3
+
+== extensions/ego_dlc_terran/maps/xu_ep2_universe/dlc_terran_clusters.xml (20) ==
+region Cluster_101_macro: atf_asteroid_field_high @ (-21818,-4677,1108)
+region Cluster_101_macro: atf_asteroid_field_high @ (34277,-1352,12226)
+region Cluster_101_macro: atf_ice_field_high @ (-30238,2752,-78611)
+region Cluster_101_macro: atf_methane_highyield_field @ (-8378,-1845,54549)
+region Cluster_101_macro: atf_wreckfield_xenon_battle @ (-66578,-44,53850)
+region Cluster_102_macro: atf_asteroid_field_high @ (-36337,-4767,6119)
+region Cluster_102_macro: atf_helium_highyield_field @ (56862,485,28372)
+region Cluster_102_macro: atf_hydrogen_highyield_field @ (-66360,-1343,39412)
+region Cluster_102_macro: atf_methane_highyield_field @ (-48374,1142,60959)
+region Cluster_102_macro: atf_methane_highyield_field @ (45511,-1862,-12824)
+region Cluster_104_macro: atf_asteroid_field_high @ (-11184,1677,63001)
+region Cluster_104_macro: atf_asteroid_field_high @ (32343,-3286,-175958074)
+region Cluster_104_macro: atf_ice_field_high @ (-9903,-764,70451)
+region Cluster_104_macro: atf_wreckfield_xenon_battle @ (65324,-1550,-175942232)
+region Cluster_106_macro: atf_asteroid_field_high @ (58017,-2504,51676)
+region Cluster_106_macro: atf_hydrogen_highyield_field @ (49014,4061,-43913)
+region Cluster_106_macro: atf_methane_highyield_field @ (-34543,-2516,42052)
+region Cluster_106_macro: atf_methane_highyield_field @ (-53808,3981,-65290)
+region Cluster_115_macro: atf_asteroid_field_high @ (-39412,-3810,62797)
+region Cluster_115_macro: atf_helium_highyield_field @ (61611,1182,28129)
+
+== extensions/ego_dlc_terran/md/story_terran_core.xml (1) ==
+op replace /mdscript[@name='Story_Terran_Core']//cue[@name='Start']//cue[@name='Setup']/actions
+
+== extensions/ego_dlc_terran/md/story_terran_prelude.xml (1) ==
+op remove //cue[@name='Prelude_Teladi_Trespassing']
+
+== libraries/constructionplans.xml (10) ==
+plan atf_bastion_arg_defence entries=36
+plan atf_bastion_bor_defence entries=30
+plan atf_bastion_par_defence entries=48
+plan atf_bastion_pio_defence entries=26
+plan atf_bastion_rip_defence entries=36
+plan atf_bastion_spl_defence entries=38
+plan atf_bastion_tel_defence entries=38
+plan atf_bastion_ter_defence entries=32
+plan atf_bastion_vig_defence entries=44
+plan atf_scrap_cross entries=129
+
+== libraries/gamestarts.xml (2) ==
+op add /gamestarts
+op add /gamestarts/groups
+
+== libraries/god.xml (809) ==
+product-add xen_solar_Cluster_100_sector001_macro ware=energycells owner=xenon @ sector:Cluster_100_sector001_macro galaxy=2 sector=2
+product-add xen_solar_Cluster_104_sector001_macro ware=energycells owner=xenon @ sector:Cluster_104_sector001_macro galaxy=2 sector=2
+product-add xen_solar_Cluster_108_sector003_macro ware=energycells owner=xenon @ sector:Cluster_108_sector003_macro galaxy=2 sector=2
+product-add xen_solar_Cluster_23_sector001_macro ware=energycells owner=xenon @ sector:Cluster_23_sector001_macro galaxy=2 sector=2
+product-add xen_solar_Cluster_39_sector001_macro ware=energycells owner=xenon @ sector:Cluster_39_sector001_macro galaxy=2 sector=2
+product-add xen_solar_Cluster_413_sector001_macro ware=energycells owner=xenon @ sector:Cluster_413_sector001_macro galaxy=2 sector=2
+product-add xen_solar_Cluster_42_sector001_macro ware=energycells owner=xenon @ sector:Cluster_42_sector001_macro galaxy=2 sector=2
+product-add xen_solar_Cluster_46_sector001_macro ware=energycells owner=xenon @ sector:Cluster_46_sector001_macro galaxy=2 sector=2
+product-add xen_solar_Cluster_602_sector001_macro ware=energycells owner=xenon @ sector:Cluster_602_sector001_macro galaxy=2 sector=2
+product-add xen_solar_Cluster_705_sector001_macro ware=energycells owner=xenon @ sector:Cluster_705_sector001_macro galaxy=2 sector=2
+product-add xen_solar_Cluster_720_sector001_macro ware=energycells owner=xenon @ sector:Cluster_720_sector001_macro galaxy=2 sector=2
+product-quota ant_advancedcomposites galaxy=1
+product-quota ant_advancedelectronics galaxy=1
+product-quota ant_antimattercells galaxy=1
+product-quota ant_antimatterconverters galaxy=1
+product-quota ant_claytronics galaxy=1
+product-quota ant_dronecomponents galaxy=1
+product-quota ant_energycells galaxy=2
+product-quota ant_engineparts galaxy=1
+product-quota ant_fieldcoils galaxy=1
+product-quota ant_foodrations galaxy=1
+product-quota ant_graphene galaxy=1
+product-quota ant_hullparts galaxy=2
+product-quota ant_meat galaxy=1
+product-quota ant_medicalsupplies galaxy=2
+product-quota ant_microchips galaxy=2
+product-quota ant_missilecomponents galaxy=1
+product-quota ant_plasmaconductors galaxy=1
+product-quota ant_quantumtubes galaxy=1
+product-quota ant_refinedmetals galaxy=1
+product-quota ant_scanningarrays galaxy=1
+product-quota ant_shieldcomponents galaxy=1
+product-quota ant_siliconwafers galaxy=1
+product-quota ant_smartchips galaxy=2
+product-quota ant_spacefuel galaxy=1
+product-quota ant_spices galaxy=1
+product-quota ant_superfluidcoolant galaxy=1
+product-quota ant_turretcomponents galaxy=1
+product-quota ant_water galaxy=1
+product-quota ant_weaponcomponents galaxy=1
+product-quota ant_wheat galaxy=1
+product-quota arg_advancedcomposites galaxy=1
+product-quota arg_advancedelectronics galaxy=1
+product-quota arg_advancedelectronics_new galaxy=1
+product-quota arg_antimattercells galaxy=1
+product-quota arg_antimatterconverters galaxy=1
+product-quota arg_claytronics galaxy=1
+product-quota arg_dlc_split_energycells galaxy=1
+product-quota arg_dlc_split_foodrations galaxy=1
+product-quota arg_dlc_split_meat galaxy=1
+product-quota arg_dlc_split_medicalsupplies galaxy=1
+product-quota arg_dlc_split_spacefuel galaxy=1
+product-quota arg_dlc_split_spices galaxy=1
+product-quota arg_dlc_split_water galaxy=1
+product-quota arg_dlc_split_wheat galaxy=1
+product-quota arg_dronecomponents galaxy=1
+product-quota arg_energycells galaxy=2
+product-quota arg_engineparts galaxy=1
+product-quota arg_fieldcoils galaxy=1
+product-quota arg_foodrations galaxy=1
+product-quota arg_graphene galaxy=1
+product-quota arg_hullparts galaxy=1
+product-quota arg_meat galaxy=1
+product-quota arg_medicalsupplies galaxy=2
+product-quota arg_microchips galaxy=2
+product-quota arg_missilecomponents galaxy=1
+product-quota arg_plasmaconductors galaxy=1
+product-quota arg_quantumtubes galaxy=1
+product-quota arg_refinedmetals galaxy=1
+product-quota arg_refinedmetals_new galaxy=1
+product-quota arg_scanningarrays galaxy=1
+product-quota arg_shieldcomponents galaxy=1
+product-quota arg_siliconwafers galaxy=2
+product-quota arg_smartchips galaxy=2
+product-quota arg_spacefuel galaxy=1
+product-quota arg_spices galaxy=1
+product-quota arg_superfluidcoolant galaxy=1
+product-quota arg_turretcomponents galaxy=1
+product-quota arg_turretcomponents_new galaxy=1
+product-quota arg_water galaxy=1
+product-quota arg_water_new galaxy=1
+product-quota arg_weaponcomponents galaxy=1
+product-quota arg_wheat galaxy=1
+product-quota bor_advancedcomposites galaxy=1
+product-quota bor_advancedelectronics galaxy=1
+product-quota bor_antimattercells galaxy=1
+product-quota bor_antimatterconverters galaxy=1
+product-quota bor_bofu galaxy=1
+product-quota bor_bogas galaxy=1
+product-quota bor_claytronics galaxy=1
+product-quota bor_dronecomponents galaxy=1
+product-quota bor_energycells galaxy=1
+product-quota bor_engineparts galaxy=1
+product-quota bor_fieldcoils galaxy=1
+product-quota bor_graphene galaxy=1
+product-quota bor_hullparts galaxy=2
+product-quota bor_medicalsupplies galaxy=1
+product-quota bor_microchips galaxy=1
+product-quota bor_missilecomponents galaxy=1
+product-quota bor_plankton galaxy=1
+product-quota bor_plasmaconductors galaxy=1
+product-quota bor_quantumtubes galaxy=1
+product-quota bor_refinedmetals galaxy=1
+product-quota bor_scanningarrays galaxy=1
+product-quota bor_shieldcomponents galaxy=1
+product-quota bor_siliconwafers galaxy=1
+product-quota bor_smartchips galaxy=1
+product-quota bor_superfluidcoolant galaxy=1
+product-quota bor_turretcomponents galaxy=1
+product-quota bor_water galaxy=1
+product-quota bor_weaponcomponents galaxy=1
+product-quota frf_advancedcomposites galaxy=1
+product-quota frf_advancedelectronics galaxy=1
+product-quota frf_antimattercells galaxy=1
+product-quota frf_antimatterconverters galaxy=1
+product-quota frf_cheltmeat galaxy=1
+product-quota frf_claytronics galaxy=2
+product-quota frf_dronecomponents galaxy=1
+product-quota frf_energycells galaxy=2
+product-quota frf_engineparts galaxy=1
+product-quota frf_fieldcoils galaxy=1
+product-quota frf_graphene galaxy=2
+product-quota frf_hullparts galaxy=5
+product-quota frf_medicalsupplies galaxy=5
+product-quota frf_microchips galaxy=2
+product-quota frf_missilecomponents galaxy=1
+product-quota frf_plasmaconductors galaxy=1
+product-quota frf_quantumtubes galaxy=1
+product-quota frf_refinedmetals galaxy=2
+product-quota frf_scanningarrays galaxy=1
+product-quota frf_scruffinfruits galaxy=1
+product-quota frf_shieldcomponents galaxy=1
+product-quota frf_siliconwafers galaxy=2
+product-quota frf_smartchips galaxy=2
+product-quota frf_spices galaxy=2
+product-quota frf_superfluidcoolant galaxy=1
+product-quota frf_turretcomponents galaxy=1
+product-quota frf_water galaxy=1
+product-quota frf_weaponcomponents galaxy=1
+product-quota hol_advancedcomposites galaxy=1
+product-quota hol_advancedelectronics galaxy=1
+product-quota hol_antimattercells galaxy=1
+product-quota hol_antimatterconverters galaxy=1
+product-quota hol_claytronics galaxy=1
+product-quota hol_dronecomponents galaxy=1
+product-quota hol_energycells galaxy=1
+product-quota hol_engineparts galaxy=2
+product-quota hol_fieldcoils galaxy=1
+product-quota hol_graphene galaxy=1
+product-quota hol_hullparts galaxy=2
+product-quota hol_majasnails galaxy=1
+product-quota hol_medicalsupplies galaxy=2
+product-quota hol_microchips galaxy=1
+product-quota hol_missilecomponents galaxy=1
+product-quota hol_plasmaconductors galaxy=1
+product-quota hol_quantumtubes galaxy=1
+product-quota hol_refinedmetals galaxy=1
+product-quota hol_scanningarrays galaxy=1
+product-quota hol_shieldcomponents galaxy=1
+product-quota hol_siliconwafers galaxy=1
+product-quota hol_smartchips galaxy=2
+product-quota hol_sojabeans galaxy=1
+product-quota hol_sojahusk galaxy=1
+product-quota hol_spices galaxy=1
+product-quota hol_superfluidcoolant galaxy=1
+product-quota hol_turretcomponents galaxy=1
+product-quota hol_water galaxy=1
+product-quota hol_weaponcomponents galaxy=1
+product-quota par_advancedcomposites galaxy=1
+product-quota par_advancedcomposites_new galaxy=1
+product-quota par_advancedelectronics galaxy=1
+product-quota par_advancedelectronics_new galaxy=1
+product-quota par_antimattercells galaxy=1
+product-quota par_antimattercells_new galaxy=1
+product-quota par_antimatterconverters galaxy=1
+product-quota par_claytronics galaxy=1
+product-quota par_dlc_split_antimatterconverters galaxy=1
+product-quota par_dlc_split_energycells galaxy=1
+product-quota par_dlc_split_engineparts galaxy=1
+product-quota par_dlc_split_hullparts galaxy=1
+product-quota par_dlc_split_shieldcomponents galaxy=1
+product-quota par_dlc_split_turretcomponents galaxy=1
+product-quota par_dlc_split_weaponcomponents galaxy=1
+product-quota par_dronecomponents galaxy=1
+product-quota par_energycells galaxy=1
+product-quota par_engineparts galaxy=1
+product-quota par_fieldcoils galaxy=1
+product-quota par_graphene galaxy=1
+product-quota par_graphene_new galaxy=1
+product-quota par_hullparts galaxy=2
+product-quota par_majasnails galaxy=1
+product-quota par_majasnails_new galaxy=1
+product-quota par_medicalsupplies galaxy=3
+product-quota par_medicalsupplies_new galaxy=1
+product-quota par_microchips galaxy=1
+product-quota par_missilecomponents galaxy=1
+product-quota par_plasmaconductors galaxy=1
+product-quota par_quantumtubes galaxy=2
+product-quota par_refinedmetals galaxy=1
+product-quota par_scanningarrays galaxy=1
+product-quota par_scanningarrays_new galaxy=1
+product-quota par_shieldcomponents galaxy=1
+product-quota par_siliconwafers galaxy=1
+product-quota par_siliconwafers_new galaxy=1
+product-quota par_smartchips galaxy=2
+product-quota par_sojabeans galaxy=1
+product-quota par_sojahusk galaxy=1
+product-quota par_spices galaxy=1
+product-quota par_superfluidcoolant galaxy=1
+product-quota par_turretcomponents galaxy=1
+product-quota par_water galaxy=1
+product-quota par_weaponcomponents galaxy=1
+product-quota pio_computronicsubstrate galaxy=1
+product-quota pio_computronicsubstrate_neptune galaxy=1
+product-quota pio_computronicsubstrate_oortcloud galaxy=1
+product-quota pio_computronicsubstrate_pluto galaxy=1
+product-quota pio_energycells galaxy=7
+product-quota pio_medicalsupplies galaxy=3
+product-quota pio_medicalsupplies_neptune galaxy=1
+product-quota pio_medicalsupplies_pluto galaxy=1
+product-quota pio_metallicmicrolattice galaxy=1
+product-quota pio_metallicmicrolattice_neptune galaxy=1
+product-quota pio_metallicmicrolattice_oortcloud galaxy=1
+product-quota pio_metallicmicrolattice_pluto galaxy=1
+product-quota pio_proteinpaste galaxy=1
+product-quota pio_proteinpaste_neptune galaxy=1
+product-quota pio_siliconcarbide galaxy=1
+product-quota pio_siliconcarbide_neptune galaxy=1
+product-quota pio_siliconcarbide_oortcloud galaxy=1
+product-quota pio_siliconcarbide_pluto galaxy=1
+product-quota pio_stimulants galaxy=1
+product-quota pio_terranmre galaxy=1
+product-quota pio_terranmre_neptune galaxy=1
+product-quota pio_terranmre_pluto galaxy=1
+product-quota pir_spacefuel galaxy=3
+product-quota rip_energycells_tide galaxy=6
+product-quota rip_scrap_tide galaxy=2
+product-quota spl_advancedcomposites galaxy=1
+product-quota spl_advancedelectronics galaxy=1
+product-quota spl_antimattercells galaxy=1
+product-quota spl_antimatterconverters galaxy=1
+product-quota spl_cheltmeat galaxy=1
+product-quota spl_claytronics galaxy=1
+product-quota spl_dronecomponents galaxy=1
+product-quota spl_energycells galaxy=1
+product-quota spl_engineparts galaxy=1
+product-quota spl_fieldcoils galaxy=1
+product-quota spl_graphene galaxy=1
+product-quota spl_hullparts galaxy=2
+product-quota spl_medicalsupplies galaxy=1
+product-quota spl_microchips galaxy=2
+product-quota spl_missilecomponents galaxy=1
+product-quota spl_plasmaconductors galaxy=1
+product-quota spl_quantumtubes galaxy=1
+product-quota spl_refinedmetals galaxy=1
+product-quota spl_scanningarrays galaxy=1
+product-quota spl_scruffinfruits galaxy=2
+product-quota spl_shieldcomponents galaxy=1
+product-quota spl_siliconwafers galaxy=2
+product-quota spl_smartchips galaxy=2
+product-quota spl_spices galaxy=2
+product-quota spl_superfluidcoolant galaxy=1
+product-quota spl_turretcomponents galaxy=1
+product-quota spl_water galaxy=1
+product-quota spl_weaponcomponents galaxy=1
+product-quota tel_advancedcomposites galaxy=1
+product-quota tel_advancedelectronics galaxy=1
+product-quota tel_advancedelectronics_new galaxy=1
+product-quota tel_antimattercells galaxy=1
+product-quota tel_antimattercells_new galaxy=1
+product-quota tel_antimatterconverters galaxy=1
+product-quota tel_claytronics galaxy=1
+product-quota tel_claytronics_new galaxy=1
+product-quota tel_dlc_split_advancedelectronics galaxy=1
+product-quota tel_dlc_split_siliconwafers galaxy=1
+product-quota tel_dlc_split_teladianium galaxy=1
+product-quota tel_dlc_split_weaponcomponents galaxy=1
+product-quota tel_dronecomponents galaxy=1
+product-quota tel_energycells galaxy=1
+product-quota tel_energycells_new galaxy=1
+product-quota tel_engineparts galaxy=2
+product-quota tel_fieldcoils galaxy=1
+product-quota tel_graphene galaxy=1
+product-quota tel_graphene_new galaxy=1
+product-quota tel_hullparts galaxy=4
+product-quota tel_medicalsupplies galaxy=4
+product-quota tel_medicalsupplies_new galaxy=1
+product-quota tel_microchips galaxy=2
+product-quota tel_missilecomponents galaxy=1
+product-quota tel_nostropoil galaxy=1
+product-quota tel_nostropoil_new galaxy=1
+product-quota tel_plasmaconductors galaxy=1
+product-quota tel_quantumtubes galaxy=1
+product-quota tel_scanningarrays galaxy=2
+product-quota tel_shieldcomponents galaxy=1
+product-quota tel_siliconwafers galaxy=1
+product-quota tel_smartchips galaxy=3
+product-quota tel_smartchips_new galaxy=1
+product-quota tel_spaceweed galaxy=2
+product-quota tel_spices galaxy=1
+product-quota tel_sunriseflowers galaxy=2
+product-quota tel_superfluidcoolant galaxy=1
+product-quota tel_swampplant galaxy=2
+product-quota tel_teladianium galaxy=1
+product-quota tel_teladianium_new galaxy=1
+product-quota tel_turretcomponents galaxy=1
+product-quota tel_water galaxy=1
+product-quota tel_weaponcomponents galaxy=1
+product-quota ter_computronicsubstrate galaxy=1
+product-quota ter_energycells galaxy=13
+product-quota ter_medicalsupplies galaxy=2
+product-quota ter_metallicmicrolattice galaxy=1
+product-quota ter_proteinpaste galaxy=1
+product-quota ter_siliconcarbide galaxy=1
+product-quota ter_stimulants galaxy=1
+product-quota ter_terranmre galaxy=1
+product-quota vig_foodrations galaxy=2
+product-quota vig_meat galaxy=1
+product-quota vig_medicalsupplies galaxy=2
+product-quota vig_spices galaxy=1
+product-quota vig_water galaxy=2
+product-quota vig_wheat galaxy=1
+product-quota xen_dlc_split_energycells galaxy=30
+product-quota xen_dlc_terran_energycells_cluster_112_sector001 galaxy=12
+product-quota xen_dlc_terran_energycells_cluster_112_sector002 galaxy=3
+product-quota xen_energycells galaxy=36
+station-add connection_ClusterGate014To013_bastion_0 owner=argon type=factory @ zone:Zone001_Cluster_14_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate014To013_bastion_1 owner=argon type=factory @ zone:Zone001_Cluster_14_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate014To013_bastion_2 owner=argon type=factory @ zone:Zone001_Cluster_14_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate014To013_bastion_3 owner=argon type=factory @ zone:Zone001_Cluster_14_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate014To013_bastion_4 owner=argon type=factory @ zone:Zone001_Cluster_14_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate014To013_bastion_5 owner=argon type=factory @ zone:Zone001_Cluster_14_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate014To029_bastion_0 owner=argon type=factory @ zone:Zone003_Cluster_14_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate014To029_bastion_1 owner=argon type=factory @ zone:Zone003_Cluster_14_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate014To029_bastion_2 owner=argon type=factory @ zone:Zone003_Cluster_14_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate014To029_bastion_3 owner=argon type=factory @ zone:Zone003_Cluster_14_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate014To029_bastion_4 owner=argon type=factory @ zone:Zone003_Cluster_14_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate014To029_bastion_5 owner=argon type=factory @ zone:Zone003_Cluster_14_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate014To706_bastion_0 owner=argon type=factory @ zone:Zone002_Cluster_14_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate014To706_bastion_1 owner=argon type=factory @ zone:Zone002_Cluster_14_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate014To706_bastion_2 owner=argon type=factory @ zone:Zone002_Cluster_14_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate014To706_bastion_3 owner=argon type=factory @ zone:Zone002_Cluster_14_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate014To706_bastion_4 owner=argon type=factory @ zone:Zone002_Cluster_14_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate014To706_bastion_5 owner=argon type=factory @ zone:Zone002_Cluster_14_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate015To009_bastion_0 owner=teladi type=factory @ zone:Zone004_Cluster_15_Sector001_macro plan=atf_bastion_tel_defence
+station-add connection_ClusterGate015To009_bastion_1 owner=teladi type=factory @ zone:Zone004_Cluster_15_Sector001_macro plan=atf_bastion_tel_defence
+station-add connection_ClusterGate015To009_bastion_2 owner=teladi type=factory @ zone:Zone004_Cluster_15_Sector001_macro plan=atf_bastion_tel_defence
+station-add connection_ClusterGate015To009_bastion_3 owner=teladi type=factory @ zone:Zone004_Cluster_15_Sector001_macro plan=atf_bastion_tel_defence
+station-add connection_ClusterGate015To009_bastion_4 owner=teladi type=factory @ zone:Zone004_Cluster_15_Sector001_macro plan=atf_bastion_tel_defence
+station-add connection_ClusterGate015To009_bastion_5 owner=teladi type=factory @ zone:Zone004_Cluster_15_Sector001_macro plan=atf_bastion_tel_defence
+station-add connection_ClusterGate015To016_bastion_0 owner=teladi type=factory @ zone:Zone002_Cluster_15_Sector001_macro plan=atf_bastion_tel_defence
+station-add connection_ClusterGate015To016_bastion_1 owner=teladi type=factory @ zone:Zone002_Cluster_15_Sector001_macro plan=atf_bastion_tel_defence
+station-add connection_ClusterGate015To016_bastion_2 owner=teladi type=factory @ zone:Zone002_Cluster_15_Sector001_macro plan=atf_bastion_tel_defence
+station-add connection_ClusterGate015To016_bastion_3 owner=teladi type=factory @ zone:Zone002_Cluster_15_Sector001_macro plan=atf_bastion_tel_defence
+station-add connection_ClusterGate015To016_bastion_4 owner=teladi type=factory @ zone:Zone002_Cluster_15_Sector001_macro plan=atf_bastion_tel_defence
+station-add connection_ClusterGate015To016_bastion_5 owner=teladi type=factory @ zone:Zone002_Cluster_15_Sector001_macro plan=atf_bastion_tel_defence
+station-add connection_ClusterGate015To408_bastion_0 owner=teladi type=factory @ zone:Zone001_Cluster_15_Sector002_macro plan=atf_bastion_tel_defence
+station-add connection_ClusterGate015To408_bastion_1 owner=teladi type=factory @ zone:Zone001_Cluster_15_Sector002_macro plan=atf_bastion_tel_defence
+station-add connection_ClusterGate015To408_bastion_2 owner=teladi type=factory @ zone:Zone001_Cluster_15_Sector002_macro plan=atf_bastion_tel_defence
+station-add connection_ClusterGate015To408_bastion_3 owner=teladi type=factory @ zone:Zone001_Cluster_15_Sector002_macro plan=atf_bastion_tel_defence
+station-add connection_ClusterGate015To408_bastion_4 owner=teladi type=factory @ zone:Zone001_Cluster_15_Sector002_macro plan=atf_bastion_tel_defence
+station-add connection_ClusterGate015To408_bastion_5 owner=teladi type=factory @ zone:Zone001_Cluster_15_Sector002_macro plan=atf_bastion_tel_defence
+station-add connection_ClusterGate015To701_bastion_0 owner=teladi type=factory @ zone:Zone001_Cluster_15_Sector001_macro plan=atf_bastion_tel_defence
+station-add connection_ClusterGate015To701_bastion_1 owner=teladi type=factory @ zone:Zone001_Cluster_15_Sector001_macro plan=atf_bastion_tel_defence
+station-add connection_ClusterGate015To701_bastion_2 owner=teladi type=factory @ zone:Zone001_Cluster_15_Sector001_macro plan=atf_bastion_tel_defence
+station-add connection_ClusterGate015To701_bastion_3 owner=teladi type=factory @ zone:Zone001_Cluster_15_Sector001_macro plan=atf_bastion_tel_defence
+station-add connection_ClusterGate015To701_bastion_4 owner=teladi type=factory @ zone:Zone001_Cluster_15_Sector001_macro plan=atf_bastion_tel_defence
+station-add connection_ClusterGate015To701_bastion_5 owner=teladi type=factory @ zone:Zone001_Cluster_15_Sector001_macro plan=atf_bastion_tel_defence
+station-add connection_ClusterGate018To009_bastion_0 owner=paranid type=factory @ zone:Zone003_Cluster_18_Sector001_macro plan=atf_bastion_par_defence
+station-add connection_ClusterGate018To009_bastion_1 owner=paranid type=factory @ zone:Zone003_Cluster_18_Sector001_macro plan=atf_bastion_par_defence
+station-add connection_ClusterGate018To009_bastion_2 owner=paranid type=factory @ zone:Zone003_Cluster_18_Sector001_macro plan=atf_bastion_par_defence
+station-add connection_ClusterGate018To009_bastion_3 owner=paranid type=factory @ zone:Zone003_Cluster_18_Sector001_macro plan=atf_bastion_par_defence
+station-add connection_ClusterGate018To009_bastion_4 owner=paranid type=factory @ zone:Zone003_Cluster_18_Sector001_macro plan=atf_bastion_par_defence
+station-add connection_ClusterGate018To009_bastion_5 owner=paranid type=factory @ zone:Zone003_Cluster_18_Sector001_macro plan=atf_bastion_par_defence
+station-add connection_ClusterGate018To010_bastion_0 owner=paranid type=factory @ zone:Zone005_Cluster_18_Sector001_macro plan=atf_bastion_par_defence
+station-add connection_ClusterGate018To010_bastion_1 owner=paranid type=factory @ zone:Zone005_Cluster_18_Sector001_macro plan=atf_bastion_par_defence
+station-add connection_ClusterGate018To010_bastion_2 owner=paranid type=factory @ zone:Zone005_Cluster_18_Sector001_macro plan=atf_bastion_par_defence
+station-add connection_ClusterGate018To010_bastion_3 owner=paranid type=factory @ zone:Zone005_Cluster_18_Sector001_macro plan=atf_bastion_par_defence
+station-add connection_ClusterGate018To010_bastion_4 owner=paranid type=factory @ zone:Zone005_Cluster_18_Sector001_macro plan=atf_bastion_par_defence
+station-add connection_ClusterGate018To010_bastion_5 owner=paranid type=factory @ zone:Zone005_Cluster_18_Sector001_macro plan=atf_bastion_par_defence
+station-add connection_ClusterGate018To019_bastion_0 owner=paranid type=factory @ zone:Zone002_Cluster_18_Sector001_macro plan=atf_bastion_par_defence
+station-add connection_ClusterGate018To019_bastion_1 owner=paranid type=factory @ zone:Zone002_Cluster_18_Sector001_macro plan=atf_bastion_par_defence
+station-add connection_ClusterGate018To019_bastion_2 owner=paranid type=factory @ zone:Zone002_Cluster_18_Sector001_macro plan=atf_bastion_par_defence
+station-add connection_ClusterGate018To019_bastion_3 owner=paranid type=factory @ zone:Zone002_Cluster_18_Sector001_macro plan=atf_bastion_par_defence
+station-add connection_ClusterGate018To019_bastion_4 owner=paranid type=factory @ zone:Zone002_Cluster_18_Sector001_macro plan=atf_bastion_par_defence
+station-add connection_ClusterGate018To019_bastion_5 owner=paranid type=factory @ zone:Zone002_Cluster_18_Sector001_macro plan=atf_bastion_par_defence
+station-add connection_ClusterGate019To018_bastion_0 owner=teladi type=factory @ zone:Zone003_Cluster_19_Sector001_macro plan=atf_bastion_tel_defence
+station-add connection_ClusterGate019To018_bastion_1 owner=teladi type=factory @ zone:Zone003_Cluster_19_Sector001_macro plan=atf_bastion_tel_defence
+station-add connection_ClusterGate019To018_bastion_2 owner=teladi type=factory @ zone:Zone003_Cluster_19_Sector001_macro plan=atf_bastion_tel_defence
+station-add connection_ClusterGate019To018_bastion_3 owner=teladi type=factory @ zone:Zone003_Cluster_19_Sector001_macro plan=atf_bastion_tel_defence
+station-add connection_ClusterGate019To018_bastion_4 owner=teladi type=factory @ zone:Zone003_Cluster_19_Sector001_macro plan=atf_bastion_tel_defence
+station-add connection_ClusterGate019To018_bastion_5 owner=teladi type=factory @ zone:Zone003_Cluster_19_Sector001_macro plan=atf_bastion_tel_defence
+station-add connection_ClusterGate019To020_bastion_0 owner=paranid type=factory @ zone:Zone003_Cluster_19_Sector002_macro plan=atf_bastion_par_defence
+station-add connection_ClusterGate019To020_bastion_1 owner=paranid type=factory @ zone:Zone003_Cluster_19_Sector002_macro plan=atf_bastion_par_defence
+station-add connection_ClusterGate019To020_bastion_2 owner=paranid type=factory @ zone:Zone003_Cluster_19_Sector002_macro plan=atf_bastion_par_defence
+station-add connection_ClusterGate019To020_bastion_3 owner=paranid type=factory @ zone:Zone003_Cluster_19_Sector002_macro plan=atf_bastion_par_defence
+station-add connection_ClusterGate019To020_bastion_4 owner=paranid type=factory @ zone:Zone003_Cluster_19_Sector002_macro plan=atf_bastion_par_defence
+station-add connection_ClusterGate019To020_bastion_5 owner=paranid type=factory @ zone:Zone003_Cluster_19_Sector002_macro plan=atf_bastion_par_defence
+station-add connection_ClusterGate019To042_bastion_0 owner=teladi type=factory @ zone:Zone002_Cluster_19_Sector001_macro plan=atf_bastion_tel_defence
+station-add connection_ClusterGate019To042_bastion_1 owner=teladi type=factory @ zone:Zone002_Cluster_19_Sector001_macro plan=atf_bastion_tel_defence
+station-add connection_ClusterGate019To042_bastion_2 owner=teladi type=factory @ zone:Zone002_Cluster_19_Sector001_macro plan=atf_bastion_tel_defence
+station-add connection_ClusterGate019To042_bastion_3 owner=teladi type=factory @ zone:Zone002_Cluster_19_Sector001_macro plan=atf_bastion_tel_defence
+station-add connection_ClusterGate019To042_bastion_4 owner=teladi type=factory @ zone:Zone002_Cluster_19_Sector001_macro plan=atf_bastion_tel_defence
+station-add connection_ClusterGate019To042_bastion_5 owner=teladi type=factory @ zone:Zone002_Cluster_19_Sector001_macro plan=atf_bastion_tel_defence
+station-add connection_ClusterGate027To013_bastion_0 owner=antigone type=factory @ zone:Zone001_Cluster_27_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate027To013_bastion_1 owner=antigone type=factory @ zone:Zone001_Cluster_27_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate027To013_bastion_2 owner=antigone type=factory @ zone:Zone001_Cluster_27_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate027To013_bastion_3 owner=antigone type=factory @ zone:Zone001_Cluster_27_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate027To013_bastion_4 owner=antigone type=factory @ zone:Zone001_Cluster_27_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate027To013_bastion_5 owner=antigone type=factory @ zone:Zone001_Cluster_27_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate027To048_bastion_0 owner=antigone type=factory @ zone:Zone005_Cluster_27_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate027To048_bastion_1 owner=antigone type=factory @ zone:Zone005_Cluster_27_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate027To048_bastion_2 owner=antigone type=factory @ zone:Zone005_Cluster_27_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate027To048_bastion_3 owner=antigone type=factory @ zone:Zone005_Cluster_27_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate027To048_bastion_4 owner=antigone type=factory @ zone:Zone005_Cluster_27_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate027To048_bastion_5 owner=antigone type=factory @ zone:Zone005_Cluster_27_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate027To049_bastion_0 owner=antigone type=factory @ zone:Zone004_Cluster_27_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate027To049_bastion_1 owner=antigone type=factory @ zone:Zone004_Cluster_27_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate027To049_bastion_2 owner=antigone type=factory @ zone:Zone004_Cluster_27_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate027To049_bastion_3 owner=antigone type=factory @ zone:Zone004_Cluster_27_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate027To049_bastion_4 owner=antigone type=factory @ zone:Zone004_Cluster_27_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate027To049_bastion_5 owner=antigone type=factory @ zone:Zone004_Cluster_27_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate028To113_bastion_0 owner=antigone type=factory @ zone:Zone004_Cluster_28_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate028To113_bastion_1 owner=antigone type=factory @ zone:Zone004_Cluster_28_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate028To113_bastion_2 owner=antigone type=factory @ zone:Zone004_Cluster_28_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate028To113_bastion_3 owner=antigone type=factory @ zone:Zone004_Cluster_28_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate028To113_bastion_4 owner=antigone type=factory @ zone:Zone004_Cluster_28_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate028To113_bastion_5 owner=antigone type=factory @ zone:Zone004_Cluster_28_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate029To008_bastion_0 owner=hatikvah type=factory @ zone:Zone002_Cluster_29_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate029To008_bastion_1 owner=hatikvah type=factory @ zone:Zone002_Cluster_29_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate029To008_bastion_2 owner=hatikvah type=factory @ zone:Zone002_Cluster_29_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate029To008_bastion_3 owner=hatikvah type=factory @ zone:Zone002_Cluster_29_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate029To008_bastion_4 owner=hatikvah type=factory @ zone:Zone002_Cluster_29_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate029To008_bastion_5 owner=hatikvah type=factory @ zone:Zone002_Cluster_29_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate029To014_bastion_0 owner=hatikvah type=factory @ zone:Zone003_Cluster_29_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate029To014_bastion_1 owner=hatikvah type=factory @ zone:Zone003_Cluster_29_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate029To014_bastion_2 owner=hatikvah type=factory @ zone:Zone003_Cluster_29_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate029To014_bastion_3 owner=hatikvah type=factory @ zone:Zone003_Cluster_29_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate029To014_bastion_4 owner=hatikvah type=factory @ zone:Zone003_Cluster_29_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate029To014_bastion_5 owner=hatikvah type=factory @ zone:Zone003_Cluster_29_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate029To030_bastion_0 owner=hatikvah type=factory @ zone:Zone001_Cluster_29_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate029To030_bastion_1 owner=hatikvah type=factory @ zone:Zone001_Cluster_29_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate029To030_bastion_2 owner=hatikvah type=factory @ zone:Zone001_Cluster_29_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate029To030_bastion_3 owner=hatikvah type=factory @ zone:Zone001_Cluster_29_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate029To030_bastion_4 owner=hatikvah type=factory @ zone:Zone001_Cluster_29_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate029To030_bastion_5 owner=hatikvah type=factory @ zone:Zone001_Cluster_29_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate029To032_bastion_0 owner=hatikvah type=factory @ zone:Zone002_Cluster_29_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate029To032_bastion_1 owner=hatikvah type=factory @ zone:Zone002_Cluster_29_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate029To032_bastion_2 owner=hatikvah type=factory @ zone:Zone002_Cluster_29_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate029To032_bastion_3 owner=hatikvah type=factory @ zone:Zone002_Cluster_29_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate029To032_bastion_4 owner=hatikvah type=factory @ zone:Zone002_Cluster_29_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate029To032_bastion_5 owner=hatikvah type=factory @ zone:Zone002_Cluster_29_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate036To024_bastion_0 owner=holyorder type=factory @ zone:Zone002_Cluster_36_Sector001_macro plan=atf_bastion_par_defence
+station-add connection_ClusterGate036To024_bastion_1 owner=holyorder type=factory @ zone:Zone002_Cluster_36_Sector001_macro plan=atf_bastion_par_defence
+station-add connection_ClusterGate036To024_bastion_2 owner=holyorder type=factory @ zone:Zone002_Cluster_36_Sector001_macro plan=atf_bastion_par_defence
+station-add connection_ClusterGate036To024_bastion_3 owner=holyorder type=factory @ zone:Zone002_Cluster_36_Sector001_macro plan=atf_bastion_par_defence
+station-add connection_ClusterGate036To024_bastion_4 owner=holyorder type=factory @ zone:Zone002_Cluster_36_Sector001_macro plan=atf_bastion_par_defence
+station-add connection_ClusterGate036To024_bastion_5 owner=holyorder type=factory @ zone:Zone002_Cluster_36_Sector001_macro plan=atf_bastion_par_defence
+station-add connection_ClusterGate040To013_bastion_0 owner=antigone type=factory @ zone:Zone001_Cluster_40_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate040To013_bastion_1 owner=antigone type=factory @ zone:Zone001_Cluster_40_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate040To013_bastion_2 owner=antigone type=factory @ zone:Zone001_Cluster_40_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate040To013_bastion_3 owner=antigone type=factory @ zone:Zone001_Cluster_40_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate040To013_bastion_4 owner=antigone type=factory @ zone:Zone001_Cluster_40_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate040To013_bastion_5 owner=antigone type=factory @ zone:Zone001_Cluster_40_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate040To041_bastion_0 owner=antigone type=factory @ zone:Zone005_Cluster_40_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate040To041_bastion_1 owner=antigone type=factory @ zone:Zone005_Cluster_40_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate040To041_bastion_2 owner=antigone type=factory @ zone:Zone005_Cluster_40_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate040To041_bastion_3 owner=antigone type=factory @ zone:Zone005_Cluster_40_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate040To041_bastion_4 owner=antigone type=factory @ zone:Zone005_Cluster_40_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate040To041_bastion_5 owner=antigone type=factory @ zone:Zone005_Cluster_40_Sector001_macro plan=atf_bastion_arg_defence
+station-add connection_ClusterGate101To100_bastion_0 owner=terran type=factory @ zone:Zone005_Cluster_101_Sector001_macro plan=atf_bastion_ter_defence
+station-add connection_ClusterGate101To100_bastion_1 owner=terran type=factory @ zone:Zone005_Cluster_101_Sector001_macro plan=atf_bastion_ter_defence
+station-add connection_ClusterGate101To100_bastion_2 owner=terran type=factory @ zone:Zone005_Cluster_101_Sector001_macro plan=atf_bastion_ter_defence
+station-add connection_ClusterGate101To100_bastion_3 owner=terran type=factory @ zone:Zone005_Cluster_101_Sector001_macro plan=atf_bastion_ter_defence
+station-add connection_ClusterGate101To100_bastion_4 owner=terran type=factory @ zone:Zone005_Cluster_101_Sector001_macro plan=atf_bastion_ter_defence
+station-add connection_ClusterGate101To100_bastion_5 owner=terran type=factory @ zone:Zone005_Cluster_101_Sector001_macro plan=atf_bastion_ter_defence
+station-add connection_ClusterGate102To104_bastion_0 owner=terran type=factory @ zone:Zone003_Cluster_102_Sector001_macro plan=atf_bastion_ter_defence
+station-add connection_ClusterGate102To104_bastion_1 owner=terran type=factory @ zone:Zone003_Cluster_102_Sector001_macro plan=atf_bastion_ter_defence
+station-add connection_ClusterGate102To104_bastion_2 owner=terran type=factory @ zone:Zone003_Cluster_102_Sector001_macro plan=atf_bastion_ter_defence
+station-add connection_ClusterGate102To104_bastion_3 owner=terran type=factory @ zone:Zone003_Cluster_102_Sector001_macro plan=atf_bastion_ter_defence
+station-add connection_ClusterGate102To104_bastion_4 owner=terran type=factory @ zone:Zone003_Cluster_102_Sector001_macro plan=atf_bastion_ter_defence
+station-add connection_ClusterGate102To104_bastion_5 owner=terran type=factory @ zone:Zone003_Cluster_102_Sector001_macro plan=atf_bastion_ter_defence
+station-add connection_ClusterGate113To028_bastion_0 owner=pioneers type=factory @ zone:Zone005_Cluster_113_Sector001_macro plan=atf_bastion_pio_defence
+station-add connection_ClusterGate113To028_bastion_1 owner=pioneers type=factory @ zone:Zone005_Cluster_113_Sector001_macro plan=atf_bastion_pio_defence
+station-add connection_ClusterGate113To028_bastion_2 owner=pioneers type=factory @ zone:Zone005_Cluster_113_Sector001_macro plan=atf_bastion_pio_defence
+station-add connection_ClusterGate113To028_bastion_3 owner=pioneers type=factory @ zone:Zone005_Cluster_113_Sector001_macro plan=atf_bastion_pio_defence
+station-add connection_ClusterGate113To028_bastion_4 owner=pioneers type=factory @ zone:Zone005_Cluster_113_Sector001_macro plan=atf_bastion_pio_defence
+station-add connection_ClusterGate113To028_bastion_5 owner=pioneers type=factory @ zone:Zone005_Cluster_113_Sector001_macro plan=atf_bastion_pio_defence
+station-add connection_ClusterGate115To110_bastion_0 owner=pioneers type=factory @ zone:Zone002_Cluster_115_Sector001_macro plan=atf_bastion_pio_defence
+station-add connection_ClusterGate115To110_bastion_1 owner=pioneers type=factory @ zone:Zone002_Cluster_115_Sector001_macro plan=atf_bastion_pio_defence
+station-add connection_ClusterGate115To110_bastion_2 owner=pioneers type=factory @ zone:Zone002_Cluster_115_Sector001_macro plan=atf_bastion_pio_defence
+station-add connection_ClusterGate115To110_bastion_3 owner=pioneers type=factory @ zone:Zone002_Cluster_115_Sector001_macro plan=atf_bastion_pio_defence
+station-add connection_ClusterGate115To110_bastion_4 owner=pioneers type=factory @ zone:Zone002_Cluster_115_Sector001_macro plan=atf_bastion_pio_defence
+station-add connection_ClusterGate115To110_bastion_5 owner=pioneers type=factory @ zone:Zone002_Cluster_115_Sector001_macro plan=atf_bastion_pio_defence
+station-add connection_ClusterGate115To724_bastion_0 owner=pioneers type=factory @ zone:Zone006_Cluster_115_Sector001_macro plan=atf_bastion_pio_defence
+station-add connection_ClusterGate115To724_bastion_1 owner=pioneers type=factory @ zone:Zone006_Cluster_115_Sector001_macro plan=atf_bastion_pio_defence
+station-add connection_ClusterGate115To724_bastion_2 owner=pioneers type=factory @ zone:Zone006_Cluster_115_Sector001_macro plan=atf_bastion_pio_defence
+station-add connection_ClusterGate115To724_bastion_3 owner=pioneers type=factory @ zone:Zone006_Cluster_115_Sector001_macro plan=atf_bastion_pio_defence
+station-add connection_ClusterGate115To724_bastion_4 owner=pioneers type=factory @ zone:Zone006_Cluster_115_Sector001_macro plan=atf_bastion_pio_defence
+station-add connection_ClusterGate115To724_bastion_5 owner=pioneers type=factory @ zone:Zone006_Cluster_115_Sector001_macro plan=atf_bastion_pio_defence
+station-add connection_ClusterGate405To419_bastion_0 owner=split type=factory @ zone:Zone005_Cluster_405_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate405To419_bastion_1 owner=split type=factory @ zone:Zone005_Cluster_405_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate405To419_bastion_2 owner=split type=factory @ zone:Zone005_Cluster_405_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate405To419_bastion_3 owner=split type=factory @ zone:Zone005_Cluster_405_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate405To419_bastion_4 owner=split type=factory @ zone:Zone005_Cluster_405_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate405To419_bastion_5 owner=split type=factory @ zone:Zone005_Cluster_405_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate406To404_bastion_0 owner=split type=factory @ zone:Zone002_Cluster_406_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate406To404_bastion_1 owner=split type=factory @ zone:Zone002_Cluster_406_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate406To404_bastion_2 owner=split type=factory @ zone:Zone002_Cluster_406_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate406To404_bastion_3 owner=split type=factory @ zone:Zone002_Cluster_406_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate406To404_bastion_4 owner=split type=factory @ zone:Zone002_Cluster_406_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate406To404_bastion_5 owner=split type=factory @ zone:Zone002_Cluster_406_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate409To407_bastion_0 owner=freesplit type=factory @ zone:Zone005_Cluster_409_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate409To407_bastion_1 owner=freesplit type=factory @ zone:Zone005_Cluster_409_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate409To407_bastion_2 owner=freesplit type=factory @ zone:Zone005_Cluster_409_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate409To407_bastion_3 owner=freesplit type=factory @ zone:Zone005_Cluster_409_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate409To407_bastion_4 owner=freesplit type=factory @ zone:Zone005_Cluster_409_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate409To407_bastion_5 owner=freesplit type=factory @ zone:Zone005_Cluster_409_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate409To421_bastion_0 owner=freesplit type=factory @ zone:Zone001_Cluster_409_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate409To421_bastion_1 owner=freesplit type=factory @ zone:Zone001_Cluster_409_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate409To421_bastion_2 owner=freesplit type=factory @ zone:Zone001_Cluster_409_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate409To421_bastion_3 owner=freesplit type=factory @ zone:Zone001_Cluster_409_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate409To421_bastion_4 owner=freesplit type=factory @ zone:Zone001_Cluster_409_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate409To421_bastion_5 owner=freesplit type=factory @ zone:Zone001_Cluster_409_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate410To412_bastion_0 owner=freesplit type=factory @ zone:Zone005_Cluster_410_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate410To412_bastion_1 owner=freesplit type=factory @ zone:Zone005_Cluster_410_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate410To412_bastion_2 owner=freesplit type=factory @ zone:Zone005_Cluster_410_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate410To412_bastion_3 owner=freesplit type=factory @ zone:Zone005_Cluster_410_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate410To412_bastion_4 owner=freesplit type=factory @ zone:Zone005_Cluster_410_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate410To412_bastion_5 owner=freesplit type=factory @ zone:Zone005_Cluster_410_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate411To425_bastion_0 owner=freesplit type=factory @ zone:Zone002_Cluster_411_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate411To425_bastion_1 owner=freesplit type=factory @ zone:Zone002_Cluster_411_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate411To425_bastion_2 owner=freesplit type=factory @ zone:Zone002_Cluster_411_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate411To425_bastion_3 owner=freesplit type=factory @ zone:Zone002_Cluster_411_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate411To425_bastion_4 owner=freesplit type=factory @ zone:Zone002_Cluster_411_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate411To425_bastion_5 owner=freesplit type=factory @ zone:Zone002_Cluster_411_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate417To416_bastion_0 owner=split type=factory @ zone:Zone005_Cluster_417_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate417To416_bastion_1 owner=split type=factory @ zone:Zone005_Cluster_417_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate417To416_bastion_2 owner=split type=factory @ zone:Zone005_Cluster_417_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate417To416_bastion_3 owner=split type=factory @ zone:Zone005_Cluster_417_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate417To416_bastion_4 owner=split type=factory @ zone:Zone005_Cluster_417_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate417To416_bastion_5 owner=split type=factory @ zone:Zone005_Cluster_417_Sector001_macro plan=atf_bastion_spl_defence
+station-add connection_ClusterGate500To502_bastion_0 owner=scavenger type=factory @ zone:Zone001_Cluster_500_Sector003_macro plan=atf_bastion_rip_defence
+station-add connection_ClusterGate500To502_bastion_1 owner=scavenger type=factory @ zone:Zone001_Cluster_500_Sector003_macro plan=atf_bastion_rip_defence
+station-add connection_ClusterGate500To502_bastion_2 owner=scavenger type=factory @ zone:Zone001_Cluster_500_Sector003_macro plan=atf_bastion_rip_defence
+station-add connection_ClusterGate500To502_bastion_3 owner=scavenger type=factory @ zone:Zone001_Cluster_500_Sector003_macro plan=atf_bastion_rip_defence
+station-add connection_ClusterGate500To502_bastion_4 owner=scavenger type=factory @ zone:Zone001_Cluster_500_Sector003_macro plan=atf_bastion_rip_defence
+station-add connection_ClusterGate500To502_bastion_5 owner=scavenger type=factory @ zone:Zone001_Cluster_500_Sector003_macro plan=atf_bastion_rip_defence
+station-add connection_ClusterGate501To002_bastion_0 owner=loanshark type=factory @ zone:Zone004_Cluster_501_Sector001_macro plan=atf_bastion_vig_defence
+station-add connection_ClusterGate501To002_bastion_1 owner=loanshark type=factory @ zone:Zone004_Cluster_501_Sector001_macro plan=atf_bastion_vig_defence
+station-add connection_ClusterGate501To002_bastion_2 owner=loanshark type=factory @ zone:Zone004_Cluster_501_Sector001_macro plan=atf_bastion_vig_defence
+station-add connection_ClusterGate501To002_bastion_3 owner=loanshark type=factory @ zone:Zone004_Cluster_501_Sector001_macro plan=atf_bastion_vig_defence
+station-add connection_ClusterGate501To002_bastion_4 owner=loanshark type=factory @ zone:Zone004_Cluster_501_Sector001_macro plan=atf_bastion_vig_defence
+station-add connection_ClusterGate501To002_bastion_5 owner=loanshark type=factory @ zone:Zone004_Cluster_501_Sector001_macro plan=atf_bastion_vig_defence
+station-add connection_ClusterGate501To008_bastion_0 owner=loanshark type=factory @ zone:Zone002_Cluster_501_Sector001_macro plan=atf_bastion_vig_defence
+station-add connection_ClusterGate501To008_bastion_1 owner=loanshark type=factory @ zone:Zone002_Cluster_501_Sector001_macro plan=atf_bastion_vig_defence
+station-add connection_ClusterGate501To008_bastion_2 owner=loanshark type=factory @ zone:Zone002_Cluster_501_Sector001_macro plan=atf_bastion_vig_defence
+station-add connection_ClusterGate501To008_bastion_3 owner=loanshark type=factory @ zone:Zone002_Cluster_501_Sector001_macro plan=atf_bastion_vig_defence
+station-add connection_ClusterGate501To008_bastion_4 owner=loanshark type=factory @ zone:Zone002_Cluster_501_Sector001_macro plan=atf_bastion_vig_defence
+station-add connection_ClusterGate501To008_bastion_5 owner=loanshark type=factory @ zone:Zone002_Cluster_501_Sector001_macro plan=atf_bastion_vig_defence
+station-add connection_ClusterGate502To500_bastion_0 owner=loanshark type=factory @ zone:Zone004_Cluster_502_Sector001_macro plan=atf_bastion_vig_defence
+station-add connection_ClusterGate502To500_bastion_1 owner=loanshark type=factory @ zone:Zone004_Cluster_502_Sector001_macro plan=atf_bastion_vig_defence
+station-add connection_ClusterGate502To500_bastion_2 owner=loanshark type=factory @ zone:Zone004_Cluster_502_Sector001_macro plan=atf_bastion_vig_defence
+station-add connection_ClusterGate502To500_bastion_3 owner=loanshark type=factory @ zone:Zone004_Cluster_502_Sector001_macro plan=atf_bastion_vig_defence
+station-add connection_ClusterGate502To500_bastion_4 owner=loanshark type=factory @ zone:Zone004_Cluster_502_Sector001_macro plan=atf_bastion_vig_defence
+station-add connection_ClusterGate502To500_bastion_5 owner=loanshark type=factory @ zone:Zone004_Cluster_502_Sector001_macro plan=atf_bastion_vig_defence
+station-add connection_ClusterGate503To006_bastion_0 owner=loanshark type=factory @ zone:Zone005_Cluster_503_Sector001_macro plan=atf_bastion_vig_defence
+station-add connection_ClusterGate503To006_bastion_1 owner=loanshark type=factory @ zone:Zone005_Cluster_503_Sector001_macro plan=atf_bastion_vig_defence
+station-add connection_ClusterGate503To006_bastion_2 owner=loanshark type=factory @ zone:Zone005_Cluster_503_Sector001_macro plan=atf_bastion_vig_defence
+station-add connection_ClusterGate503To006_bastion_3 owner=loanshark type=factory @ zone:Zone005_Cluster_503_Sector001_macro plan=atf_bastion_vig_defence
+station-add connection_ClusterGate503To006_bastion_4 owner=loanshark type=factory @ zone:Zone005_Cluster_503_Sector001_macro plan=atf_bastion_vig_defence
+station-add connection_ClusterGate503To006_bastion_5 owner=loanshark type=factory @ zone:Zone005_Cluster_503_Sector001_macro plan=atf_bastion_vig_defence
+station-add connection_ClusterGate606To605_bastion_0 owner=boron type=factory @ zone:Zone002_Cluster_606_Sector003_macro plan=atf_bastion_bor_defence
+station-add connection_ClusterGate606To605_bastion_1 owner=boron type=factory @ zone:Zone002_Cluster_606_Sector003_macro plan=atf_bastion_bor_defence
+station-add connection_ClusterGate606To605_bastion_2 owner=boron type=factory @ zone:Zone002_Cluster_606_Sector003_macro plan=atf_bastion_bor_defence
+station-add connection_ClusterGate606To605_bastion_3 owner=boron type=factory @ zone:Zone002_Cluster_606_Sector003_macro plan=atf_bastion_bor_defence
+station-add connection_ClusterGate606To605_bastion_4 owner=boron type=factory @ zone:Zone002_Cluster_606_Sector003_macro plan=atf_bastion_bor_defence
+station-add connection_ClusterGate606To605_bastion_5 owner=boron type=factory @ zone:Zone002_Cluster_606_Sector003_macro plan=atf_bastion_bor_defence
+station-add connection_ClusterGate607To608_bastion_0 owner=boron type=factory @ zone:Zone005_Cluster_607_Sector001_macro plan=atf_bastion_bor_defence
+station-add connection_ClusterGate607To608_bastion_1 owner=boron type=factory @ zone:Zone005_Cluster_607_Sector001_macro plan=atf_bastion_bor_defence
+station-add connection_ClusterGate607To608_bastion_2 owner=boron type=factory @ zone:Zone005_Cluster_607_Sector001_macro plan=atf_bastion_bor_defence
+station-add connection_ClusterGate607To608_bastion_3 owner=boron type=factory @ zone:Zone005_Cluster_607_Sector001_macro plan=atf_bastion_bor_defence
+station-add connection_ClusterGate607To608_bastion_4 owner=boron type=factory @ zone:Zone005_Cluster_607_Sector001_macro plan=atf_bastion_bor_defence
+station-add connection_ClusterGate607To608_bastion_5 owner=boron type=factory @ zone:Zone005_Cluster_607_Sector001_macro plan=atf_bastion_bor_defence
+station-add connection_ClusterGate607To609_bastion_0 owner=boron type=factory @ zone:Zone004_Cluster_607_Sector001_macro plan=atf_bastion_bor_defence
+station-add connection_ClusterGate607To609_bastion_1 owner=boron type=factory @ zone:Zone004_Cluster_607_Sector001_macro plan=atf_bastion_bor_defence
+station-add connection_ClusterGate607To609_bastion_2 owner=boron type=factory @ zone:Zone004_Cluster_607_Sector001_macro plan=atf_bastion_bor_defence
+station-add connection_ClusterGate607To609_bastion_3 owner=boron type=factory @ zone:Zone004_Cluster_607_Sector001_macro plan=atf_bastion_bor_defence
+station-add connection_ClusterGate607To609_bastion_4 owner=boron type=factory @ zone:Zone004_Cluster_607_Sector001_macro plan=atf_bastion_bor_defence
+station-add connection_ClusterGate607To609_bastion_5 owner=boron type=factory @ zone:Zone004_Cluster_607_Sector001_macro plan=atf_bastion_bor_defence
+station-add shipyard_xenon_clusterCluster_100_sector001_macro owner=xenon type=shipyard @ sector:Cluster_100_sector001_macro
+station-add shipyard_xenon_clusterCluster_108_sector003_macro owner=xenon type=shipyard @ sector:Cluster_108_sector003_macro
+station-add shipyard_xenon_clusterCluster_109_sector001_macro owner=xenon type=shipyard @ sector:Cluster_109_sector001_macro
+station-add shipyard_xenon_clusterCluster_46_sector001_macro owner=xenon type=shipyard @ sector:Cluster_46_sector001_macro
+station-add shipyard_xenon_clusterCluster_720_sector001_macro owner=xenon type=shipyard @ sector:Cluster_720_sector001_macro
+station-add shipyard_xenon_cluster_x_shipyard_alliance owner=xenon type=shipyard @ zone:zone001_cluster_23_sector001_macro
+station-add shipyard_xenon_cluster_x_shipyard_holyorder owner=xenon type=shipyard @ sector:cluster_24_sector001_macro
+station-add shipyard_xenon_cluster_x_shipyard_ministry_01 owner=xenon type=shipyard @ sector:cluster_02_sector001_macro
+station-add shipyard_xenon_cluster_x_shipyard_teladi_01 owner=xenon type=shipyard @ sector:cluster_34_sector001_macro
+station-add shipyard_xenon_cluster_x_ter_shipyard_cluster_104_sector002 owner=xenon type=shipyard @ sector:cluster_104_sector002_macro
+station-add wharf_xenon_clusterCluster_100_sector001_macro owner=xenon type=shipyard @ sector:Cluster_100_sector001_macro
+station-add wharf_xenon_clusterCluster_413_sector001_macro owner=xenon type=shipyard @ sector:Cluster_413_sector001_macro
+station-add wharf_xenon_clusterCluster_42_sector001_macro owner=xenon type=shipyard @ sector:Cluster_42_sector001_macro
+station-add wharf_xenon_clusterCluster_46_sector001_macro owner=xenon type=shipyard @ sector:Cluster_46_sector001_macro
+station-add wharf_xenon_clusterCluster_705_sector001_macro owner=xenon type=shipyard @ sector:Cluster_705_sector001_macro
+station-add wharf_xenon_cluster_x_arg_wharf_cluster_416_sector002 owner=xenon type=shipyard @ sector:cluster_416_sector002_macro
+station-add wharf_xenon_cluster_x_boron_equipment_609_001 owner=xenon type=shipyard @ zone:zone005_cluster_609_sector001_macro
+station-add wharf_xenon_cluster_x_boron_wharf_603_001 owner=xenon type=shipyard @ sector:cluster_603_sector001_macro
+station-add wharf_xenon_cluster_x_equipmentdock_antigone owner=xenon type=shipyard @ sector:cluster_41_sector001_macro
+station-add wharf_xenon_cluster_x_equipmentdock_argon_01 owner=xenon type=shipyard @ zone:zone002_cluster_06_sector001_macro
+station-add wharf_xenon_cluster_x_equipmentdock_freesplit_01 owner=xenon type=shipyard @ sector:cluster_412_sector001_macro
+station-add wharf_xenon_cluster_x_equipmentdock_freesplit_02 owner=xenon type=shipyard @ sector:cluster_407_sector001_macro
+station-add wharf_xenon_cluster_x_equipmentdock_paranid owner=xenon type=shipyard @ sector:cluster_22_sector001_macro
+station-add wharf_xenon_cluster_x_equipmentdock_teladi_01 owner=xenon type=shipyard @ zone:zone001_cluster_20_sector001_macro
+station-add wharf_xenon_cluster_x_tel_dlc_split_ringstation_01 owner=xenon type=shipyard @ sector:cluster_419_sector001_macro
+station-add wharf_xenon_cluster_x_ter_equipmentdock_cluster_107_sector001 owner=xenon type=shipyard @ sector:cluster_107_sector001_macro
+station-add wharf_xenon_cluster_x_ter_logisticsdock_cluster_104_sector001 owner=xenon type=shipyard @ sector:cluster_104_sector001_macro
+station-add wharf_xenon_cluster_x_ter_logisticsdock_cluster_110_sector001 owner=xenon type=shipyard @ sector:cluster_110_sector001_macro
+station-add wharf_xenon_cluster_x_ter_supplybase_cluster_108_sector001 owner=xenon type=shipyard @ sector:cluster_108_sector001_macro
+station-add wharf_xenon_cluster_x_ter_supportstation_cluster_104_sector002 owner=xenon type=shipyard @ sector:cluster_104_sector002_macro
+station-add wharf_xenon_cluster_x_wharf_holyorder owner=xenon type=shipyard @ sector:cluster_24_sector001_macro
+station-add wharf_xenon_cluster_x_wharf_ministry_01 owner=xenon type=shipyard @ sector:cluster_02_sector001_macro
+station-add wharf_xenon_cluster_x_wharf_split_02 owner=xenon type=shipyard @ sector:cluster_403_sector001_macro
+station-add wharf_xenon_cluster_x_wharf_teladi_01 owner=xenon type=shipyard @ sector:cluster_34_sector001_macro
+station-add xen_defence_cluster_x_ant_defence_cluster_41_sector001 owner=xenon type=defence @ zone:zone004_cluster_41_sector001_macro
+station-add xen_defence_cluster_x_arg_defence_cluster_06_sector001 owner=xenon type=defence @ zone:zone001_cluster_06_sector001_macro
+station-add xen_defence_cluster_x_arg_defence_cluster_06_sector002 owner=xenon type=defence @ zone:zone001_cluster_06_sector002_macro
+station-add xen_defence_cluster_x_arg_defence_cluster_08_sector001_01 owner=xenon type=defence @ zone:zone001_cluster_08_sector001_macro
+station-add xen_defence_cluster_x_arg_defence_cluster_08_sector001_02 owner=xenon type=defence @ zone:zone005_cluster_08_sector001_macro
+station-add xen_defence_cluster_x_arg_defence_cluster_30_sector001 owner=xenon type=defence @ zone:zone003_cluster_30_sector001_macro
+station-add xen_defence_cluster_x_arg_defence_cluster_416_sector001 owner=xenon type=defence @ zone:zone001_cluster_416_sector001_macro
+station-add xen_defence_cluster_x_arg_defence_cluster_416_sector002 owner=xenon type=defence @ zone:zone001_cluster_416_sector002_macro
+station-add xen_defence_cluster_x_arg_defence_cluster_704_sector001_01 owner=xenon type=defence @ sector:cluster_704_sector001_macro
+station-add xen_defence_cluster_x_arg_tradestation_cluster_704 owner=xenon type=defence @ sector:cluster_704_sector001_macro
+station-add xen_defence_cluster_x_boron_defence_602_001 owner=xenon type=defence @ zone:zone003_cluster_602_sector001_macro
+station-add xen_defence_cluster_x_boron_defence_603_001 owner=xenon type=defence @ zone:zone004_cluster_603_sector001_macro
+station-add xen_defence_cluster_x_boron_defence_608_001 owner=xenon type=defence @ sector:cluster_608_sector001_macro
+station-add xen_defence_cluster_x_boron_defence_609_001 owner=xenon type=defence @ sector:cluster_609_sector001_macro
+station-add xen_defence_cluster_x_boron_logisticsharbour_608_001 owner=xenon type=defence @ zone:zone005_cluster_608_sector001_macro
+station-add xen_defence_cluster_x_boron_supplyreservoir_609_001 owner=xenon type=defence @ zone:zone005_cluster_609_sector001_macro
+station-add xen_defence_cluster_x_boron_trade_602_001 owner=xenon type=defence @ sector:cluster_602_sector001_macro
+station-add xen_defence_cluster_x_boron_trade_604_001 owner=xenon type=defence @ sector:cluster_604_sector001_macro
+station-add xen_defence_cluster_x_frf_defence_cluster_407_sector001 owner=xenon type=defence @ zone:zone001_cluster_407_sector001_macro
+station-add xen_defence_cluster_x_frf_defence_cluster_408_sector001 owner=xenon type=defence @ zone:zone001_cluster_408_sector001_macro
+station-add xen_defence_cluster_x_frf_defence_cluster_408_sector002 owner=xenon type=defence @ zone:zone001_cluster_408_sector002_macro
+station-add xen_defence_cluster_x_frf_defence_cluster_412_sector001 owner=xenon type=defence @ zone:zone001_cluster_412_sector001_macro
+station-add xen_defence_cluster_x_frf_defence_cluster_421_sector001 owner=xenon type=defence @ zone:zone001_cluster_421_sector001_macro
+station-add xen_defence_cluster_x_hol_defence_cluster_11_sector001_01 owner=xenon type=defence @ zone:zone001_cluster_11_sector001_macro
+station-add xen_defence_cluster_x_hol_defence_cluster_11_sector001_02 owner=xenon type=defence @ zone:zone003_cluster_11_sector001_macro
+station-add xen_defence_cluster_x_hol_defence_cluster_12_sector001_01 owner=xenon type=defence @ zone:zone001_cluster_12_sector001_macro
+station-add xen_defence_cluster_x_hol_defence_cluster_12_sector001_02 owner=xenon type=defence @ zone:zone003_cluster_12_sector001_macro
+station-add xen_defence_cluster_x_hol_defence_cluster_24_sector001_01 owner=xenon type=defence @ zone:zone002_cluster_24_sector001_macro
+station-add xen_defence_cluster_x_hol_defence_cluster_24_sector001_02 owner=xenon type=defence @ zone:zone003_cluster_24_sector001_macro
+station-add xen_defence_cluster_x_par_defence_cluster_10_sector001 owner=xenon type=defence @ sector:cluster_10_sector001_macro
+station-add xen_defence_cluster_x_par_defence_cluster_22_sector001_01 owner=xenon type=defence @ zone:zone001_cluster_22_sector001_macro
+station-add xen_defence_cluster_x_par_defence_cluster_22_sector001_02 owner=xenon type=defence @ zone:zone004_cluster_22_sector001_macro
+station-add xen_defence_cluster_x_par_defence_cluster_23_sector001 owner=xenon type=defence @ zone:zone002_cluster_23_sector001_macro
+station-add xen_defence_cluster_x_par_defence_cluster_37_sector001 owner=xenon type=defence @ zone:zone001_cluster_37_sector001_macro
+station-add xen_defence_cluster_x_par_defence_cluster_38_sector001 owner=xenon type=defence @ zone:zone001_cluster_38_sector001_macro
+station-add xen_defence_cluster_x_par_defence_cluster_423_sector001 owner=xenon type=defence @ zone:zone001_cluster_423_sector001_macro
+station-add xen_defence_cluster_x_par_defence_cluster_423_sector002 owner=xenon type=defence @ zone:zone001_cluster_423_sector002_macro
+station-add xen_defence_cluster_x_par_defence_cluster_709_sector001_01 owner=xenon type=defence @ sector:cluster_709_sector001_macro
+station-add xen_defence_cluster_x_par_defence_cluster_709_sector001_02 owner=xenon type=defence @ sector:cluster_709_sector001_macro
+station-add xen_defence_cluster_x_par_palace_cluster_709_sector001 owner=xenon type=defence @ sector:cluster_709_sector001_macro
+station-add xen_defence_cluster_x_spl_defence_cluster_400_sector001 owner=xenon type=defence @ sector:cluster_400_sector001_macro
+station-add xen_defence_cluster_x_spl_defence_cluster_402_sector001 owner=xenon type=defence @ zone:zone002_cluster_402_sector001_macro
+station-add xen_defence_cluster_x_spl_defence_cluster_402_sector001_2 owner=xenon type=defence @ zone:zone005_cluster_402_sector001_macro
+station-add xen_defence_cluster_x_spl_defence_cluster_403_sector001 owner=xenon type=defence @ zone:zone004_cluster_403_sector001_macro
+station-add xen_defence_cluster_x_tel_defence_cluster_02_sector001_01 owner=xenon type=defence @ zone:zone003_cluster_02_sector001_macro
+station-add xen_defence_cluster_x_tel_defence_cluster_02_sector001_02 owner=xenon type=defence @ zone:zone003_cluster_02_sector001_macro
+station-add xen_defence_cluster_x_tel_defence_cluster_03_sector001 owner=xenon type=defence @ zone:zone002_cluster_03_sector001_macro
+station-add xen_defence_cluster_x_tel_defence_cluster_05_sector001 owner=xenon type=defence @ zone:zone001_cluster_05_sector001_macro
+station-add xen_defence_cluster_x_tel_defence_cluster_20_sector001 owner=xenon type=defence @ zone:zone003_cluster_20_sector001_macro
+station-add xen_defence_cluster_x_tel_defence_cluster_34_sector001 owner=xenon type=defence @ zone:zone004_cluster_34_sector001_macro
+station-add xen_defence_cluster_x_tel_defence_cluster_39_sector001 owner=xenon type=defence @ zone:zone001_cluster_39_sector001_macro
+station-add xen_defence_cluster_x_tel_defence_cluster_419_sector001 owner=xenon type=defence @ zone:zone001_cluster_419_sector001_macro
+station-add xen_defence_cluster_x_tel_defence_cluster_420_sector001 owner=xenon type=defence @ zone:zone001_cluster_420_sector001_macro
+station-add xen_defence_cluster_x_tel_defence_cluster_42_sector001 owner=xenon type=defence @ zone:zone001_cluster_42_sector001_macro
+station-add xen_defence_cluster_x_tel_defence_cluster_713_sector001_01 owner=xenon type=defence @ sector:cluster_713_sector001_macro
+station-add xen_defence_cluster_x_tel_defence_cluster_713_sector001_02 owner=xenon type=defence @ sector:cluster_713_sector001_macro
+station-add xen_defence_cluster_x_ter_defence_cluster_104_sector001 owner=xenon type=defence @ sector:cluster_104_sector001_macro
+station-add xen_defence_cluster_x_ter_defence_cluster_104_sector002 owner=xenon type=defence @ zone:zone005_cluster_104_sector002_macro
+station-add xen_defence_cluster_x_ter_defence_cluster_107_sector001 owner=xenon type=defence @ sector:cluster_107_sector001_macro
+station-add xen_defence_cluster_x_ter_defence_cluster_108_sector001 owner=xenon type=defence @ zone:zone002_cluster_108_sector001_macro
+station-add xen_defence_cluster_x_ter_defence_cluster_108_sector002 owner=xenon type=defence @ zone:zone002_cluster_108_sector002_macro
+station-add xen_defence_cluster_x_ter_defence_cluster_108_sector003 owner=xenon type=defence @ sector:cluster_108_sector003_macro
+station-add xen_defence_cluster_x_ter_defence_cluster_109_sector001 owner=xenon type=defence @ zone:zone002_cluster_109_sector001_macro
+station-add xen_defence_cluster_x_ter_defence_cluster_110_sector001 owner=xenon type=defence @ zone:zone005_cluster_110_sector001_macro
+station-add xen_defence_cluster_x_ter_defence_cluster_111_sector001 owner=xenon type=defence @ sector:cluster_111_sector001_macro
+station-add xen_defence_cluster_x_ter_defenceplatform_cluster_100_sector001 owner=xenon type=defence @ zone:zone004_cluster_100_sector001_macro
+station-add xen_defence_cluster_x_tradestation_argon_01 owner=xenon type=defence @ sector:cluster_06_sector002_macro
+station-add xen_defence_cluster_x_tradestation_argon_02 owner=xenon type=defence @ sector:cluster_08_sector001_macro
+station-add xen_defence_cluster_x_tradestation_holyorder owner=xenon type=defence @ sector:cluster_24_sector001_macro
+station-add xen_defence_cluster_x_tradestation_paranid owner=xenon type=defence @ sector:cluster_22_sector001_macro
+station-move arg_tradestation_cluster_704 -> sector:cluster_07_sector001_macro
+station-move arg_wharf_cluster_416_sector002 -> sector:cluster_29_sector002_macro
+station-move boron_equipment_609_001 -> sector:cluster_606_sector003_macro
+station-move boron_logisticsharbour_608_001 -> sector:cluster_606_sector001_macro
+station-move boron_supplyreservoir_609_001 -> sector:cluster_606_sector002_macro
+station-move boron_trade_602_001 -> sector:cluster_606_sector002_macro
+station-move boron_trade_604_001 -> sector:cluster_606_sector003_macro
+station-move boron_wharf_603_001 -> sector:cluster_606_sector001_macro
+station-move equipmentdock_antigone -> sector:cluster_28_sector001_macro
+station-move equipmentdock_argon_01 -> sector:cluster_07_sector001_macro
+station-move equipmentdock_freesplit_01 -> sector:cluster_410_sector001_macro
+station-move equipmentdock_freesplit_02 -> sector:cluster_410_sector001_macro
+station-move equipmentdock_ministry_01 -> sector:cluster_15_sector001_macro
+station-move equipmentdock_paranid -> sector:cluster_19_sector002_macro
+station-move equipmentdock_split_01 -> sector:cluster_405_sector001_macro
+station-move equipmentdock_split_02 -> sector:cluster_417_sector001_macro
+station-move equipmentdock_teladi_01 -> sector:cluster_15_sector001_macro
+station-move par_palace_cluster_709_sector001 -> sector:cluster_19_sector002_macro
+station-move par_wharf_cluster_422_sector001 -> sector:cluster_47_sector001_macro
+station-move ringstation_01 -> sector:cluster_15_sector001_macro
+station-move shipyard_alliance -> sector:cluster_47_sector001_macro
+station-move shipyard_holyorder -> sector:cluster_35_sector001_macro
+station-move shipyard_ministry_01 -> sector:cluster_15_sector001_macro
+station-move shipyard_teladi_01 -> sector:cluster_15_sector001_macro
+station-move ter_equipmentdock_cluster_107_sector001 -> sector:cluster_106_sector001_macro
+station-move ter_logisticsdock_cluster_104_sector001 -> sector:cluster_102_sector001_macro
+station-move ter_shipyard_cluster_104_sector002 -> sector:cluster_106_sector001_macro
+station-move tradestation_argon_01 -> sector:cluster_07_sector001_macro
+station-move tradestation_argon_02 -> sector:cluster_29_sector002_macro
+station-move tradestation_holyorder -> sector:cluster_35_sector001_macro
+station-move tradestation_paranid -> sector:cluster_19_sector002_macro
+station-move wharf_holyorder -> sector:cluster_714_sector001_macro
+station-move wharf_ministry_01 -> sector:cluster_15_sector002_macro
+station-move wharf_split_02 -> sector:cluster_406_sector001_macro
+station-move wharf_teladi_01 -> sector:cluster_15_sector002_macro
+station-remove ant_defence_cluster_13_sector001_01
+station-remove ant_defence_cluster_13_sector001_02
+station-remove ant_defence_cluster_41_sector001
+station-remove arg_defence_cluster_06_sector001
+station-remove arg_defence_cluster_06_sector002
+station-remove arg_defence_cluster_08_sector001_01
+station-remove arg_defence_cluster_08_sector001_02
+station-remove arg_defence_cluster_30_sector001
+station-remove arg_defence_cluster_416_sector001
+station-remove arg_defence_cluster_416_sector002
+station-remove arg_defence_cluster_46_sector001
+station-remove arg_defence_cluster_704_sector001_01
+station-remove boron_defence_602_001
+station-remove boron_defence_603_001
+station-remove boron_defence_608_001
+station-remove boron_defence_609_001
+station-remove frf_defence_cluster_407_sector001
+station-remove frf_defence_cluster_408_sector001
+station-remove frf_defence_cluster_408_sector002
+station-remove frf_defence_cluster_412_sector001
+station-remove frf_defence_cluster_421_sector001
+station-remove hol_defence_cluster_11_sector001_01
+station-remove hol_defence_cluster_11_sector001_02
+station-remove hol_defence_cluster_12_sector001_01
+station-remove hol_defence_cluster_12_sector001_02
+station-remove hol_defence_cluster_24_sector001_01
+station-remove hol_defence_cluster_24_sector001_02
+station-remove par_defence_cluster_10_sector001
+station-remove par_defence_cluster_22_sector001_01
+station-remove par_defence_cluster_22_sector001_02
+station-remove par_defence_cluster_23_sector001
+station-remove par_defence_cluster_37_sector001
+station-remove par_defence_cluster_38_sector001
+station-remove par_defence_cluster_422_sector001
+station-remove par_defence_cluster_423_sector001
+station-remove par_defence_cluster_423_sector002
+station-remove par_defence_cluster_709_sector001_01
+station-remove par_defence_cluster_709_sector001_02
+station-remove spl_defence_cluster_400_sector001
+station-remove spl_defence_cluster_401_sector001
+station-remove spl_defence_cluster_401_sector001_2
+station-remove spl_defence_cluster_402_sector001
+station-remove spl_defence_cluster_402_sector001_2
+station-remove spl_defence_cluster_403_sector001
+station-remove spl_defence_cluster_404_sector001
+station-remove spl_defence_cluster_404_sector001_2
+station-remove spl_defence_cluster_418_sector001
+station-remove spl_defence_cluster_418_sector001_2
+station-remove tel_defence_cluster_01_sector001
+station-remove tel_defence_cluster_01_sector002
+station-remove tel_defence_cluster_01_sector003
+station-remove tel_defence_cluster_02_sector001_01
+station-remove tel_defence_cluster_02_sector001_02
+station-remove tel_defence_cluster_03_sector001
+station-remove tel_defence_cluster_05_sector001
+station-remove tel_defence_cluster_09_sector001
+station-remove tel_defence_cluster_20_sector001
+station-remove tel_defence_cluster_34_sector001
+station-remove tel_defence_cluster_39_sector001
+station-remove tel_defence_cluster_419_sector001
+station-remove tel_defence_cluster_420_sector001
+station-remove tel_defence_cluster_42_sector001
+station-remove tel_defence_cluster_43_sector001
+station-remove tel_defence_cluster_713_sector001_01
+station-remove tel_defence_cluster_713_sector001_02
+station-remove tel_dlc_split_ringstation_01
+station-remove ter_defence_cluster_104_sector001
+station-remove ter_defence_cluster_104_sector002
+station-remove ter_defence_cluster_107_sector001
+station-remove ter_defence_cluster_108_sector001
+station-remove ter_defence_cluster_108_sector002
+station-remove ter_defence_cluster_108_sector003
+station-remove ter_defence_cluster_109_sector001
+station-remove ter_defence_cluster_110_sector001
+station-remove ter_defence_cluster_111_sector001
+station-remove ter_defence_cluster_116_sector001
+station-remove ter_defenceplatform_cluster_100_sector001
+station-remove ter_logisticsdock_cluster_110_sector001
+station-remove ter_supplybase_cluster_108_sector001
+station-remove ter_supportstation_cluster_104_sector002
+
+== libraries/jobs.xml (109) ==
+job-add terran_battleship_patrol_xl_mercury
+job-add terran_destroyer_patrol_l_venus
+job-add xenon_carrier_patrol_xl_border_zone_defence_atf_terran_asteroid
+job-add xenon_carrier_patrol_xl_border_zone_defence_atf_terran_earth
+job-add xenon_destroyer_patrol_xl_comp_atf_hop_holy_vision
+job-add xenon_destroyer_patrol_xl_comp_atf_morningstar_iv
+job-add xenon_destroyer_patrol_xl_comp_atf_terran_earthmoon
+job-add xenon_destroyer_patrol_xl_comp_atf_terran_saturn
+job-add xenon_frigate_patrol_m_sector_arg_hatikvahs_choice
+job-add xenon_frigate_patrol_m_sector_atf_terran_asteroid
+job-add xenon_frigate_patrol_m_sector_atf_terran_uranus
+job-add xenon_frigate_patrol_m_sector_hop_holy_vision
+job-preferbuild antigone_destroyer_patrol_l_border_sector preferbuilding=true buildatshipyard=true
+job-preferbuild antigone_destroyer_patrol_l_comp preferbuilding=true buildatshipyard=true
+job-preferbuild antigone_destroyer_patrol_l_comp_mission preferbuilding=true buildatshipyard=true
+job-preferbuild argon_carrier_patrol_xl_center_galaxy preferbuilding=true buildatshipyard=true
+job-preferbuild argon_destroyer_patrol_l_comp preferbuilding=true buildatshipyard=true
+job-preferbuild argon_destroyer_patrol_l_comp_mission preferbuilding=true buildatshipyard=true
+job-preferbuild argon_destroyer_patrol_l_sector preferbuilding=true buildatshipyard=true
+job-preferbuild argon_destroyer_patrol_l_sector_spl preferbuilding=true buildatshipyard=true
+job-preferbuild boron_carrier_patrol_l_sector preferbuilding=true buildatshipyard=true
+job-preferbuild boron_carrier_patrol_xl_flagship preferbuilding=true buildatshipyard=true
+job-preferbuild boron_destroyer_patrol_l_leader preferbuilding=true buildatshipyard=true
+job-preferbuild hatikvah_plunderer_l_cluster preferbuilding=true buildatshipyard=true
+job-preferbuild hatikvah_scavenger_sm_deepspace_single preferbuilding=true buildatshipyard=true
+job-preferbuild holyorder_destroyer_patrol_l_cluster_exp preferbuilding=true buildatshipyard=true
+job-preferbuild holyorder_destroyer_patrol_l_comp preferbuilding=true buildatshipyard=true
+job-preferbuild loanshark_patrol_iceunion preferbuilding=true buildatshipyard=true
+job-preferbuild loanshark_plunderer_iceunion preferbuilding=true buildatshipyard=true
+job-preferbuild loanshark_raider_iceunion preferbuilding=true buildatshipyard=true
+job-preferbuild ministry_destroyer_patrol_l_border preferbuilding=true buildatshipyard=true
+job-preferbuild ministry_destroyer_patrol_l_border2 preferbuilding=true buildatshipyard=true
+job-preferbuild ministry_destroyer_patrol_l_comp preferbuilding=true buildatshipyard=true
+job-preferbuild ministry_destroyer_patrol_l_comp_mission preferbuilding=true buildatshipyard=true
+job-preferbuild ministry_destroyer_patrol_l_spl preferbuilding=true buildatshipyard=true
+job-preferbuild paranid_carrier_patrol_xl_cluster preferbuilding=true buildatshipyard=true
+job-preferbuild paranid_carrier_patrol_xl_cluster_spl preferbuilding=true buildatshipyard=true
+job-preferbuild paranid_destroyer_patrol_l_comp preferbuilding=true buildatshipyard=true
+job-preferbuild paranid_destroyer_patrol_l_sector_exp preferbuilding=true buildatshipyard=true
+job-preferbuild pioneers_destroyer_patrol_l_comp preferbuilding=true buildatshipyard=true
+job-preferbuild pioneers_destroyer_patrol_l_comp_mission preferbuilding=true buildatshipyard=true
+job-preferbuild pioneers_destroyer_patrol_l_exp preferbuilding=true buildatshipyard=true
+job-preferbuild pioneers_destroyer_patrol_l_segaris preferbuilding=true buildatshipyard=true
+job-preferbuild teladi_carrier_patrol_xl_cluster preferbuilding=true buildatshipyard=true
+job-preferbuild teladi_destroyer_patrol_l_border_cluster preferbuilding=true buildatshipyard=true
+job-preferbuild terran_battleship_intervention_xl preferbuilding=true buildatshipyard=true
+job-preferbuild terran_battleship_patrol_xl_luna preferbuilding=true buildatshipyard=true
+job-preferbuild terran_carrier_defence_xl_asteroidbelt_heavy preferbuilding=true buildatshipyard=true
+job-preferbuild terran_carrier_defence_xl_earth_heavy preferbuilding=true buildatshipyard=true
+job-preferbuild terran_carrier_defence_xl_mars_medium preferbuilding=true buildatshipyard=true
+job-preferbuild terran_carrier_defence_xl_neptune_medium preferbuilding=true buildatshipyard=true
+job-preferbuild terran_carrier_intervention_xl preferbuilding=true buildatshipyard=true
+job-preferbuild terran_carrier_patrol_xl_mobile_light preferbuilding=true buildatshipyard=true
+job-preferbuild terran_destroyer_patrol_l_comp preferbuilding=true buildatshipyard=true
+job-preferbuild terran_destroyer_patrol_l_comp_mission preferbuilding=true buildatshipyard=true
+job-preferbuild terran_destroyer_patrol_l_mars preferbuilding=true buildatshipyard=true
+job-preferbuild terran_destroyer_patrol_l_mobile_pack preferbuilding=true buildatshipyard=true
+job-preferbuild terran_destroyer_patrol_l_pioneers_pack preferbuilding=true buildatshipyard=true
+job-preferbuild zyarth_carrier_patrol_xl_center preferbuilding=true buildatshipyard=true
+job-preferbuild zyarth_carrier_patrol_xl_familykritt preferbuilding=true buildatshipyard=true
+job-preferbuild zyarth_carrier_patrol_xl_familyzhin preferbuilding=true buildatshipyard=true
+job-preferbuild zyarth_destroyer_patrol_l_border_sector preferbuilding=true buildatshipyard=true
+job-preferbuild zyarth_destroyer_patrol_l_border_sector_colonial preferbuilding=true buildatshipyard=true
+job-preferbuild zyarth_destroyer_patrol_l_comp preferbuilding=true buildatshipyard=true
+job-preferbuild zyarth_destroyer_patrol_l_comp_mission preferbuilding=true buildatshipyard=true
+job-quota fallensplit_marauder_mixed_cluster galaxy=6 sector=1
+job-quota fallensplit_raider_mixed_cluster galaxy=15 sector=3
+job-quota scaleplate_patrol_l_cluster_anarchy_aggresive galaxy=1 sector=1
+job-quota scaleplate_patrol_l_cluster_anarchy_port galaxy=1 sector=1
+job-quota scaleplate_patrol_m_cluster_anarchy_aggresive galaxy=2 sector=2
+job-quota scaleplate_patrol_s_cluster_anarchy_aggresive galaxy=3 sector=1
+job-quota scaleplate_plunderer_l_cluster galaxy=4 sector=1
+job-quota scaleplate_plunderer_m_cluster galaxy=4 sector=1
+job-quota scaleplate_scavenger_m_cluster galaxy=7 sector=1
+job-quota scaleplate_scavenger_m_cluster_anarchy galaxy=2 sector=1
+job-quota scaleplate_scavenger_sm_deepspace galaxy=4 sector=1
+job-quota xenon_carrier_patrol_xl_border_cluster galaxy=3 maxgalaxy=3
+job-quota xenon_carrier_patrol_xl_border_zone_defence_spl galaxy=3
+job-quota xenon_carrier_patrol_xl_zone_defence galaxy=5 sector=3
+job-quota xenon_destroyer_patrol_xl_cluster galaxy=15 maxgalaxy=44 cluster=8
+job-quota xenon_destroyer_patrol_xl_cluster_mission galaxy=15 maxgalaxy=15 cluster=3
+job-quota xenon_destroyer_patrol_xl_cluster_mission_ter galaxy=3 maxgalaxy=5 cluster=3
+job-quota xenon_destroyer_patrol_xl_cluster_ter galaxy=5 maxgalaxy=5 cluster=3
+job-quota xenon_destroyer_patrol_xl_comp galaxy=5 maxgalaxy=27 cluster=5
+job-quota xenon_destroyer_patrol_xl_comp_mission galaxy=3 maxgalaxy=3 cluster=3
+job-quota xenon_destroyer_patrol_xl_comp_spl galaxy=8 maxgalaxy=8 sector=8
+job-quota xenon_destroyer_patrol_xl_comp_spl_mission galaxy=5 maxgalaxy=5 sector=5
+job-quota xenon_destroyer_patrol_xl_defence galaxy=15 cluster=10
+job-quota xenon_fighter_patrol_s_zone galaxy=207 maxgalaxy=329
+job-quota xenon_fighter_patrol_s_zone_spl galaxy=56 maxgalaxy=88
+job-quota xenon_fighter_s_deepspace_group galaxy=25
+job-quota xenon_fighter_s_deepspace_single galaxy=53
+job-quota xenon_free_miner_m_mineral galaxy=280 cluster=40
+job-quota xenon_free_miner_m_mineral_local galaxy=180 cluster=30
+job-quota xenon_free_miner_m_mineral_spl galaxy=200 cluster=40
+job-quota xenon_free_miner_m_mineral_ter galaxy=200 sector=20
+job-quota xenon_free_trader_m_energy galaxy=210 cluster=30
+job-quota xenon_free_trader_m_energy_spl galaxy=150 cluster=30
+job-quota xenon_free_trader_m_energy_ter galaxy=150 sector=15
+job-quota xenon_frigate_patrol_m_sector_spl galaxy=39 maxgalaxy=95 sector=11
+job-quota xenon_frigate_patrol_m_sector_spl_mission galaxy=25 maxgalaxy=25 sector=4
+job-quota xenon_frigate_patrol_m_zone_everywhereelse galaxy=102 maxgalaxy=242 sector=7
+job-quota xenon_frigate_patrol_m_zone_everywhereelse_mission galaxy=46 maxgalaxy=46 sector=4
+job-quota xenon_scout_patrol_s galaxy=40 maxgalaxy=80 cluster=10
+job-quota xenon_staticdefense_engineer_m galaxy=0 maxgalaxy=15
+job-quota xenon_staticdefense_minelayer_s galaxy=0 maxgalaxy=10
+job-quota xenon_terraformer_patrol_l_rare galaxy=3 maxgalaxy=3 sector=3
+job-quota xenon_terraformer_patrol_l_sector galaxy=8 maxgalaxy=8 sector=3
+job-quota yaki_raider_m_sector galaxy=15 sector=3
+
+== libraries/loadouts.xml (5) ==
+loadout eod_abandoned_ship_loadout_1 macro=ship_bor_xl_carrier_01_a_macro macros=10 groups=17
+loadout eod_abandoned_ship_loadout_2 macro=ship_bor_l_destroyer_01_a_macro macros=9 groups=17
+loadout eod_abandoned_ship_loadout_3 macro=ship_atf_xl_battleship_01_a_macro macros=8 groups=23
+loadout eod_abandoned_ship_loadout_4 macro=ship_atf_l_destroyer_01_a_macro macros=7 groups=21
+loadout eod_abandoned_ship_loadout_5 macro=ship_bor_l_carrier_01_a_macro macros=11 groups=17
+
+== libraries/mapdefaults.xml (18) ==
+other-op remove /defaults/dataset[@macro='Cluster_101_Sector001_macro']/properties/access
+other-op replace /defaults/dataset[@macro='Cluster_106_Sector001_macro']/properties/access
+resources Cluster_07_Sector001_macro: sphere_large_helium_high_slow=3, sphere_large_hydrogen_high_slow=3, sphere_large_methane_high_slow=3, sphere_medium_helium_medium_average=3, sphere_medium_hydrogen_medium_average=3, sphere_medium_methane_medium_average=3
+resources Cluster_14_Sector001_macro: sphere_large_ice_high_slow=3, sphere_large_ore_high_slow=6, sphere_large_silicon_high_slow=4, sphere_medium_rawscrap_high_slow=3, sphere_small_hydrogen_medium_average=2, sphere_small_ice_medium_average=3, sphere_small_nividium_medium_average=2, sphere_small_ore_medium_average=8, sphere_small_silicon_medium_average=6
+resources Cluster_15_Sector001_macro: sphere_large_hydrogen_high_slow=3, sphere_large_methane_high_slow=3, sphere_large_ore_high_slow=3, sphere_large_silicon_high_slow=2, sphere_medium_hydrogen_medium_average=3, sphere_medium_methane_medium_average=3, sphere_medium_rawscrap_high_slow=3, sphere_small_hydrogen_medium_average=2, sphere_small_nividium_medium_average=1, sphere_small_ore_medium_average=4, sphere_small_silicon_medium_average=3
+resources Cluster_15_Sector002_macro: sphere_large_helium_high_slow=3, sphere_large_ice_high_slow=3, sphere_large_ore_high_slow=3, sphere_large_silicon_high_slow=2, sphere_medium_helium_medium_average=3, sphere_small_ice_medium_average=3, sphere_small_nividium_medium_average=1, sphere_small_ore_medium_average=4, sphere_small_silicon_medium_average=3
+resources Cluster_18_Sector001_macro: sphere_large_helium_high_slow=3, sphere_large_ice_high_slow=3, sphere_large_methane_high_slow=3, sphere_large_ore_high_slow=3, sphere_large_silicon_high_slow=2, sphere_medium_helium_medium_average=3, sphere_medium_methane_medium_average=3, sphere_small_ice_medium_average=3, sphere_small_nividium_medium_average=1, sphere_small_ore_medium_average=4, sphere_small_silicon_medium_average=3
+resources Cluster_19_Sector001_macro: sphere_large_ore_high_slow=3, sphere_large_silicon_high_slow=2, sphere_small_nividium_medium_average=1, sphere_small_ore_medium_average=4, sphere_small_silicon_medium_average=3
+resources Cluster_19_Sector002_macro: sphere_large_hydrogen_high_slow=3, sphere_medium_hydrogen_medium_average=3
+resources Cluster_27_Sector001_macro: sphere_large_ice_high_slow=3, sphere_medium_rawscrap_high_slow=3, sphere_small_hydrogen_medium_average=2, sphere_small_ice_medium_average=3
+resources Cluster_28_Sector001_macro: sphere_large_helium_high_slow=3, sphere_large_hydrogen_high_slow=3, sphere_large_methane_high_slow=3, sphere_large_ore_high_slow=3, sphere_large_silicon_high_slow=2, sphere_medium_helium_medium_average=3, sphere_medium_hydrogen_medium_average=3, sphere_medium_methane_medium_average=3, sphere_small_nividium_medium_average=1, sphere_small_ore_medium_average=4, sphere_small_silicon_medium_average=3
+resources Cluster_29_Sector001_macro: sphere_large_helium_high_slow=3, sphere_large_hydrogen_high_slow=3, sphere_large_methane_high_slow=3, sphere_medium_helium_medium_average=3, sphere_medium_hydrogen_medium_average=3, sphere_medium_methane_medium_average=3
+resources Cluster_35_Sector001_macro: sphere_large_helium_high_slow=3, sphere_large_ice_high_slow=3, sphere_large_ore_high_slow=3, sphere_large_silicon_high_slow=2, sphere_medium_helium_medium_average=3, sphere_small_ice_medium_average=3, sphere_small_nividium_medium_average=1, sphere_small_ore_medium_average=4, sphere_small_silicon_medium_average=3
+resources Cluster_36_Sector001_macro: sphere_large_methane_high_slow=3, sphere_large_ore_high_slow=3, sphere_large_silicon_high_slow=2, sphere_medium_methane_medium_average=3, sphere_medium_rawscrap_high_slow=3, sphere_small_hydrogen_medium_average=2, sphere_small_nividium_medium_average=1, sphere_small_ore_medium_average=4, sphere_small_silicon_medium_average=3
+resources Cluster_40_Sector001_macro: sphere_large_ore_high_slow=3, sphere_large_silicon_high_slow=2, sphere_small_nividium_medium_average=1, sphere_small_ore_medium_average=4, sphere_small_silicon_medium_average=3
+resources Cluster_42_Sector001_macro: sphere_large_ice_high_slow=3, sphere_large_ore_high_slow=6, sphere_large_silicon_high_slow=4, sphere_medium_rawscrap_high_slow=3, sphere_small_hydrogen_medium_average=2, sphere_small_ice_medium_average=3, sphere_small_nividium_medium_average=2, sphere_small_ore_medium_average=8, sphere_small_silicon_medium_average=6
+resources Cluster_47_Sector001_macro: sphere_large_ore_high_slow=3, sphere_large_silicon_high_slow=2, sphere_medium_rawscrap_high_slow=3, sphere_small_hydrogen_medium_average=2, sphere_small_nividium_medium_average=1, sphere_small_ore_medium_average=4, sphere_small_silicon_medium_average=3
+resources cluster_714_Sector001_macro: sphere_large_helium_high_slow=3, sphere_large_methane_high_slow=3, sphere_large_ore_high_slow=6, sphere_large_silicon_high_slow=4, sphere_medium_helium_medium_average=3, sphere_medium_methane_medium_average=3, sphere_small_nividium_medium_average=2, sphere_small_ore_medium_average=8, sphere_small_silicon_medium_average=6
+
+== libraries/region_definitions.xml (6) ==
+region-def atf_asteroid_field_high
+region-def atf_helium_highyield_field
+region-def atf_hydrogen_highyield_field
+region-def atf_ice_field_high
+region-def atf_methane_highyield_field
+region-def atf_wreckfield_xenon_battle
+
+== maps/xu_ep2_universe/clusters.xml (46) ==
+region Cluster_07_macro: atf_helium_highyield_field @ (38533,-3050,61926)
+region Cluster_07_macro: atf_hydrogen_highyield_field @ (-45444,-4792,-58427)
+region Cluster_07_macro: atf_methane_highyield_field @ (57776,-1412,-63408)
+region Cluster_14_macro: atf_asteroid_field_high @ (12875,1205,37199)
+region Cluster_14_macro: atf_asteroid_field_high @ (4733,-1413,33200)
+region Cluster_14_macro: atf_ice_field_high @ (39661,-1038,-40759)
+region Cluster_14_macro: atf_wreckfield_xenon_battle @ (29815,-2895,2806)
+region Cluster_15_macro: atf_asteroid_field_high @ (109970117,-1254,23566)
+region Cluster_15_macro: atf_asteroid_field_high @ (24392,-2404,-67886)
+region Cluster_15_macro: atf_helium_highyield_field @ (110039000,2305,42880)
+region Cluster_15_macro: atf_hydrogen_highyield_field @ (-77607,3196,-76844)
+region Cluster_15_macro: atf_ice_field_high @ (109911426,-2144,-39838)
+region Cluster_15_macro: atf_methane_highyield_field @ (-21752,2382,33788)
+region Cluster_15_macro: atf_wreckfield_xenon_battle @ (60770,722,7048)
+region Cluster_18_macro: atf_asteroid_field_high @ (-36638,-1084,-33040)
+region Cluster_18_macro: atf_helium_highyield_field @ (-76666,-448,34502)
+region Cluster_18_macro: atf_ice_field_high @ (-62182,-2451,-5860)
+region Cluster_18_macro: atf_methane_highyield_field @ (-70501,4353,8519)
+region Cluster_19_macro: atf_asteroid_field_high @ (16144,-4295,43044)
+region Cluster_19_macro: atf_hydrogen_highyield_field @ (112742236,-3233,-69300)
+region Cluster_27_macro: atf_ice_field_high @ (-36808,-2170,21638)
+region Cluster_27_macro: atf_wreckfield_xenon_battle @ (-32836,-1305,56428)
+region Cluster_28_macro: atf_asteroid_field_high @ (-69239,4306,-51690)
+region Cluster_28_macro: atf_helium_highyield_field @ (18533,-585,-529)
+region Cluster_28_macro: atf_hydrogen_highyield_field @ (-51894,3522,23096)
+region Cluster_28_macro: atf_methane_highyield_field @ (-75184,371,33824)
+region Cluster_29_macro: atf_helium_highyield_field @ (-79588,-161,-8327)
+region Cluster_29_macro: atf_hydrogen_highyield_field @ (-2338,-2472,43324)
+region Cluster_29_macro: atf_methane_highyield_field @ (-2167,2115,-7801)
+region Cluster_35_macro: atf_asteroid_field_high @ (68148,-2851,55337)
+region Cluster_35_macro: atf_helium_highyield_field @ (55905,-1224,-35595)
+region Cluster_35_macro: atf_ice_field_high @ (21710,4949,23194)
+region Cluster_36_macro: atf_asteroid_field_high @ (47332,-860,39863)
+region Cluster_36_macro: atf_methane_highyield_field @ (-71622,-1954,48469)
+region Cluster_36_macro: atf_wreckfield_xenon_battle @ (-39888,3487,-35952)
+region Cluster_40_macro: atf_asteroid_field_high @ (-64831,-820,-25620)
+region Cluster_42_macro: atf_asteroid_field_high @ (-69321,-4299,43962)
+region Cluster_42_macro: atf_asteroid_field_high @ (1782,2974,52369)
+region Cluster_42_macro: atf_ice_field_high @ (-53447,2361,-38366)
+region Cluster_42_macro: atf_wreckfield_xenon_battle @ (960,-2698,-18058)
+region Cluster_47_macro: atf_asteroid_field_high @ (18482,-749,22231)
+region Cluster_47_macro: atf_wreckfield_xenon_battle @ (-66452,3116,-61769)
+region Cluster_714_macro: atf_asteroid_field_high @ (-23395,410,-79259)
+region Cluster_714_macro: atf_asteroid_field_high @ (-54731,-3320,77278)
+region Cluster_714_macro: atf_helium_highyield_field @ (17931,2951,41697)
+region Cluster_714_macro: atf_methane_highyield_field @ (17973,-433,57683)
+
+== md/factionlogic.xml (2) ==
+op replace //cue[@name='TerranFactionLogic_Manager']/param[@name='PreferredHQSpaceMacro']/@value
+op replace //cue[@name='TerranFactionLogic_Manager']/param[@name='PreferredHQTypes']/@value
+
+== md/placedobjects.xml (122) ==
+ship ship_arg_l_destroyer_01_a_macro @ Cluster_32_Sector001_macro (-136km,-9km,-78km)
+ship ship_arg_l_destroyer_01_a_macro @ Cluster_49_Sector001_macro (27km,3km,56km)
+ship ship_arg_l_destroyer_01_a_macro @ Cluster_50_Sector002_macro (-79km,-10km,138km)
+ship ship_arg_l_destroyer_02_a_macro @ Cluster_413_Sector001_macro (67km,-9km,155km)
+ship ship_arg_l_destroyer_02_a_macro @ Cluster_420_Sector001_macro (32km,-9km,96km)
+ship ship_arg_l_trans_container_02_b_macro @ Cluster_110_Sector001_macro (-140km,3km,119km)
+ship ship_arg_l_trans_container_04_a_macro @ Cluster_504_Sector001_macro (-145km,0km,-81km)
+ship ship_arg_l_trans_container_04_b_macro @ Cluster_40_Sector001_macro (-148km,-4km,-136km)
+ship ship_arg_l_trans_container_05_a_macro @ Cluster_39_Sector001_macro (127km,-7km,-30km)
+ship ship_arg_l_trans_container_05_b_macro @ Cluster_08_Sector001_macro (37km,3km,-94km)
+ship ship_arg_m_bomber_01_b_macro @ Cluster_416_Sector001_macro (-110km,-7km,173km)
+ship ship_arg_m_bomber_01_b_macro @ Cluster_42_Sector001_macro (108km,-7km,-108km)
+ship ship_arg_m_bomber_01_b_macro @ Cluster_49_Sector001_macro (31km,3km,60km)
+ship ship_arg_m_bomber_02_a_macro @ Cluster_108_Sector002_macro (123km,-7km,-115km)
+ship ship_arg_m_frigate_01_a_macro @ Cluster_19_Sector002_macro (132km,1km,10km)
+ship ship_arg_m_frigate_01_b_macro @ Cluster_50_Sector002_macro (-86km,-9km,144km)
+ship ship_arg_m_miner_solid_01_b_macro @ Cluster_30_Sector001_macro (-66km,-10km,-112km)
+ship ship_arg_m_miner_solid_01_b_macro @ Cluster_32_Sector001_macro (84km,-6km,156km)
+ship ship_arg_m_trans_container_02_a_macro @ Cluster_06_Sector001_macro (-56km,-8km,91km)
+ship ship_arg_s_fighter_01_b_macro @ Cluster_50_Sector002_macro (-85km,-11km,143km)
+ship ship_arg_s_heavyfighter_01_b_macro @ Cluster_108_Sector002_macro (125km,-13km,-118km)
+ship ship_arg_s_heavyfighter_02_a_macro @ Cluster_108_Sector002_macro (126km,-6km,-114km)
+ship ship_arg_s_heavyfighter_02_a_macro @ Cluster_503_Sector001_macro (76km,7km,-131km)
+ship ship_arg_s_heavyfighter_02_a_macro @ Cluster_50_Sector002_macro (-82km,-9km,138km)
+ship ship_arg_s_miner_solid_01_a_macro @ Cluster_603_Sector001_macro (-40km,-10km,79km)
+ship ship_arg_s_scout_01_b_macro @ Cluster_112_Sector002_macro (111km,3km,127km)
+ship ship_arg_s_trans_container_01_b_macro @ Cluster_407_Sector001_macro (97km,-5km,-179km)
+ship ship_arg_s_trans_container_02_a_macro @ Cluster_409_Sector001_macro (95km,-9km,-81km)
+ship ship_arg_s_trans_container_02_b_macro @ Cluster_42_Sector001_macro (158km,3km,131km)
+ship ship_arg_xl_builder_01_b_macro @ Cluster_21_Sector001_macro (-70km,-6km,94km)
+ship ship_arg_xl_carrier_01_a_macro @ Cluster_107_Sector001_macro (131km,0km,147km)
+ship ship_arg_xl_carrier_01_b_macro @ Cluster_107_Sector001_macro (-138km,5km,4km)
+ship ship_atf_l_destroyer_01_a_macro @ Cluster_408_Sector001_macro (23km,4km,-134km) loadout=eod_abandoned_ship_loadout_4
+ship ship_atf_xl_battleship_01_a_macro @ Cluster_44_Sector001_macro (-126km,-1km,18km) loadout=eod_abandoned_ship_loadout_3
+ship ship_bor_l_carrier_01_a_macro @ Cluster_44_Sector001_macro (-107km,-8km,51km) loadout=eod_abandoned_ship_loadout_5
+ship ship_bor_l_destroyer_01_a_macro @ Cluster_49_Sector001_macro (26km,6km,57km) loadout=eod_abandoned_ship_loadout_2
+ship ship_bor_m_corvette_01_a_macro @ Cluster_108_Sector002_macro (130km,-15km,-112km)
+ship ship_bor_m_corvette_01_a_macro @ Cluster_44_Sector001_macro (-12km,2km,-27km)
+ship ship_bor_m_corvette_01_a_macro @ Cluster_50_Sector002_macro (-80km,-11km,142km)
+ship ship_bor_m_trans_container_01_a_macro @ Cluster_710_Sector001_macro (-61km,-6km,27km)
+ship ship_bor_s_heavyfighter_01_a_macro @ Cluster_112_Sector002_macro (119km,4km,123km)
+ship ship_bor_s_miner_solid_01_a_macro @ Cluster_606_Sector002_macro (-66km,6km,-126km)
+ship ship_bor_xl_carrier_01_a_macro @ Cluster_711_Sector001_macro (-46km,4km,28km) loadout=eod_abandoned_ship_loadout_1
+ship ship_par_l_destroyer_01_a_macro @ Cluster_107_Sector001_macro (137km,8km,142km)
+ship ship_par_l_destroyer_01_a_macro @ Cluster_711_Sector001_macro (-156km,6km,-173km)
+ship ship_par_l_miner_liquid_01_a_macro @ Cluster_01_Sector002_macro (-72km,1km,39km)
+ship ship_par_l_trans_container_02_b_macro @ Cluster_501_Sector001_macro (69km,-9km,-44km)
+ship ship_par_l_trans_container_03_a_macro @ Cluster_424_Sector001_macro (-93km,9km,-128km)
+ship ship_par_m_corvette_01_a_macro @ Cluster_32_Sector002_macro (139km,1km,-83km)
+ship ship_par_m_corvette_01_b_macro @ Cluster_49_Sector001_macro (29km,2km,60km)
+ship ship_par_m_frigate_01_a_macro @ Cluster_107_Sector001_macro (132km,2km,149km)
+ship ship_par_m_frigate_01_a_macro @ Cluster_20_Sector001_macro (158km,2km,153km)
+ship ship_par_m_miner_liquid_01_a_macro @ Cluster_07_Sector001_macro (146km,-7km,-7km)
+ship ship_par_m_miner_liquid_01_b_macro @ Cluster_502_Sector001_macro (-26km,-4km,-142km)
+ship ship_par_m_trans_container_01_a_macro @ Cluster_102_Sector001_macro (134km,-1km,11km)
+ship ship_par_s_heavyfighter_01_a_macro @ Cluster_418_Sector001_macro (-14km,7km,40km)
+ship ship_par_s_heavyfighter_01_a_macro @ Cluster_50_Sector002_macro (-83km,-10km,141km)
+ship ship_par_s_miner_solid_01_a_macro @ Cluster_27_Sector001_macro (-88km,4km,69km)
+ship ship_par_s_scout_01_b_macro @ Cluster_27_Sector001_macro (50km,-8km,-22km)
+ship ship_par_s_scout_01_b_macro @ Cluster_401_Sector001_macro (-158km,-9km,-2km)
+ship ship_par_s_trans_container_01_b_macro @ Cluster_05_Sector001_macro (-86km,-6km,54km)
+ship ship_par_xl_builder_01_a_macro @ Cluster_609_Sector001_macro (103km,6km,146km)
+ship ship_par_xl_carrier_01_b_macro @ Cluster_720_Sector001_macro (77km,-7km,139km)
+ship ship_par_xl_resupplier_01_a_macro @ Cluster_01_Sector001_macro (-77km,0km,-98km)
+ship ship_pir_s_heavyfighter_01_a_macro @ Cluster_02_Sector001_macro (-44km,1km,-50km)
+ship ship_pir_s_trans_condensate_01_a_macro @ Cluster_26_Sector002_macro (70km,7km,7km)
+ship ship_pir_s_trans_condensate_01_a_macro @ Cluster_714_Sector001_macro (100km,6km,-61km)
+ship ship_pir_xl_builder_01_macro @ Cluster_05_Sector001_macro (15km,3km,-109km)
+ship ship_spl_l_miner_liquid_01_a_macro @ Cluster_415_Sector001_macro (-134km,-4km,45km)
+ship ship_spl_m_bomber_01_a_macro @ Cluster_108_Sector002_macro (126km,-15km,-114km)
+ship ship_spl_m_corvette_01_a_macro @ Cluster_116_Sector001_macro (138km,-7km,-156km)
+ship ship_spl_m_corvette_01_a_macro @ Cluster_50_Sector002_macro (-81km,-8km,137km)
+ship ship_spl_m_frigate_01_a_macro @ Cluster_27_Sector001_macro (117km,-1km,4km)
+ship ship_spl_m_trans_container_01_a_macro @ Cluster_45_Sector001_macro (-56km,-3km,-106km)
+ship ship_spl_s_heavyfighter_02_a_macro @ Cluster_107_Sector001_macro (132km,2km,149km)
+ship ship_spl_s_heavyfighter_02_a_macro @ Cluster_710_Sector001_macro (126km,4km,-119km)
+ship ship_spl_s_miner_solid_01_a_macro @ Cluster_15_Sector002_macro (-109km,7km,-9km)
+ship ship_spl_s_miner_solid_01_a_macro @ Cluster_606_Sector001_macro (-86km,-3km,-107km)
+ship ship_spl_s_scout_01_a_macro @ Cluster_115_Sector001_macro (53km,3km,168km)
+ship ship_spl_s_trans_container_01_a_macro @ Cluster_401_Sector001_macro (13km,-7km,-155km)
+ship ship_spl_xl_carrier_01_a_macro @ Cluster_414_Sector001_macro (-105km,-1km,-143km)
+ship ship_tel_l_destroyer_01_a_macro @ Cluster_31_Sector001_macro (76km,4km,-22km)
+ship ship_tel_l_destroyer_01_b_macro @ Cluster_107_Sector001_macro (131km,2km,145km)
+ship ship_tel_l_destroyer_01_b_macro @ Cluster_49_Sector001_macro (34km,7km,65km)
+ship ship_tel_l_destroyer_01_b_macro @ Cluster_720_Sector001_macro (112km,2km,41km)
+ship ship_tel_l_destroyer_02_a_macro @ Cluster_107_Sector001_macro (134km,7km,149km)
+ship ship_tel_l_miner_liquid_01_a_macro @ Cluster_413_Sector001_macro (-146km,-4km,-166km)
+ship ship_tel_l_miner_liquid_02_a_macro @ Cluster_100_Sector001_macro (-133km,2km,-160km)
+ship ship_tel_l_miner_solid_01_b_macro @ Cluster_50_Sector002_macro (-151km,5km,-50km)
+ship ship_tel_l_trans_container_03_a_macro @ Cluster_01_Sector003_macro (-160km,9km,-19km)
+ship ship_tel_m_bomber_01_a_macro @ Cluster_112_Sector002_macro (118km,5km,120km)
+ship ship_tel_m_frigate_01_a_macro @ Cluster_112_Sector002_macro (115km,9km,123km)
+ship ship_tel_m_frigate_01_b_macro @ Cluster_108_Sector002_macro (127km,-10km,-120km)
+ship ship_tel_m_miner_liquid_01_b_macro @ Cluster_410_Sector001_macro (32km,-10km,-122km)
+ship ship_tel_m_trans_container_01_a_macro @ Cluster_102_Sector001_macro (-58km,5km,63km)
+ship ship_tel_m_trans_container_03_a_macro @ Cluster_05_Sector001_macro (24km,8km,-7km)
+ship ship_tel_m_trans_container_03_a_macro @ Cluster_416_Sector002_macro (-40km,-1km,65km)
+ship ship_tel_s_fighter_02_a_macro @ Cluster_112_Sector002_macro (119km,1km,119km)
+ship ship_tel_s_fighter_02_b_macro @ Cluster_112_Sector002_macro (111km,1km,124km)
+ship ship_tel_s_scout_02_a_macro @ Cluster_50_Sector002_macro (-80km,-3km,140km)
+ship ship_tel_s_trans_container_01_b_macro @ Cluster_400_Sector001_macro (-18km,-9km,11km)
+ship ship_ter_l_trans_container_01_a_macro @ Cluster_44_Sector001_macro (-129km,0km,73km)
+ship ship_ter_m_corvette_01_a_macro @ Cluster_112_Sector002_macro (116km,8km,120km)
+ship ship_ter_m_corvette_02_a_macro @ Cluster_108_Sector002_macro (125km,-14km,-115km)
+ship ship_ter_m_corvette_02_b_macro @ Cluster_406_Sector001_macro (-127km,-7km,92km)
+ship ship_ter_m_gunboat_01_a_macro @ Cluster_108_Sector002_macro (128km,-15km,-116km)
+ship ship_ter_m_gunboat_01_a_macro @ Cluster_116_Sector001_macro (79km,-5km,125km)
+ship ship_ter_m_gunboat_01_a_macro @ Cluster_607_Sector001_macro (-44km,-3km,55km)
+ship ship_ter_m_miner_liquid_01_a_macro @ Cluster_500_Sector002_macro (-96km,-7km,131km)
+ship ship_ter_m_trans_container_01_a_macro @ Cluster_416_Sector001_macro (-156km,1km,118km)
+ship ship_ter_s_fighter_02_a_macro @ Cluster_113_Sector001_macro (115km,-5km,177km)
+ship ship_ter_s_fighter_04_a_macro @ Cluster_112_Sector002_macro (110km,6km,121km)
+ship ship_ter_s_fighter_04_a_macro @ Cluster_409_Sector001_macro (-116km,1km,113km)
+ship ship_ter_s_fighter_04_c_macro @ Cluster_106_Sector001_macro (107km,-3km,106km)
+ship ship_ter_s_fighter_04_c_macro @ Cluster_107_Sector001_macro (139km,3km,143km)
+ship ship_ter_s_fighter_04_c_macro @ Cluster_413_Sector001_macro (91km,-4km,-29km)
+ship ship_ter_s_scout_02_a_macro @ Cluster_721_Sector001_macro (130km,-4km,-117km)
+ship ship_ter_s_trans_container_01_a_macro @ Cluster_409_Sector001_macro (-62km,-8km,-91km)
+ship ship_yak_m_corvette_01_a_macro @ Cluster_107_Sector001_macro (135km,5km,142km)
+ship ship_yak_m_corvette_01_a_macro @ Cluster_49_Sector001_macro (33km,1km,61km)
+ship ship_yak_s_fighter_01_a_macro @ Cluster_108_Sector002_macro (129km,-14km,-115km)
+ship ship_yak_s_fighter_01_a_macro @ Cluster_112_Sector002_macro (111km,3km,124km)
+

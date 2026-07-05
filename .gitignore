@@ -369,3 +369,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+## Verification harness working data (baselines are regenerated from git refs)
+verification/cache/
+verification/last_run.log
