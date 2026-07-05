@@ -393,7 +393,9 @@ let private abandonedShipXml (ship: AbandonedShip) =
     let yaw, pitch, roll = ship.RotationDeg
 
     // If the ship has a custom loadout, the placed object references it by id; the
-    // loadout itself is written separately to the loadouts file.
+    // loadout itself is written separately to the loadouts file. The schema
+    // (createship group in common.xsd) requires <loadout> BEFORE <position> and
+    // <rotation> - the game validates MD scripts against that sequence.
     let loadoutReference =
         match ship.Loadout with
         | Some loadout -> $"""<loadout ref="{loadout.Id}" />"""
@@ -406,9 +408,9 @@ let private abandonedShipXml (ship: AbandonedShip) =
         <do_if value="$sector.exists">
           <create_ship name="$ship" macro="macro.{ship.Macro}" sector="$sector">
             <owner exact="faction.ownerless"/>
+            {loadoutReference}
             <position x="{x}km" y="{y}km" z="{z}km"/>
             <rotation yaw="{yaw}deg" pitch="{pitch}deg" roll="{roll}deg"/>
-            {loadoutReference}
           </create_ship>
         </do_if>
     </add>
