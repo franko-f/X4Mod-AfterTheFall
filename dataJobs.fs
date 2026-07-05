@@ -58,15 +58,13 @@ let private toJob (job: X4Job.Job) : Job = {
             Tags = category.Tags
             Size = category.Size
         })
-    Quota =
-        [
-            job.Quota.Galaxy |> Option.map (fun value -> QuotaScope.Galaxy, value)
-            job.Quota.Maxgalaxy |> Option.map (fun value -> QuotaScope.MaxGalaxy, value)
-            job.Quota.Cluster |> Option.map (fun value -> QuotaScope.Cluster, value)
-            job.Quota.Sector |> Option.map (fun value -> QuotaScope.Sector, value)
-            job.Quota.Wing |> Option.map (fun value -> QuotaScope.Wing, value)
-        ]
-        |> List.choose id
+    Quota = {
+        Galaxy = job.Quota.Galaxy
+        Maxgalaxy = job.Quota.Maxgalaxy
+        Cluster = job.Quota.Cluster
+        Sector = job.Quota.Sector
+        Wing = job.Quota.Wing
+    }
     Location = {
         Class = job.Location.Class
         Macro = job.Location.Macro
@@ -117,15 +115,6 @@ let allJobs: Job list =
 // The mod's jobs.xml is produced here from the pure JobDirective values decided by
 // the jobs logic. The XML construction is inherited verbatim from the original code.
 
-// The jobs.xml attribute for each quota scope.
-let private quotaAttributeName =
-    function
-    | QuotaScope.Galaxy -> "galaxy"
-    | QuotaScope.MaxGalaxy -> "maxgalaxy"
-    | QuotaScope.Cluster -> "cluster"
-    | QuotaScope.Sector -> "sector"
-    | QuotaScope.Wing -> "wing"
-
 // Construct an XML element representing a 'replace' tag that will replace the quotas for a given job.
 // Important note: stations and products have a QUOTAS section containing a list of quotas, but JOBS
 // have only a single QUOTA element, and no quotas list.
@@ -134,19 +123,20 @@ let private quotaAttributeName =
 //      <quota galaxy="42" cluster="3"/>
 // </replace>
 let private replaceQuotaXml (id: string) (quota: JobQuota) =
-    // The whole vanilla <quota> element is replaced, so any scope the directive
-    // doesn't carry is dropped. Galaxy is always written (0 if the job never set one).
+    // The whole vanilla <quota> element is replaced: galaxy is always written (0 if
+    // the job never set one), the other scopes only when set. Wing is never written.
     let attributes = [
-        yield new XAttribute("galaxy", quota |> JobQuota.tryScope QuotaScope.Galaxy |> Option.defaultValue 0)
-        for scope, value in quota do
-            if scope <> QuotaScope.Galaxy then
-                yield new XAttribute(quotaAttributeName scope, value)
+        yield new XAttribute("galaxy", quota.Galaxy |> Option.defaultValue 0)
+        for name, value in [ "maxgalaxy", quota.Maxgalaxy; "cluster", quota.Cluster; "sector", quota.Sector ] do
+            match value with
+            | Some value -> yield new XAttribute(name, value)
+            | None -> ()
     ]
 
     let xml =
         new XElement("replace", new XAttribute("sel", $"//jobs/job[@id='{id}']/quota"), new XElement("quota", attributes))
 
-    printfn "     REPLACING JOB QUOTA %s with %A" id quota
+    printfn "     REPLACING JOB QUOTA %s with gal:%A maxGal:%A clust:%A sect:%A" id quota.Galaxy quota.Maxgalaxy quota.Cluster quota.Sector
     xml
 
 

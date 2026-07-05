@@ -152,15 +152,12 @@ let printJobInfo (job: Job) =
             | Some category -> Option.defaultValue "----" category.Size
 
         let quota =
-            let scope s = job.Quota |> JobQuota.tryScope s |> Option.defaultValue 0
-
-            sprintf
-                "%3d/%-3d, %3d, %3d, %3d"
-                (scope QuotaScope.Galaxy)
-                (scope QuotaScope.MaxGalaxy)
-                (scope QuotaScope.Cluster)
-                (scope QuotaScope.Sector)
-                (scope QuotaScope.Wing)
+            let galaxy = job.Quota.Galaxy |> Option.defaultValue 0
+            let maxGalaxy = job.Quota.Maxgalaxy |> Option.defaultValue 0
+            let sector = job.Quota.Sector |> Option.defaultValue 0
+            let cluster = job.Quota.Cluster |> Option.defaultValue 0
+            let wing = job.Quota.Wing |> Option.defaultValue 0
+            sprintf "%3d/%-3d, %3d, %3d, %3d" galaxy maxGalaxy cluster sector wing
 
         let subordinate = isSubordinate job |> either "escort" ""
         let subordinates = hasSubordinate job |> either "escorted" ""
@@ -242,21 +239,29 @@ let printJobCategoryCount allJobs =
 let processJob (job: Job) =
     printJobInfo job
 
-    // Scale every quota scope the job actually sets, rounding UP. Wing quotas are
-    // excluded: they size a carrier's escort wing, not how many ships spawn in the
-    // galaxy, so the replacement <quota> deliberately drops them.
-    let scaleQuota multiplier =
-        job.Quota
-        |> List.choose (fun (scope, value) ->
-            match scope with
-            | QuotaScope.Wing -> None
-            | scope -> Some(scope, int (ceil (float value * multiplier))))
+    // Scale every quota scope the job actually sets, rounding UP. Wing is dropped:
+    // wing quotas size a carrier's escort wing, not how many ships spawn in the
+    // galaxy, and the replacement <quota> deliberately leaves them off.
+    let scaleQuota multiplier : JobQuota =
+        let scale quota =
+            quota |> Option.map (fun value -> int (ceil (float value * multiplier)))
+
+        {
+            Galaxy = scale job.Quota.Galaxy
+            Maxgalaxy = scale job.Quota.Maxgalaxy
+            Cluster = scale job.Quota.Cluster
+            Sector = scale job.Quota.Sector
+            Wing = None
+        }
 
     // If the job has any quota scopes we scale, emit the quota replacement directive.
     let maybeReplaceQuota multiplier =
-        match scaleQuota multiplier with
-        | [] -> None
-        | scaled -> Some(ReplaceJobQuota(job.Id, scaled))
+        let scaled = scaleQuota multiplier
+
+        if [ scaled.Galaxy; scaled.Maxgalaxy; scaled.Cluster; scaled.Sector ] |> List.exists Option.isSome then
+            Some(ReplaceJobQuota(job.Id, scaled))
+        else
+            None
 
     let size =
         match job.Category with

@@ -134,24 +134,15 @@ type GodProduct = {
     QuotaCluster: int option
 }
 
-/// One quota scope of a jobs.xml job, named after the <quota> attributes.
-[<RequireQualifiedAccess>]
-type QuotaScope =
-    | Galaxy
-    | MaxGalaxy
-    | Cluster
-    | Sector
-    | Wing
-
-/// The quota of a jobs.xml job: just the scopes the vanilla file sets, in the
-/// file's attribute order (galaxy, maxgalaxy, cluster, sector, wing).
-type JobQuota = (QuotaScope * int) list
-
-module JobQuota =
-    /// The value of one scope of the quota, if the job sets it.
-    let tryScope (scope: QuotaScope) (quota: JobQuota) =
-        quota
-        |> List.tryPick (fun (s, value) -> if s = scope then Some value else None)
+/// The quota of a jobs.xml job. Every scope is optional - a job carries only
+/// the scopes the vanilla file sets.
+type JobQuota = {
+    Galaxy: int option
+    Maxgalaxy: int option
+    Cluster: int option
+    Sector: int option
+    Wing: int option
+}
 
 type JobCategory = {
     Faction: string
@@ -241,8 +232,8 @@ type SectorResourceGrant = {
 
 /// A change to a vanilla job, decided by the jobs logic and written by the data layer.
 type JobDirective =
-    /// Replace the job's <quota> element with these scaled scopes. The writer emits
-    /// exactly these attributes, except galaxy, which is always written (0 if absent).
+    /// Replace the job's <quota> element with these scaled quotas. The writer always
+    /// writes galaxy (0 if absent) and never writes wing.
     | ReplaceJobQuota of jobId: string * quota: JobQuota
     /// Force the job to be built at shipyards instead of spawning at game start.
     /// Carries the whole job: the writer clones its existing <environment> (via
