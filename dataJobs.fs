@@ -58,13 +58,15 @@ let private toJob (job: X4Job.Job) : Job = {
             Tags = category.Tags
             Size = category.Size
         })
-    Quota = {
-        Galaxy = job.Quota.Galaxy
-        Maxgalaxy = job.Quota.Maxgalaxy
-        Cluster = job.Quota.Cluster
-        Sector = job.Quota.Sector
-        Wing = job.Quota.Wing
-    }
+    Quota =
+        [
+            job.Quota.Galaxy |> Option.map (fun value -> QuotaScope.Galaxy, value)
+            job.Quota.Maxgalaxy |> Option.map (fun value -> QuotaScope.MaxGalaxy, value)
+            job.Quota.Cluster |> Option.map (fun value -> QuotaScope.Cluster, value)
+            job.Quota.Sector |> Option.map (fun value -> QuotaScope.Sector, value)
+            job.Quota.Wing |> Option.map (fun value -> QuotaScope.Wing, value)
+        ]
+        |> List.choose id
     Location = {
         Class = job.Location.Class
         Macro = job.Location.Macro
@@ -115,6 +117,15 @@ let allJobs: Job list =
 // The mod's jobs.xml is produced here from the pure JobDirective values decided by
 // the jobs logic. The XML construction is inherited verbatim from the original code.
 
+// The jobs.xml attribute for each quota scope.
+let private quotaAttributeName =
+    function
+    | QuotaScope.Galaxy -> "galaxy"
+    | QuotaScope.MaxGalaxy -> "maxgalaxy"
+    | QuotaScope.Cluster -> "cluster"
+    | QuotaScope.Sector -> "sector"
+    | QuotaScope.Wing -> "wing"
+
 // Construct an XML element representing a 'replace' tag that will replace the quotas for a given job.
 // Important note: stations and products have a QUOTAS section containing a list of quotas, but JOBS
 // have only a single QUOTA element, and no quotas list.
@@ -122,24 +133,20 @@ let allJobs: Job list =
 // <replace sel="/jobs/job[@id='xen_energycells']/@quota">
 //      <quota galaxy="42" cluster="3"/>
 // </replace>
-let private replaceQuotaXml (id: string) (galaxy: int) (maxGalaxy: Option<int>) (cluster: Option<int>) (sector: Option<int>) =
-    let quota = [
-        yield new XAttribute("galaxy", galaxy)
-        match maxGalaxy with
-        | Some x -> yield new XAttribute("maxgalaxy", x)
-        | _ -> ()
-        match cluster with
-        | Some x -> yield new XAttribute("cluster", x)
-        | _ -> ()
-        match sector with
-        | Some x -> yield new XAttribute("sector", x)
-        | _ -> ()
+let private replaceQuotaXml (id: string) (quota: JobQuota) =
+    // The whole vanilla <quota> element is replaced, so any scope the directive
+    // doesn't carry is dropped. Galaxy is always written (0 if the job never set one).
+    let attributes = [
+        yield new XAttribute("galaxy", quota |> JobQuota.tryScope QuotaScope.Galaxy |> Option.defaultValue 0)
+        for scope, value in quota do
+            if scope <> QuotaScope.Galaxy then
+                yield new XAttribute(quotaAttributeName scope, value)
     ]
 
     let xml =
-        new XElement("replace", new XAttribute("sel", $"//jobs/job[@id='{id}']/quota"), new XElement("quota", quota))
+        new XElement("replace", new XAttribute("sel", $"//jobs/job[@id='{id}']/quota"), new XElement("quota", attributes))
 
-    printfn "     REPLACING JOB QUOTA %s with gal:%A maxGal:%A clust:%A sect:%A" id galaxy maxGalaxy cluster sector
+    printfn "     REPLACING JOB QUOTA %s with %A" id quota
     xml
 
 
@@ -184,7 +191,7 @@ let X4JobModTemplate =
 
 let private jobDirectiveXml (directive: JobDirective) =
     match directive with
-    | ReplaceJobQuota(id, galaxy, maxGalaxy, cluster, sector) -> replaceQuotaXml id galaxy maxGalaxy cluster sector
+    | ReplaceJobQuota(id, quota) -> replaceQuotaXml id quota
     | SetPreferBuild job -> setPreferBuildXml job
 
 // Write the mod's jobs.xml diff from the job directives, seeded from the hand written

@@ -14,14 +14,6 @@ open X4.Types
 open X4.Utilities
 
 
-// Quotas may or may not exist. This is an easy function to multiply a quota if it's Some quota,
-// or just return None if it's None. ie; a Option aware multiplier. Unlike normal integer math, This rounds UP.
-let maybeMultiply (quota: Option<int>) (multiplier: float) =
-    match quota with
-    | Some q -> Some(int (ceil (float q * multiplier)))
-    | None -> None
-
-
 // Each job has a faction that it belongs to. The fields in the XML seem a bit unreliable
 // USUALLY it seems to be dictated by the category.faction, but this doesn't always exist.
 // If not, best guess seems to be look at the ship specified in the job, and use it's faction.
@@ -160,12 +152,15 @@ let printJobInfo (job: Job) =
             | Some category -> Option.defaultValue "----" category.Size
 
         let quota =
-            let galaxy = job.Quota.Galaxy |> Option.defaultValue 0
-            let maxGalaxy = job.Quota.Maxgalaxy |> Option.defaultValue 0
-            let sector = job.Quota.Sector |> Option.defaultValue 0
-            let cluster = job.Quota.Cluster |> Option.defaultValue 0
-            let wing = job.Quota.Wing |> Option.defaultValue 0
-            sprintf "%3d/%-3d, %3d, %3d, %3d" galaxy maxGalaxy cluster sector wing
+            let scope s = job.Quota |> JobQuota.tryScope s |> Option.defaultValue 0
+
+            sprintf
+                "%3d/%-3d, %3d, %3d, %3d"
+                (scope QuotaScope.Galaxy)
+                (scope QuotaScope.MaxGalaxy)
+                (scope QuotaScope.Cluster)
+                (scope QuotaScope.Sector)
+                (scope QuotaScope.Wing)
 
         let subordinate = isSubordinate job |> either "escort" ""
         let subordinates = hasSubordinate job |> either "escorted" ""
@@ -247,25 +242,21 @@ let printJobCategoryCount allJobs =
 let processJob (job: Job) =
     printJobInfo job
 
-    // Given a quota and a multiplier, apply the multiplier to any quota element that is actually set for the job.
-    // A quota that is None is still None. Some quota will become Some quota*multiplier, for each cluster/sector/etc quota
-    let quotaMultiply (quota: JobQuota) multiplier =
-        let galaxyQuota = maybeMultiply quota.Galaxy multiplier
-        let maxGalaxyQuota = maybeMultiply quota.Maxgalaxy multiplier
-        let clusterQuota = maybeMultiply quota.Cluster multiplier
-        let sectorQuota = maybeMultiply quota.Sector multiplier
-        galaxyQuota, maxGalaxyQuota, clusterQuota, sectorQuota
+    // Scale every quota scope the job actually sets, rounding UP. Wing quotas are
+    // excluded: they size a carrier's escort wing, not how many ships spawn in the
+    // galaxy, so the replacement <quota> deliberately drops them.
+    let scaleQuota multiplier =
+        job.Quota
+        |> List.choose (fun (scope, value) ->
+            match scope with
+            | QuotaScope.Wing -> None
+            | scope -> Some(scope, int (ceil (float value * multiplier))))
 
-    // If the job has any non-None quotas, multiply it, then create the new quota replacement XML
-    let maybeGenerateQuotaReplacementXML (quota: JobQuota) multiplier =
-        // Calculate the new quotas.
-        let galaxyQuota, maxGalaxyQuota, clusterQuota, sectorQuota =
-            quotaMultiply quota multiplier
-        // We only need to create a replace tag if we're actually changing something. Check if any quotas are 'Some x'.
-        if List.exists Option.isSome [ galaxyQuota; maxGalaxyQuota; clusterQuota; sectorQuota ] then
-            Some(ReplaceJobQuota(job.Id, (galaxyQuota |> Option.defaultValue 0), maxGalaxyQuota, clusterQuota, sectorQuota))
-        else
-            None
+    // If the job has any quota scopes we scale, emit the quota replacement directive.
+    let maybeReplaceQuota multiplier =
+        match scaleQuota multiplier with
+        | [] -> None
+        | scaled -> Some(ReplaceJobQuota(job.Id, scaled))
 
     let size =
         match job.Category with
@@ -287,7 +278,7 @@ let processJob (job: Job) =
             | true, _ -> X4.Tuning.Jobs.XenonMilitarySMMultiplier // S and M military ships
             | false, _ -> X4.Tuning.Jobs.XenonCivilianMultiplier // s & m civilian ships
 
-        maybeGenerateQuotaReplacementXML job.Quota multiplier
+        maybeReplaceQuota multiplier
 
     // Handle the NON-XENON factions
     else if not (isMilitaryJob job) then
@@ -298,7 +289,7 @@ let processJob (job: Job) =
         || isFaction (job, "fallensplit")
         || isFaction (job, "yaki")
     then
-        maybeGenerateQuotaReplacementXML job.Quota X4.Tuning.Jobs.PirateMilitaryMultiplier
+        maybeReplaceQuota X4.Tuning.Jobs.PirateMilitaryMultiplier
 
     else if List.contains size [ "ship_s"; "ship_m" ] then
         None // We don't care about small ships, just the big ones:
