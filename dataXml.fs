@@ -191,10 +191,6 @@ let getDlcDirectory dlc subDir =
     | dir -> X4UnpackedDataFolder + "/extensions/" + dir + subDir
 
 
-// Function that given a subdir, will expand out a list of directories, one for each DLC and the core game.
-let getDlcDirectories subDir =
-    ContentDirectories |> List.map (fun dlc -> getDlcDirectory dlc subDir)
-
 // The 'index' xml files contain 'entries' that are used to map an entity name (component or macro)
 // to a file name containing the definition of that entity.
 // This function will load the index entries across all the DLCs and core game for a specific index file,

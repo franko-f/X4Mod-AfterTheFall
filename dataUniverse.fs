@@ -342,7 +342,7 @@ let private gateFromZone (zone: X4Zone.Macro) (connection: X4Zone.Connection) : 
         ConnectionType = connectionMacro.Ref
         ConnectionName = connectionName
         Position = position
-        Quarternion = quaternion
+        Quaternion = quaternion
         Connection = galaxyConnection
     }
 

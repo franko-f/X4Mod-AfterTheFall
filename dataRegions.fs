@@ -2,8 +2,7 @@
 /// The mining-resource side of the data layer: the X4 9.0 regionyields.xml
 /// vocabulary used to compose resource area refs, and the vanilla mapdefaults
 /// datasets that determine what diff operation each sector needs.
-/// (Phase G of the refactor will also move the WRITING of the mod's mapdefaults
-/// and cluster region diffs here.)
+/// Also renders and writes the mod's mapdefaults and cluster region diffs.
 /// </summary>
 [<AutoOpen>]
 module X4.Data.Regions

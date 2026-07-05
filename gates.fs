@@ -105,28 +105,18 @@ let calculateStationPosition (position: Position) (rotation: Quaternion) (distan
     let newPositionVector = positionVector + displacementVector
 
     // Convert the result back to a Position
-    let newPosition = {
+    {
         X = newPositionVector.[0]
         Y = newPositionVector.[1]
         Z = newPositionVector.[2]
     }
-
-    printfn
-        "Position old/new: %A / %A    (angle: %A, distance: %A, rotation: %A)"
-        position
-        newPosition
-        angle
-        distance
-        rotation
-
-    newPosition
 
 // This function, given a gate, will extract the position, and rotation defined in quaternion, and then
 // return three new locations that are positioned around the gate, each at an offset of 120 degrees, and each
 // 10000 meters away from the gate. This is used to determine where to place defense stations around the gate.
 let getDefenseStationLocations (gate: Gate) (numberOfStations: int) (distanceFromGate: int) =
     let position = gate.Position
-    let rotation = gate.Quarternion
+    let rotation = gate.Quaternion
     let angle = float (360 / numberOfStations)
     let angle_offset = float (360 / numberOfStations) / 2.0 // offset the angle by half the angle so that the first station is not right in front of the gate
 
@@ -149,11 +139,8 @@ let getRequiredDefenseStationLocations numberOfStations distanceFromGate =
 /// ======== Some debug dump functions to print out the gates we've found. =========
 
 let printGates (gates: Gate list) =
-    [|
-        for gate in gates do
-            printfn "%A (%A)" (gate.asString ()) (isGateConnectionSafe gate)
-    |]
-    |> ignore
+    for gate in gates do
+        printfn "%A (safe: %b)" gate (isGateConnectionSafe gate)
 
     printfn "Total gates: %d" gates.Length
 

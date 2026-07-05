@@ -107,7 +107,14 @@ fi
 
 if [ "$TESTS" = 1 ]; then
     echo "== F# logic tests =="
-    (cd "$PROJ/X4MLParser.Tests" && dotnet test 2>&1 | tail -2) || FAILED=1
+    TESTLOG=$(mktemp /tmp/x4tests.XXXXXX)
+    if (cd "$PROJ/X4MLParser.Tests" && dotnet test > "$TESTLOG" 2>&1); then
+        tail -2 "$TESTLOG"
+    else
+        tail -20 "$TESTLOG"
+        FAILED=1
+    fi
+    rm -f "$TESTLOG"
 fi
 
 echo

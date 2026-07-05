@@ -2,7 +2,7 @@
 /// The god.xml side of the data layer: the vanilla stations and products across the
 /// core game and all DLC god diffs, exposed as the pure GodStation/GodProduct records,
 /// plus the X4 9.0 prefab factory counts.
-/// (Phase G of the refactor will also move the WRITING of the mod's god.xml here.)
+/// Also renders and writes the mod's god.xml from the god directives.
 /// </summary>
 [<AutoOpen>]
 module X4.Data.Economy

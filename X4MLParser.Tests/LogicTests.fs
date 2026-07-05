@@ -197,7 +197,7 @@ let ``defence stations ring the gate at the configured distance`` () =
         ConnectionType = "gates"
         ConnectionName = "t_conn"
         Position = { X = 1000.0; Y = 200.0; Z = -500.0 }
-        Quarternion = Quaternion.Default
+        Quaternion = Quaternion.Default
         Connection = None
     }
 

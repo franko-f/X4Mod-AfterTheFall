@@ -1,8 +1,8 @@
 /// <summary>
 /// Construction plan data: locating the vanilla defence plans that bastions are
 /// stacked from, and measuring station module geometry from the asset files.
-/// (Phase G of the refactor will also move the WRITING of the mod's
-/// constructionplans.xml here.)
+/// Also renders and writes the mod's constructionplans.xml from the
+/// bastion plan directives.
 /// </summary>
 [<AutoOpen>]
 module X4.Data.Plans

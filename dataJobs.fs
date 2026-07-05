@@ -2,7 +2,7 @@
 /// The jobs.xml side of the data layer: loads the vanilla job definitions from the
 /// core game and every DLC (two file formats: plain jobs files and diff files) and
 /// exposes them as the pure Job records.
-/// (Phase G of the refactor will also move the WRITING of the mod's jobs.xml here.)
+/// Also renders and writes the mod's jobs.xml from the job directives.
 /// </summary>
 [<AutoOpen>]
 module X4.Data.JobData

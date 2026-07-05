@@ -75,15 +75,9 @@ let computeResourceAssignments (dlc: string) = [
 let generateDLCVisualRegions (dlc: string) (filename: string) assignments =
     printfn "======= Generating visual mining regions for DLC: %s" dlc
 
-    let mutable counter = 0
-
-    let placements = [
-        for (cluster, sector, resource) in assignments do
-            counter <- counter + 1
-            placeRegion cluster sector resource counter
-    ]
-
-    writeClusterRegions dlc filename placements
+    assignments
+    |> List.mapi (fun i (cluster, sector, resource) -> placeRegion cluster sector resource (i + 1))
+    |> writeClusterRegions dlc filename
 
 
 // ==== 9.0 mapdefaults resource areas ====

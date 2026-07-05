@@ -74,6 +74,32 @@ let stationSectorName (station: GodStation) =
     | Some "sector" -> station.LocationMacro |> Option.defaultValue "none"
     | _ -> "none"
 
+// Station owners the mod never touches: the enemies whose stations we're clearing
+// space for, and special factions with no territory of their own.
+let private ignoredOwners = [
+    "khaak"
+    "xenon"
+    "yaki"
+    "scaleplate"
+    "buccaneers"
+    "player"
+    "kaori"
+    "holyorderfanatic"
+]
+
+// The major factions: a station inside any of their (shrunk) territories survives.
+let private majorFactions = [
+    "teladi"
+    "paranid"
+    "holyorder"
+    "split"
+    "freesplit"
+    "argon"
+    "antigone"
+    "hatikvah"
+    "ministry"
+]
+
 // Is this station in a sector we're going to leave alone? ie, in the territory of the owning faction
 // or a faction we're ignoring and not changing?
 let ignoreStation (station: GodStation) =
@@ -81,29 +107,9 @@ let ignoreStation (station: GodStation) =
     let inTerritory = isFactionInSector station.Owner sector // Station already in the territory of the owning faction
 
     let inFriendlyTerritory =
-        List.exists (fun faction -> isFactionInSector faction sector) [
-            "teladi"
-            "paranid"
-            "holyorder"
-            "split"
-            "freesplit"
-            "argon"
-            "antigone"
-            "hatikvah"
-            "ministry"
-        ] // Station is in the territory of a fr
+        majorFactions |> List.exists (fun faction -> isFactionInSector faction sector)
 
-    let isIgnored =
-        List.contains station.Owner [
-            "khaak"
-            "xenon"
-            "yaki"
-            "scaleplate"
-            "buccaneers"
-            "player"
-            "kaori"
-            "holyorderfanatic"
-        ]
+    let isIgnored = List.contains station.Owner ignoredOwners
 
     let isPirateBase =
         station.SelectTags |> Option.exists (fun tags -> tags = "[piratebase]")
@@ -118,34 +124,17 @@ let ignoreStation (station: GodStation) =
 // station.type is set to 'factory', and you must look to the 'tags' field to determine the
 // type of station.
 let findStation (faction: string) (stationType: string) (stations: GodStation list) =
-    match
-        List.tryFind
-            (fun (station: GodStation) -> station.Owner = faction && station.Type = Some stationType)
-            stations
-    with
-    | Some station -> Some station
-    | None ->
-        // Ok, this might be a case where station type is 'factory', and we need to look at the select tags
-        match
-            List.tryFind
-                (fun (station: GodStation) ->
-                    // check if the tags (a comma separated string) contain the stationType we're looking for.
-                    station.Owner = faction
-                    && station.SelectTags
-                       |> (Option.defaultValue "")
-                       |> fun tags -> tags.Contains stationType)
-                stations
-        with
-        | Some station -> Some station
-        | None ->
-            // And some terran/PIO defence stations don't have tags either. They use station.constructionplan
-            List.tryFind
-                (fun (station: GodStation) ->
-                    station.Owner = faction
-                    && station.ConstructionPlan
-                       |> (Option.defaultValue "")
-                       |> fun plan -> plan.Contains stationType)
-                stations
+    let ofFaction (predicate: GodStation -> bool) =
+        stations |> List.tryFind (fun station -> station.Owner = faction && predicate station)
+
+    // First by explicit type; then by the select tags (station.type is often just
+    // 'factory'); and some terran/PIO defence stations have neither - they're only
+    // identifiable by their construction plan.
+    ofFaction (fun station -> station.Type = Some stationType)
+    |> Option.orElseWith (fun () ->
+        ofFaction (fun station -> station.SelectTags |> Option.exists (fun tags -> tags.Contains stationType)))
+    |> Option.orElseWith (fun () ->
+        ofFaction (fun station -> station.ConstructionPlan |> Option.exists (fun plan -> plan.Contains stationType)))
 
 
 // MAIN PROCESSING FUNCTIONS
@@ -251,11 +240,9 @@ let processStation (station: GodStation) (stationsToMove: string list) : Station
 // We need to re-add some, but not all. Just make sure each faction has at least one of each type.
 let findStationsThatNeedMoving (stations: GodStation list) =
     stations
-    // We're looking for the station we did NOT ignore earlier: ie, the ones that may have been replaced.
+    // We're looking for the stations we did NOT ignore earlier: ie, the ones that may
+    // have been replaced. (ignoreStation already excludes every ignoredOwners faction.)
     |> List.filter (fun (station: GodStation) -> ignoreStation station = false)
-    // But they may have been ignored because they belong to a faction we're not touching
-    |> List.filter (fun station ->
-        not (List.contains station.Owner [ "khaak"; "xenon"; "yaki"; "scaleplate"; "buccaneers"; "player" ]))
     // And we're only interested in the ones that are shipyards, wharfs, trading stations, etc.
     |> List.filter (fun station ->
         // most special stations are identified by tags in the optional 'select' field.

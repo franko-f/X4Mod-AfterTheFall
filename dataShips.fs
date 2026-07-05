@@ -2,8 +2,8 @@
 /// The ships and equipment side of the data layer: loads every ship hull (with its
 /// parsed equipment slots) and every piece of ship equipment from the asset files,
 /// exposing them as the pure ShipInfo/EquipmentInfo records.
-/// (Phase G of the refactor will also move the WRITING of placedobjects.xml and
-/// loadouts.xml here.)
+/// Also renders and writes placedobjects.xml and loadouts.xml from the
+/// AbandonedShip directives.
 /// </summary>
 [<AutoOpen>]
 module X4.Data.ShipData
@@ -32,7 +32,7 @@ let (allAssets: Asset list) =
     // We use this component reference to look up the actual component file in the component index.
     AllIndexMacros
     |> Array.filter (fun index -> index.File.ToLower().Contains("assets/"))
-    |> Array.map (fun index ->
+    |> Array.choose (fun index ->
         printfn "Loading equipment: %s" index.File
         // Load the referenced file.
         let fileName = X4UnpackedDataFolder + "/" + index.File.Replace("\\", "/")
@@ -42,9 +42,8 @@ let (allAssets: Asset list) =
         else
             printfn "Warning: Component file %s not found." fileName
             None)
-    |> Array.choose id
     |> Array.toList
-    |> List.map (fun (index, macro) ->
+    |> List.choose (fun (index, macro) ->
         option {
             // We have the macro loaded, so now find the component the macro references,
             // and look it up in the components index, and THEN finally load that component.
@@ -57,17 +56,11 @@ let (allAssets: Asset list) =
 
             printfn "Found component %s -> %s" componentEntry.Name componentFilename
             return index, macro.Macro.Name, componentFilename
-        }
-
-    )
-    |> List.choose id
-    |> List.map (fun (index, name, componentFilename) ->
+        })
+    |> List.choose (fun (index, name, componentFilename) ->
         try
             // Now parse the file using the X4Equipment type.
             let parsed = X4Equipment.Load(componentFilename)
-            // Ensure the name is set correctly in the XElement. Should be index, not component name
-            // parsed.Component.XElement.SetAttributeValue("name", name.Trim())
-            // printfn "Loaded equipment: %-35s %-20s from %s" parsed.Component.Name parsed.Component.Class x
             Some {
                 Name = name.Trim() // Ensure the name is set correctly. Should be index, not component name
                 File = componentFilename
@@ -84,7 +77,6 @@ let (allAssets: Asset list) =
             printfn "End of children.\n"
 
             None)
-    |> List.choose id
 
 
 // Some tags are not relevant for selection/slot match
@@ -128,6 +120,15 @@ let shipEquipmentClasses = [
 
 let shipEquipmentConnectionTags =
     set [ "weapon"; "turret"; "shield"; "engine"; "thruster" ]
+
+// Boron ships may only equip Boron components, and tagging Terran gear helps resolve
+// ATF L/XL loadouts that otherwise can't be repaired/modified. We add the same
+// matching tag to both sides: the DLC's ship slots and the DLC's equipment.
+let private dlcEquipmentTag (dlc: string) =
+    match dlc with
+    | "ego_dlc_boron" -> Some "boron"
+    | "ego_dlc_terran" -> Some "terran"
+    | _ -> None
 
 
 // Checks to see if the ship connection is an equipment slot connection,
@@ -240,32 +241,15 @@ let allShips =
     |> Array.choose (fun (entry, macro) -> LoadShipComponents entry macro)
     |> Array.toList
     |> List.map (fun ship ->
-        // Boron ships are only allowed to equip boron components in their equipment slots.
-        // So, for any ship with the boron DLC, add a unique 'boron' tag to it's equipment slot tags.
-        // we do the same for the boron ship slots when loading those.
-        match ship.DLC with
-        | "ego_dlc_boron" ->
+        // Tag the DLC's equipment slots so they only match that DLC's gear (see dlcEquipmentTag).
+        match dlcEquipmentTag ship.DLC with
+        | None -> ship
+        | Some tag ->
             let slots =
                 ship.EquipmentSlots
-                |> List.map (fun slot -> {
-                    slot with
-                        Tags = slot.Tags |> Set.add "boron"
-                })
+                |> List.map (fun slot -> { slot with Tags = slot.Tags |> Set.add tag })
 
-            { ship with EquipmentSlots = slots }
-
-        // Same for terran in order to try resolve issues with ATF L/XL loadouts not being able to be repaired/modified.
-        | "ego_dlc_terran" ->
-            let slots =
-                ship.EquipmentSlots
-                |> List.map (fun slot -> {
-                    slot with
-                        Tags = slot.Tags |> Set.add "terran"
-                })
-
-            { ship with EquipmentSlots = slots }
-
-        | _ -> ship)
+            { ship with EquipmentSlots = slots })
 
 // Get all the assets, and filter them down to only the classes that are ship
 // equipment we need to generation ship loadouts.
@@ -306,12 +290,11 @@ let allShipEquipment =
                 |> Seq.tryHead
                 |> Option.defaultValue "none"
 
-            // If it's a boron or terran ship, add a tag to help with loadout generation.
+            // Tag boron/terran equipment to match the tag added to their ships' slots.
             let tags =
-                match asset.DLC with
-                | "ego_dlc_boron" -> tags.Add "boron"
-                | "ego_dlc_terran" -> tags.Add "terran"
-                | _ -> tags
+                match dlcEquipmentTag asset.DLC with
+                | Some tag -> tags.Add tag
+                | None -> tags
 
             return {
                 Name = asset.Name
