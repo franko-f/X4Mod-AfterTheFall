@@ -16,11 +16,6 @@ module Tune = X4.Tuning.AbandonedShips
 
 let rand = new Random(12345) // Seed the random number generator so we get the same results each time, as long as we're not adding new regions or changing territory order.
 
-// Define a few types for ship location that we'll use when we place an abandoned ship
-type Position = int * int * int
-type Rotation = int * int * int
-type ShipLocation = string * string * Position * Rotation // Ship name, sector name, position, rotation. Should probably use a record type here.
-
 
 // Extracts the groups from a list of ship equipment slots.
 let shipEquipmentGroups (allSlots: ShipEquipmentSlot list) =
@@ -263,19 +258,27 @@ let economyShips =
 
 
 // given a sector and a list of possible ships, select one of the ships,
-// and assign it coordinates in the given sector.
-let generateRandomAbandonedShipFromListInSector (sector: string) (shipList: string list) : ShipLocation =
+// and assign it coordinates in the given sector. The Loadout is decided later by
+// ProcessShip - IMPORTANT: batches of ships are fully placed before any loadout is
+// generated, and both draw from the same seeded rand, so that order must not change.
+let generateRandomAbandonedShipFromListInSector (sector: string) (shipList: string list) : AbandonedShip =
     let ship = shipList.[rand.Next(shipList.Length)]
     // generate random coordinates within the sector, in KM offset from sector center (different from other coordinates)
-    let x, y, z =
+    let position =
         rand.Next(-Tune.SectorScatterX, Tune.SectorScatterX),
         rand.Next(-Tune.SectorScatterY, Tune.SectorScatterY),
         rand.Next(-Tune.SectorScatterZ, Tune.SectorScatterZ)
     // generate random yaw and pitch
-    let yaw, pitch, roll =
+    let rotation =
         rand.Next(-180, 180), rand.Next(-180, 180), rand.Next(-180, 180)
 
-    (ship, sector, (x, y, z), (yaw, pitch, roll))
+    {
+        Macro = ship
+        Sector = sector
+        PositionKm = position
+        RotationDeg = rotation
+        Loadout = None
+    }
 
 // given a list of possible ships, select one, and place it randomly in any of the
 // unsafe sectors in the game.
@@ -300,36 +303,27 @@ let generateRandomEconomyAbandonedShips (count: int) (size: string) =
 let generateBattlefield (countXL: int) (countL: int) (countM: int) (countS: int) =
     printfn "GENERATING BATTLEFIELD: XL: %i, L: %i, M: %i, S: %i" countXL countL countM countS
     let spread = Tune.BattlefieldSpread
-    // First generate the ships for each class.
-    let xl, l, m, s =
-        generateRandomMilitaryAbandonedShips countXL "xl",
-        generateRandomMilitaryAbandonedShips countL "l",
-        generateRandomMilitaryAbandonedShips countM "m",
-        generateRandomMilitaryAbandonedShips countS "s"
 
-    // Then we update the location of each ship to be within 5km of the location of the first ship.
-    // First find the location of the first ship. We concat all the size classes, as we don't if any
-    // size classes were empty for this battlefield.
-    let _ship, sector, (x, y, z), _rotation = (List.concat [ xl; l; m; s ]).[0]
-    // Now update every ships sector and location to be near the first ship, keeping other data the same.
-    List.concat [
-        [
-            for (ship, _sector, _, rotation) in xl ->
-                (ship, sector, (x + rand.Next(-spread, spread), y + rand.Next(-spread, spread), z + rand.Next(-spread, spread)), rotation)
+    // First generate the ships for each class, scattered anywhere in unsafe space.
+    let ships =
+        List.concat [
+            generateRandomMilitaryAbandonedShips countXL "xl"
+            generateRandomMilitaryAbandonedShips countL "l"
+            generateRandomMilitaryAbandonedShips countM "m"
+            generateRandomMilitaryAbandonedShips countS "s"
         ]
-        [
-            for (ship, _sector, _, rotation) in l ->
-                (ship, sector, (x + rand.Next(-spread, spread), y + rand.Next(-spread, spread), z + rand.Next(-spread, spread)), rotation)
-        ]
-        [
-            for (ship, _sector, _, rotation) in m ->
-                (ship, sector, (x + rand.Next(-spread, spread), y + rand.Next(-spread, spread), z + rand.Next(-spread, spread)), rotation)
-        ]
-        [
-            for (ship, _sector, _, rotation) in s ->
-                (ship, sector, (x + rand.Next(-spread, spread), y + rand.Next(-spread, spread), z + rand.Next(-spread, spread)), rotation)
-        ]
-    ]
+
+    // Then pull every ship to within the battlefield spread of the first ship's
+    // location, keeping its rotation. The first ship's sector becomes the battlefield.
+    let anchor = ships.Head
+    let x, y, z = anchor.PositionKm
+
+    ships
+    |> List.map (fun ship -> {
+        ship with
+            Sector = anchor.Sector
+            PositionKm = x + rand.Next(-spread, spread), y + rand.Next(-spread, spread), z + rand.Next(-spread, spread)
+    })
 
 
 // Some ships have custom loadouts, so we need a unique ID for them. Used by ProcessShip.
@@ -432,25 +426,17 @@ let MaybeCustomLoadout (shipName: string) =
             }
     }
 
-// Decide the details of an abandoned ship placement from the ship, sector, position
-// and rotation given as parameters. The data layer writes the actual XML.
-let ProcessShip ((ship, sector, (x, y, z), (yaw, pitch, roll)): ShipLocation) : AbandonedShip =
-    // Interestingly, the units of KM and deg are specified in the XML attribute fields for abandoned ships.
-    // I've not seen this elsewhere, and don't know if it's necessary, but for safety I'll duplicate it.
+// Finish an abandoned ship placement: decide whether it needs a hand built loadout.
+// The data layer writes the actual XML.
+let ProcessShip (ship: AbandonedShip) : AbandonedShip =
     printfn
         "GENERATING ABANDONED SHIP: %s, Sector: %s, Position: %A, Rotation: %A"
-        ship
-        sector
-        (x, y, z)
-        (yaw, pitch, roll)
+        ship.Macro
+        ship.Sector
+        ship.PositionKm
+        ship.RotationDeg
 
-    {
-        Macro = ship
-        Sector = sector
-        PositionKm = (x, y, z)
-        RotationDeg = (yaw, pitch, roll)
-        Loadout = MaybeCustomLoadout ship
-    }
+    { ship with Loadout = MaybeCustomLoadout ship.Macro }
 
 // Create a list of random ships, assign them to random sectors, then generate XML that will place
 // them as abandoned ships in the game.
@@ -477,62 +463,29 @@ let generate_abandoned_ships_file (placedObjectsFilename: string) (loadoutFilena
             |> List.collect (fun (countXL, countL, countM, countS) ->
                 generateBattlefield countXL countL countM countS |> List.map ProcessShip)
 
-            // followed by a bunch of M & S in safe space.
+            // followed by a bunch of M & S (and a couple of large economy) ships in safe space.
             [
-                for i in 1 .. Tune.SafeMilitaryM ->
-                    militaryShips
-                    |> filterListBy [ "m" ]
-                    |> (generateRandomAbandonedShipFromListInSector (selectRandomSafeSector()))
-                    |> ProcessShip
-                for i in 1 .. Tune.SafeEconomyM ->
-                    economyShips
-                    |> filterListBy [ "m" ]
-                    |> (generateRandomAbandonedShipFromListInSector (selectRandomSafeSector()))
-                    |> ProcessShip
-                for i in 1 .. Tune.SafeMilitaryS ->
-                    militaryShips
-                    |> filterListBy [ "s" ]
-                    |> (generateRandomAbandonedShipFromListInSector (selectRandomSafeSector()))
-                    |> ProcessShip
-                for i in 1 .. Tune.SafeEconomyS ->
-                    economyShips
-                    |> filterListBy [ "s" ]
-                    |> (generateRandomAbandonedShipFromListInSector (selectRandomSafeSector()))
-                    |> ProcessShip
+                let safeShipCounts = [
+                    Tune.SafeMilitaryM, militaryShips, "m"
+                    Tune.SafeEconomyM, economyShips, "m"
+                    Tune.SafeMilitaryS, militaryShips, "s"
+                    Tune.SafeEconomyS, economyShips, "s"
+                    Tune.SafeEconomyL, economyShips, "l"
+                ]
 
-                // ok, a couple large l economy ship.
-                for i in 1 .. Tune.SafeEconomyL ->
-                    economyShips
-                    |> filterListBy [ "l" ]
-                    |> (generateRandomAbandonedShipFromListInSector (selectRandomSafeSector()))
-                    |> ProcessShip
-
+                for count, ships, size in safeShipCounts do
+                    for _ in 1..count ->
+                        ships
+                        |> filterListBy [ size ]
+                        |> (generateRandomAbandonedShipFromListInSector (selectRandomSafeSector ()))
+                        |> ProcessShip
             ]
 
-            // And finally a few individual ships
+            // And finally a few individual ships we always want in the game:
+            // at least one Raptor, an Asgard, a Syn, and a Guppy (because they're fun).
             [
-                // Make sure there's at least one Raptor!
-                filterBy [ "spl"; "xl"; "carrier" ]
-                |> generateRandomAbandonedShipFromList
-                |> ProcessShip
-            ]
-            [
-                // And Asgard!
-                filterBy [ "atf"; "xl"; "battleship" ]
-                |> generateRandomAbandonedShipFromList
-                |> ProcessShip
-            ]
-            [
-                // And Syn.
-                filterBy [ "atf"; "l"; "destroyer" ]
-                |> generateRandomAbandonedShipFromList
-                |> ProcessShip
-            ]
-            [
-                // Guppy, because they're fun
-                filterBy [ "bor"; "l"; "carrier" ]
-                |> generateRandomAbandonedShipFromList
-                |> ProcessShip
+                for search in [ [ "spl"; "xl"; "carrier" ]; [ "atf"; "xl"; "battleship" ]; [ "atf"; "l"; "destroyer" ]; [ "bor"; "l"; "carrier" ] ] ->
+                    filterBy search |> generateRandomAbandonedShipFromList |> ProcessShip
             ]
 
         // // Generate ships in specific sector to test loadouts for boron/terran
