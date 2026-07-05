@@ -18,92 +18,33 @@ let rand = new Random(12345) // Seed the random number generator so we get the s
 
 
 
-// Load the cluster data from each individual core/expansion cluster XML file. We'll combine them in to one list.
+// Load the clusters/sectors/zones from the core game and every DLC map file,
+// combined into one list in load order.
 // Convinience functions to search/manipulate these lists are defined below.
 let AllClusters =
-    let X4ClusterCore = X4Cluster.Load(X4ClusterFileCore)
-    let X4ClusterSplit = X4Cluster.Load(X4ClusterFileSplit)
-    let X4ClusterTerran = X4Cluster.Load(X4ClusterFileTerran)
-    let X4ClusterPirate = X4Cluster.Load(X4ClusterFilePirate)
-    let X4ClusterBoron = X4Cluster.Load(X4ClusterFileBoron)
-    let X4ClusterTimelines = X4Cluster.Load(X4ClusterFileTimelines)
+    X4ClusterFiles
+    |> List.collect (fun file -> X4Cluster.Load(file).Macros |> Array.toList)
 
-    Array.toList
-    <| Array.concat [
-        X4ClusterCore.Macros
-        X4ClusterSplit.Macros
-        X4ClusterTerran.Macros
-        X4ClusterPirate.Macros
-        X4ClusterBoron.Macros
-        X4ClusterTimelines.Macros
-    ]
-
-// Load the sector data from each individual sector file. We'll combine them in to one list.
 let allSectors =
-    let X4SectorCore = X4Sector.Load(X4SectorFileCore)
-    let X4SectorSplit = X4Sector.Load(X4SectorFileSplit)
-    let X4SectorTerran = X4Sector.Load(X4SectorFileTerran)
-    let X4SectorPirate = X4Sector.Load(X4SectorFilePirate)
-    let X4SectorBoron = X4Sector.Load(X4SectorFileBoron)
-    let X4SectorTimelines = X4Sector.Load(X4SectorFileTimelines)
-
-    Array.toList
-    <| Array.concat [
-        X4SectorCore.Macros
-        X4SectorSplit.Macros
-        X4SectorTerran.Macros
-        X4SectorPirate.Macros
-        X4SectorBoron.Macros
-        X4SectorTimelines.Macros
-    ]
+    X4SectorFiles
+    |> List.collect (fun file -> X4Sector.Load(file).Macros |> Array.toList)
 
 let allZones =
-    let X4ZoneCore = X4Zone.Load(X4ZoneFileCore)
-    let X4ZoneSplit = X4Zone.Load(X4ZoneFileSplit)
-    let X4ZoneTerran = X4Zone.Load(X4ZoneFileTerran)
-    let X4ZonePirate = X4Zone.Load(X4ZoneFilePirate)
-    let X4ZoneBoron = X4Zone.Load(X4ZoneFileBoron)
-    let X4ZoneTimelines = X4Zone.Load(X4ZoneFileTimelines)
-
-    Array.toList
-    <| Array.concat [
-        X4ZoneCore.Macros
-        X4ZoneSplit.Macros
-        X4ZoneTerran.Macros
-        X4ZonePirate.Macros
-        X4ZoneBoron.Macros
-        X4ZoneTimelines.Macros
-    ]
-
+    X4ZoneFiles
+    |> List.collect (fun file -> X4Zone.Load(file).Macros |> Array.toList)
 
 let allGalaxy =
     // we're assuming that the galaxy file just contains connections, and that the connection fields/structure
     // is pretty much the same between core and DLCs. Otherwise this casting from one to the other using the
     // XElement is dangerous. This only runs on mod creation though, and if it crashes it means something has
     // changed that we need to account for anyway.
-    let loadFromDiff (diff: X4GalaxyDiff.Diff) =
-        // Galaxy file just contains a list of connections.
-        [|
-            for connection in diff.Add.Connections do
-                yield new X4Galaxy.Connection(connection.XElement)
-        |]
-
-    let X4GalaxyCore = X4Galaxy.Load(X4GalaxyFileCore)
-    let X4GalaxySplit = X4GalaxyDiff.Load(X4GalaxyFileSplit)
-    let X4GalaxyTerran = X4GalaxyDiff.Load(X4GalaxyFileTerran)
-    let X4GalaxyPirate = X4GalaxyDiff.Load(X4GalaxyFilePirate)
-    let X4GalaxyBoron = X4GalaxyDiff.Load(X4GalaxyFileBoron)
-    let X4GalaxyTimelines = X4GalaxyDiff.Load(X4GalaxyFileTimelines)
-
-    Array.toList
-    <| Array.concat [
-        X4GalaxyCore.Macro.Connections
-        loadFromDiff X4GalaxySplit
-        loadFromDiff X4GalaxyTerran
-        loadFromDiff X4GalaxyPirate
-        loadFromDiff X4GalaxyBoron
-        loadFromDiff X4GalaxyTimelines
+    let loadFromDiff (file: string) = [
+        // A DLC galaxy diff just adds a list of connections.
+        for connection in X4GalaxyDiff.Load(file).Add.Connections -> new X4Galaxy.Connection(connection.XElement)
     ]
+
+    (X4Galaxy.Load(X4GalaxyFileCore).Macro.Connections |> Array.toList)
+    @ (X4GalaxyDlcFiles |> List.collect loadFromDiff)
 
 
 // ===== FINISHED LOADING DATA FROM XML FILES =====

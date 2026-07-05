@@ -71,11 +71,8 @@ let prefabFactoryCounts: Map<string * string, int> =
 
     [
         yield! prefabStationsIn X4GodFileCore false
-        yield! prefabStationsIn X4GodFileSplit true
-        yield! prefabStationsIn X4GodFileTerran true
-        yield! prefabStationsIn X4GodFilePirate true
-        yield! prefabStationsIn X4GodFileBoron true
-        yield! prefabStationsIn X4GodFileTimelines true
+        for file in X4GodDlcFiles do
+            yield! prefabStationsIn file true
     ]
     |> List.map (fun station ->
         let owner = station.Attribute(XName.Get "owner").Value
@@ -116,25 +113,15 @@ let allStations, allProducts =
         ]
 
     let X4GodCore = X4WorldStart.Load(X4GodFileCore)
-    let X4GodSplit = X4GodMod.Load(X4GodFileSplit)
-    let X4GodTerran = X4GodMod.Load(X4GodFileTerran)
-    let X4GodPirate = X4GodMod.Load(X4GodFilePirate)
-    let X4GodBoron = X4GodMod.Load(X4GodFileBoron)
-    let X4GodTimelines = X4GodMod.Load(X4GodFileTimelines)
+    let dlcGodMods = X4GodDlcFiles |> List.map X4GodMod.Load
 
     // Finally build up an uberlist of all our stations across all DLC and core game.
     // The DLC stations are of a different type: they're an XML DIFF file, not the GOD
     // file type. So we need to pull out the stations from the diff and convert them
     // to the same type as the core stations using the underlying XElement.
     let allStations =
-        List.concat [
-            Array.toList X4GodCore.Stations.Stations
-            getStationsFromDiff X4GodSplit.Adds
-            getStationsFromDiff X4GodTerran.Adds
-            getStationsFromDiff X4GodPirate.Adds
-            getStationsFromDiff X4GodBoron.Adds
-            getStationsFromDiff X4GodTimelines.Adds
-        ]
+        (Array.toList X4GodCore.Stations.Stations)
+        @ (dlcGodMods |> List.collect (fun godMod -> getStationsFromDiff godMod.Adds))
 
     // Do the same for products.
     // 9.0: the <products> block also contains <station> prefab entries (70 faction factories,
@@ -142,14 +129,8 @@ let allStations, allProducts =
     // are one level down. The prefab stations are NOT yet processed (see TODO.md): removing or
     // moving them needs selectors under //god/products/station, unlike regular stations.
     let allProducts =
-        List.concat [
-            Array.toList X4GodCore.Products.Products
-            getProductFromDiff X4GodSplit.Adds
-            getProductFromDiff X4GodTerran.Adds
-            getProductFromDiff X4GodPirate.Adds
-            getProductFromDiff X4GodBoron.Adds
-            getProductFromDiff X4GodTimelines.Adds
-        ]
+        (Array.toList X4GodCore.Products.Products)
+        @ (dlcGodMods |> List.collect (fun godMod -> getProductFromDiff godMod.Adds))
 
     allStations |> List.map toGodStation, allProducts |> List.map toGodProduct
 

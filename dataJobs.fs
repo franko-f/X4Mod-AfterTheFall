@@ -91,23 +91,14 @@ let private toJob (job: X4Job.Job) : Job = {
 }
 
 // Load all the job data from the core game and expansions, and merge in to one list.
-// ORDER MATTERS for byte-identical output: core, split, pirate, terran, boron -
+// ORDER MATTERS for reproducible output: core, split, pirate, terran, boron -
 // the generated jobs.xml diff operations appear in this processing order.
 let allJobs: Job list =
-    let X4JobsCore = X4Job.Load(X4JobFileCore)
-    let X4JobsSplit = X4Job.Load(X4JobFileSplit) // Split don't use a diff file.
-    let X4JobsPirate = X4Job.Load(X4JobFilePirate) // same for pirate.
-    let X4JobsBoron = X4JobMod.Load(X4JobFileBoron)
-    let X4JobsTerran = X4JobMod.Load(X4JobFileTerran)
+    let plainJobFiles = [ X4JobFileCore; X4JobFileSplit; X4JobFilePirate ] // split and pirate don't use diff files
+    let diffJobFiles = [ X4JobFileTerran; X4JobFileBoron ]
 
-    Array.concat [
-        X4JobsCore.Jobs
-        X4JobsSplit.Jobs
-        X4JobsPirate.Jobs
-        getJobsFromDiff X4JobsTerran.Adds
-        getJobsFromDiff X4JobsBoron.Adds
-    ]
-    |> Array.toList
+    (plainJobFiles |> List.collect (fun file -> X4Job.Load(file).Jobs |> Array.toList))
+    @ (diffJobFiles |> List.collect (fun file -> getJobsFromDiff (X4JobMod.Load(file).Adds) |> Array.toList))
     |> List.map toJob
 
 

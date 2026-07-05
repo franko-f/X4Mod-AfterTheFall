@@ -14,14 +14,18 @@ open FSharp.Data
 open System
 open System.IO
 
-let ContentDirectories = [
-    ""
+// The DLC extension folders, in load order. Adding a future DLC means adding it
+// here plus one path in each of the per-file-kind lists below.
+let DlcDirectories = [
     "ego_dlc_split"
     "ego_dlc_terran"
     "ego_dlc_pirate"
     "ego_dlc_boron"
     "ego_dlc_timelines"
 ]
+
+// The core game ("") plus every DLC - the content sources for index loading.
+let ContentDirectories = "" :: DlcDirectories
 
 // Game data is unpacked into a subdirectory per game version (e.g. X4_unpacked_data/9.0)
 // so that different versions can be kept side by side and compared. This selects the
@@ -43,116 +47,65 @@ let X4GodModFile = __SOURCE_DIRECTORY__ + "/mod_templates/god.xml"
 let X4ObjectTemplatesFile =
     __SOURCE_DIRECTORY__ + "/mod_templates/object_templates.xml"
 
+// Path to a file inside a DLC's extension folder.
+let extensionPath dlc relPath =
+    X4UnpackedDataFolder + "/extensions/" + dlc + "/" + relPath
+
 [<Literal>]
-let X4GodFileCore = X4UnpackedDataFolder + "/libraries/god.xml" // Core game data.
+let X4GodFileCore = X4UnpackedDataFolder + "/libraries/god.xml" // also the provider sample
 
-let X4GodFileSplit =
-    X4UnpackedDataFolder + "/extensions/ego_dlc_split/libraries/god.xml" // Core game data.
+// The DLC god files, in load order. They are diffs (X4GodMod format), unlike the core file.
+let X4GodDlcFiles = [ for dlc in DlcDirectories -> extensionPath dlc "libraries/god.xml" ]
 
-let X4GodFileTerran =
-    X4UnpackedDataFolder + "/extensions/ego_dlc_terran/libraries/god.xml" // Core game data.
-
-let X4GodFilePirate =
-    X4UnpackedDataFolder + "/extensions/ego_dlc_pirate/libraries/god.xml" // Core game data.
-
-let X4GodFileBoron =
-    X4UnpackedDataFolder + "/extensions/ego_dlc_boron/libraries/god.xml" // Core game data.
-
-let X4GodFileTimelines =
-    X4UnpackedDataFolder + "/extensions/ego_dlc_timelines/libraries/god.xml" // Core game data.
-
+// The map files: core first, then the DLCs in load order. Each DLC names its own
+// files differently, so these lists stay explicit. The core file of each kind is a
+// [<Literal>] because it doubles as the XmlProvider compile-time sample.
 [<Literal>]
 let X4ClusterFileCore = X4UnpackedDataFolder + "/maps/xu_ep2_universe/clusters.xml"
 
-let X4ClusterFileSplit =
-    X4UnpackedDataFolder
-    + "/extensions/ego_dlc_split/maps/xu_ep2_universe/dlc4_clusters.xml"
-
-let X4ClusterFileTerran =
-    X4UnpackedDataFolder
-    + "/extensions/ego_dlc_terran/maps/xu_ep2_universe/dlc_terran_clusters.xml"
-
-let X4ClusterFilePirate =
-    X4UnpackedDataFolder
-    + "/extensions/ego_dlc_pirate/maps/xu_ep2_universe/dlc_pirate_clusters.xml"
-
-let X4ClusterFileBoron =
-    X4UnpackedDataFolder
-    + "/extensions/ego_dlc_boron/maps/xu_ep2_universe/dlc_boron_clusters.xml"
-
-let X4ClusterFileTimelines =
-    X4UnpackedDataFolder
-    + "/extensions/ego_dlc_timelines/maps/xu_ep2_universe/dlc7_clusters.xml"
+let X4ClusterFiles = [
+    X4ClusterFileCore
+    extensionPath "ego_dlc_split" "maps/xu_ep2_universe/dlc4_clusters.xml"
+    extensionPath "ego_dlc_terran" "maps/xu_ep2_universe/dlc_terran_clusters.xml"
+    extensionPath "ego_dlc_pirate" "maps/xu_ep2_universe/dlc_pirate_clusters.xml"
+    extensionPath "ego_dlc_boron" "maps/xu_ep2_universe/dlc_boron_clusters.xml"
+    extensionPath "ego_dlc_timelines" "maps/xu_ep2_universe/dlc7_clusters.xml"
+]
 
 [<Literal>]
-let X4SectorFileCore = X4UnpackedDataFolder + "/maps/xu_ep2_universe/sectors.xml" // This core sectors file needs to be a literal, as it's also our type provider
+let X4SectorFileCore = X4UnpackedDataFolder + "/maps/xu_ep2_universe/sectors.xml"
 
-let X4SectorFileSplit =
-    X4UnpackedDataFolder
-    + "/extensions/ego_dlc_split/maps/xu_ep2_universe/dlc4_sectors.xml" // This one is normal string, as we can load and parse using X4SectorCore literal
-
-let X4SectorFileTerran =
-    X4UnpackedDataFolder
-    + "/extensions/ego_dlc_terran/maps/xu_ep2_universe/dlc_terran_sectors.xml"
-
-let X4SectorFilePirate =
-    X4UnpackedDataFolder
-    + "/extensions/ego_dlc_pirate/maps/xu_ep2_universe/dlc_pirate_sectors.xml"
-
-let X4SectorFileBoron =
-    X4UnpackedDataFolder
-    + "/extensions/ego_dlc_boron/maps/xu_ep2_universe/dlc_boron_sectors.xml"
-
-let X4SectorFileTimelines =
-    X4UnpackedDataFolder
-    + "/extensions/ego_dlc_timelines/maps/xu_ep2_universe/dlc7_sectors.xml"
+let X4SectorFiles = [
+    X4SectorFileCore
+    extensionPath "ego_dlc_split" "maps/xu_ep2_universe/dlc4_sectors.xml"
+    extensionPath "ego_dlc_terran" "maps/xu_ep2_universe/dlc_terran_sectors.xml"
+    extensionPath "ego_dlc_pirate" "maps/xu_ep2_universe/dlc_pirate_sectors.xml"
+    extensionPath "ego_dlc_boron" "maps/xu_ep2_universe/dlc_boron_sectors.xml"
+    extensionPath "ego_dlc_timelines" "maps/xu_ep2_universe/dlc7_sectors.xml"
+]
 
 [<Literal>]
 let X4ZoneFileCore = X4UnpackedDataFolder + "/maps/xu_ep2_universe/zones.xml"
 
-let X4ZoneFileSplit =
-    X4UnpackedDataFolder
-    + "/extensions/ego_dlc_split/maps/xu_ep2_universe/dlc4_zones.xml"
-
-let X4ZoneFileTerran =
-    X4UnpackedDataFolder
-    + "/extensions/ego_dlc_terran/maps/xu_ep2_universe/dlc_terran_zones.xml"
-
-let X4ZoneFilePirate =
-    X4UnpackedDataFolder
-    + "/extensions/ego_dlc_pirate/maps/xu_ep2_universe/dlc_pirate_zones.xml"
-
-let X4ZoneFileBoron =
-    X4UnpackedDataFolder
-    + "/extensions/ego_dlc_boron/maps/xu_ep2_universe/dlc_boron_zones.xml"
-
-let X4ZoneFileTimelines =
-    X4UnpackedDataFolder
-    + "/extensions/ego_dlc_timelines/maps/xu_ep2_universe/dlc7_zones.xml"
+let X4ZoneFiles = [
+    X4ZoneFileCore
+    extensionPath "ego_dlc_split" "maps/xu_ep2_universe/dlc4_zones.xml"
+    extensionPath "ego_dlc_terran" "maps/xu_ep2_universe/dlc_terran_zones.xml"
+    extensionPath "ego_dlc_pirate" "maps/xu_ep2_universe/dlc_pirate_zones.xml"
+    extensionPath "ego_dlc_boron" "maps/xu_ep2_universe/dlc_boron_zones.xml"
+    extensionPath "ego_dlc_timelines" "maps/xu_ep2_universe/dlc7_zones.xml"
+]
 
 [<Literal>]
 let X4GalaxyFileCore = X4UnpackedDataFolder + "/maps/xu_ep2_universe/galaxy.xml"
 
-[<Literal>] // the DLC galaxy files are in DIFF format, so we need a different type provider.
+[<Literal>] // the DLC galaxy files are in DIFF format, so they need a different type provider sample.
 let X4GalaxyFileSplit =
     X4UnpackedDataFolder
     + "/extensions/ego_dlc_split/maps/xu_ep2_universe/galaxy.xml"
 
-let X4GalaxyFileTerran =
-    X4UnpackedDataFolder
-    + "/extensions/ego_dlc_terran/maps/xu_ep2_universe/galaxy.xml"
-
-let X4GalaxyFilePirate =
-    X4UnpackedDataFolder
-    + "/extensions/ego_dlc_pirate/maps/xu_ep2_universe/galaxy.xml"
-
-let X4GalaxyFileBoron =
-    X4UnpackedDataFolder
-    + "/extensions/ego_dlc_boron/maps/xu_ep2_universe/galaxy.xml"
-
-let X4GalaxyFileTimelines =
-    X4UnpackedDataFolder
-    + "/extensions/ego_dlc_timelines/maps/xu_ep2_universe/galaxy.xml"
+// The DLC galaxy diff files, in load order (every DLC uses the same file name).
+let X4GalaxyDlcFiles = [ for dlc in DlcDirectories -> extensionPath dlc "maps/xu_ep2_universe/galaxy.xml" ]
 
 // NOTE: 9.0 restructured libraries/regionyields.xml completely: it now defines the
 // vocabularies (boundaries, yield tiers, gather speeds) that compose per-sector
