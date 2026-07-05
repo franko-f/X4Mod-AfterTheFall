@@ -264,12 +264,17 @@ let findStationsThatNeedMoving (stations: GodStation list) =
             List.contains tags [ "[shipyard]"; "[wharf]"; "[equipmentdock]"; "[tradestation]" ])
         || station.Type = Some "tradingstation" // Teladi trading stations are identified differently, by using type.
     )
-    // BUT, we only want to move the first instance of each type of station per fection, so lets drop duplicates.
-    // BYTE-COMPAT (T1): the old code deduped on the provider Select VALUE, which compares by
-    // reference - so stations WITH a <select> never actually deduped; only selectless stations
-    // deduped by (Owner, Type). An XmlSource compares by the identity of its wrapped element
-    // (unique per station), reproducing that behaviour exactly. Fix properly (dedup on
-    // SelectTags) as a deliberate balance change after the refactor's byte-lock is lifted.
+    // Deduplication rules (deliberate, decided 2026-07 - see git history for the T1 story):
+    // - Stations WITH a <select> tag are each treated as unique infrastructure and are
+    //   ALL moved to safety, even when a faction has several of the same kind (e.g. both
+    //   argon trade stations, both split equipment docks). Keying on Source (which
+    //   compares by the identity of the underlying parsed element) makes every such
+    //   station distinct.
+    // - Only tag-less stations (the teladi 'tradingstation' type) dedupe by (Owner, Type),
+    //   so just the first of those is moved and the rest are removed.
+    // Historical note: this started as an accident (the old code compared provider values
+    // by reference where value equality was probably intended), but we've chosen to keep
+    // it: factions hold on to their unique stations, which suits the mod's balance.
     |> List.distinctBy (fun station ->
         (station.Owner, station.Type, station.SelectTags |> Option.map (fun _ -> station.Source)))
 
