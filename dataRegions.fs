@@ -160,13 +160,7 @@ let private regionPlacementXml (placement: RegionPlacement) =
 // Write a DLC's cluster map diff placing the visual mining field regions.
 let writeClusterRegions (dlc: string) (filename: string) (placements: RegionPlacement list) =
     // Create the new XML Diff document to contain our region additions
-    let diff =
-        XElement.Parse(
-            "<?xml version=\"1.0\" encoding=\"utf-8\"?>
-        <diff>
-        </diff>
-        "
-        )
+    let diff = X4.WriteModfiles.newDiff ()
 
     // Now add the region changes, one by one, to the the xml diff.
     for placement in placements do
@@ -235,13 +229,7 @@ let writeMapDefaults (dlc: string) (grants: SectorResourceGrant list) =
     let diff =
         match dlc with
         | "core" -> XElement.Load(__SOURCE_DIRECTORY__ + "/mod_xml/libraries/mapdefaults.xml")
-        | _ ->
-            XElement.Parse(
-                "<?xml version=\"1.0\" encoding=\"utf-8\"?>
-        <diff>
-        </diff>
-        "
-            )
+        | _ -> X4.WriteModfiles.newDiff ()
 
     for grant in grants do
         diff.Add(sectorResourceAreasXml grant)

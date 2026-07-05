@@ -68,6 +68,27 @@ let clean_mod_directory () =
             printfn "Error cleaning mod directory: %s" ex.Message
 
 
+// ==== The diff-operation vocabulary ====
+// Every generated mod file is an X4 XML diff: a <diff> root holding add/replace/
+// remove operations addressed by 'sel' XPath selectors. These helpers are the
+// shared vocabulary the data-layer writers build their operations from.
+
+/// An empty <diff> document root, ready for operations.
+let newDiff () = new XElement(XName.Get "diff")
+
+/// <add sel="...">children</add>
+let addOp (sel: string) (children: XElement list) =
+    new XElement(XName.Get "add", new XAttribute(XName.Get "sel", sel), children)
+
+/// <replace sel="...">content</replace> - content may be an element or a plain value.
+let replaceOp (sel: string) (content: obj) =
+    new XElement(XName.Get "replace", new XAttribute(XName.Get "sel", sel), content)
+
+/// <remove sel="..." />
+let removeOp (sel: string) =
+    new XElement(XName.Get "remove", new XAttribute(XName.Get "sel", sel))
+
+
 // The output trees are assembled from many sources - interpolated string templates,
 // provider-parsed vanilla clones, hand written seed files and code built elements -
 // each dragging its own whitespace into the tree, which used to give the output files

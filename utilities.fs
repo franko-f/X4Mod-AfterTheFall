@@ -47,13 +47,6 @@ let check_and_create_dir (filename: string) =
     if not (System.IO.Directory.Exists(dir)) then
         System.IO.Directory.CreateDirectory(dir) |> ignore // Should really catch the failure here. TODO
 
-// Given a list of 2 element tuples, split them in to two lists.
-// The first list contains all the first elements, the second list contains all the second elements.
-// It will strip out any 'None' values.
-let splitTuples (tuples: ('a option * 'b option * 'c option) list) =
-    let x, y, z = List.unzip3 tuples
-    (List.choose id x, List.choose id y, List.choose id z)
-
 let parseStringList (input: string) : string list =
     let trimmedInput = input.Trim('[', ']')
 

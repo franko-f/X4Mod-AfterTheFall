@@ -125,7 +125,7 @@ let private replaceQuotaXml (id: string) (quota: JobQuota) =
     ]
 
     let xml =
-        new XElement("replace", new XAttribute("sel", $"//jobs/job[@id='{id}']/quota"), new XElement("quota", attributes))
+        X4.WriteModfiles.replaceOp $"//jobs/job[@id='{id}']/quota" (new XElement("quota", attributes))
 
     printfn "     REPLACING JOB QUOTA %s with gal:%A maxGal:%A clust:%A sect:%A" id quota.Galaxy quota.Maxgalaxy quota.Cluster quota.Sector
     xml
@@ -138,7 +138,7 @@ let private replaceQuotaXml (id: string) (quota: JobQuota) =
 // this would spawn half of the ships, weakening the faction nicely, but it's more complicated and adds
 // a lot of jobs. Instead, we're jjst going to target L and XL ships, and resupply ships.
 let private setPreferBuildXml (job: Job) =
-    let selector = new XAttribute("sel", $"//jobs/job[@id='{job.Id}']/environment")
+    let selector = $"//jobs/job[@id='{job.Id}']/environment"
 
     match job.Environment with
     | None ->
@@ -146,14 +146,9 @@ let private setPreferBuildXml (job: Job) =
         printfn "  ADDING JOB ENVIRONMENT AND BUILD SETTINGS %s preferbuild" job.Id
 
         let environment =
-            new XElement(
-                "environment",
-                [
-                    new XAttribute("preferbuilding", true), new XAttribute("buildatshipyard", true)
-                ]
-            )
+            new XElement("environment", new XAttribute("preferbuilding", true), new XAttribute("buildatshipyard", true))
 
-        new XElement("add", selector, environment)
+        X4.WriteModfiles.addOp selector [ environment ]
 
     | Some environment ->
         // There's an existing environment, so we'll build and xml REPLACE based on the existing settings.
@@ -161,8 +156,7 @@ let private setPreferBuildXml (job: Job) =
         let newEnvironment = new XElement(XmlSource.value environment.Source)
         newEnvironment.SetAttributeValue("preferbuilding", true)
         newEnvironment.SetAttributeValue("buildatshipyard", true)
-        let replacement = new XElement("replace", selector, newEnvironment)
-        replacement
+        X4.WriteModfiles.replaceOp selector newEnvironment
 
 
 // This string is the starting point for the output job we'll write.
@@ -178,12 +172,10 @@ let private jobDirectiveXml (directive: JobDirective) =
 // Write the mod's jobs.xml diff from the job directives, seeded from the hand written
 // template (which already contains some predefined xenon jobs for TER territory).
 let writeJobsFile (filename: string) (directives: JobDirective list) =
-    // Prepare to write out the XML for the mod. Start by creating an XML DIFF object from the template
-    let outJobFile = X4JobMod.Parse(X4JobModTemplate)
-    let diff = outJobFile.XElement // the root element is actually the 'diff' tag.
+    let diff = XElement.Parse(X4JobModTemplate)
 
     // Now add out job changes, one by one, to the mutable diff element
     for directive in directives do
         diff.Add(jobDirectiveXml directive)
 
-    X4.WriteModfiles.write_xml_file "core" filename outJobFile.XElement
+    X4.WriteModfiles.write_xml_file "core" filename diff

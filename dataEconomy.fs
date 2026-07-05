@@ -11,6 +11,7 @@ open System.Xml.Linq
 open X4.Types
 open X4.Utilities
 open X4.Data.Xml
+open X4.WriteModfiles // the diff-operation vocabulary the writer builds from
 
 // Conversions from the provider types to the pure records in X4.Types.
 // Source wraps the provider-parsed element itself - the writer clones it for
@@ -137,29 +138,41 @@ let allStations, allProducts =
 
 // ==== WRITER ====
 // The mod's god.xml is produced here from the pure directives decided by god.fs.
-// All XML construction is inherited verbatim from the original logic code.
+// The writers work on raw XElements (template clones and vanilla clones via
+// XmlSource), built from the diff-operation vocabulary in X4.WriteModfiles.
 
-let private logAddStation (action: string) (station: X4GodMod.Station) =
+// Attribute value of an element, or a fallback when the attribute is absent.
+let private attrOr (fallback: string) (name: string) (el: XElement) =
+    match el.Attribute(XName.Get name) with
+    | null -> fallback
+    | attr -> attr.Value
+
+let private logAddStation (action: string) (station: XElement) =
+    let attr name = station |> attrOr "none" name
+
     let tags =
-        match station.Station.Select with
-        | Some tag -> tag.Tags
-        | _ -> "[none]"
+        match station.Element(XName.Get "station") with
+        | null -> "[none]"
+        | spec ->
+            match spec.Element(XName.Get "select") with
+            | null -> "[none]"
+            | select -> select |> attrOr "[none]" "tags"
+
+    let location, locationMacro =
+        match station.Element(XName.Get "location") with
+        | null -> "none", "none"
+        | location -> location |> attrOr "none" "class", location |> attrOr "none" "macro"
 
     printfn
         "   %s STATION %s race: %s, owner: %s, type: %s, location: %s:%s, id: %s, station: \"none\"   "
         action
         tags
-        station.Race
-        station.Owner
-        station.Type
-        station.Location.Class
-        station.Location.Macro
-        station.Id
-
-// Given a selector ID, search an instance of a GodMod xml file for the 'ADD' section
-// with that 'sel' value. This will be the XElement we will manipulate.
-let private find_add_selector sel xml =
-    Array.find (fun (elem: X4GodMod.Add) -> elem.Sel = sel) xml
+        (attr "race")
+        (attr "owner")
+        (attr "type")
+        location
+        locationMacro
+        (attr "id")
 
 // Extract the Xenon stations from the GodModTemplate. We'll use these as templates when we add new xenon stations
 let private X4ObjectTemplatesData = X4ObjectTemplates.Load(X4ObjectTemplatesFile)
@@ -174,70 +187,52 @@ let private xenonStationTemplate (kind: XenonStationKind) =
     (Array.find (fun (elem: X4ObjectTemplates.Station) -> elem.Id = id) X4ObjectTemplatesData.Stations)
         .XElement
 
-// Render one station directive into the (optional add, optional remove, optional
-// replace-ops) triple the god diff is assembled from.
-let private renderStationDirective (directive: StationDirective) =
-    let station = directive.Original
-    let id = station.Id
-    let locationClass = Option.defaultValue "none" station.LocationClass
-    let locationMacro = Option.defaultValue "none" station.LocationMacro
+// Render the Xenon station (if any) that takes over a processed station's location.
+let private renderReplacementStation (directive: StationDirective) =
+    match directive.Replacement with
+    | None -> None
+    | Some kind ->
+        let station = directive.Original
+        // create a new Xenon station from the template, retargeted to the original's location.
+        let clone = new XElement(xenonStationTemplate kind)
+        clone.SetAttributeValue(XName.Get "id", (clone |> attrOr "station" "id") + "_x_" + station.Id) // Give it a new unique ID
+        let location = clone.Element(XName.Get "location")
+        location.SetAttributeValue(XName.Get "class", Option.defaultValue "none" station.LocationClass)
+        location.SetAttributeValue(XName.Get "macro", Option.defaultValue "none" station.LocationMacro)
+        logAddStation "REPLACE" clone
+        Some clone
 
-    let replacement =
-        match directive.Replacement with
-        | None -> None
-        | Some kind ->
-            // create a new Xenon station to replace it
-            let stationClone = new XElement(xenonStationTemplate kind)
-            let replacement = new X4GodMod.Station(stationClone)
-            replacement.XElement.SetAttributeValue(XName.Get("id"), replacement.Id + "_x_" + id) // Give it a new unique ID
-            // update location. As they're different types (as far as the type provider is concerned), we have to manually set
-            // the important zone and macro fields.
-            replacement.Location.XElement.SetAttributeValue(XName.Get("class"), locationClass)
-            replacement.Location.XElement.SetAttributeValue(XName.Get("macro"), locationMacro)
-            logAddStation "REPLACE" replacement
-            Some replacement.XElement
+// The remove operations clearing out the originals we don't move.
+let private renderStationRemovals (directives: StationDirective list) = [
+    for directive in directives do
+        match directive.Action with
+        | RemoveOriginal -> removeOp $"//god/stations/station[@id='{directive.Original.Id}']"
+        | MoveOriginalTo _ -> ()
+]
 
-    match directive.Action with
-    | MoveOriginalTo randomSector ->
-        // build the XML that will update the old stations location.
-        let replaceXml = [
-            new XElement(
-                "replace",
-                new XAttribute("sel", $"//god/stations/station[@id='{id}']/location/@class"),
-                "sector"
-            )
-            new XElement(
-                "replace",
-                new XAttribute("sel", $"//god/stations/station[@id='{id}']/location/@macro"),
-                randomSector
-            )
-        ]
-
-        (replacement, None, Some replaceXml)
-    | RemoveOriginal ->
-        // create XML tag that will remove the old station
-        let remove =
-            new XElement(
-                "remove",
-                new XAttribute("sel", $"//god/stations/station[@id='{id}']") // XML remove tag for the station we're replacing with Xenon.
-            )
-
-        (replacement, Some remove, None)
+// The replace-operation pairs retargeting moved stations to their safe sectors.
+let private renderStationMoves (directives: StationDirective list) = [
+    for directive in directives do
+        match directive.Action with
+        | MoveOriginalTo randomSector ->
+            yield replaceOp $"//god/stations/station[@id='{directive.Original.Id}']/location/@class" "sector"
+            yield replaceOp $"//god/stations/station[@id='{directive.Original.Id}']/location/@macro" randomSector
+        | RemoveOriginal -> ()
+]
 
 // Render a bastion station: clone the faction's defence station god entry and retarget
 // its id, construction plan, location and position.
 let private renderBastionStation (bastion: BastionStation) =
-    let stationClone = new XElement(XmlSource.value bastion.BasedOn.Source)
-    let defenseStation = new X4GodMod.Station(stationClone)
-    defenseStation.XElement.SetAttributeValue(XName.Get("id"), bastion.Id) // Give it a new unique ID
+    let station = new XElement(XmlSource.value bastion.BasedOn.Source)
+    station.SetAttributeValue(XName.Get "id", bastion.Id) // Give it a new unique ID
 
     // Point the bastion at our stacked construction plan instead of letting the
     // game resolve the faction's standard defence plan through the <select> tag.
     let stationSpec =
-        match defenseStation.XElement.Element(XName.Get "station") with
+        match station.Element(XName.Get "station") with
         | null ->
             let spec = new XElement(XName.Get "station")
-            defenseStation.XElement.Add spec
+            station.Add spec
             spec
         | spec -> spec
 
@@ -248,39 +243,40 @@ let private renderBastionStation (bastion: BastionStation) =
     stationSpec.SetAttributeValue(XName.Get "constructionplan", bastion.PlanId)
 
     // update location and set the location of the station copy to be the zone of the gate,
-    defenseStation.Location.XElement.SetAttributeValue(XName.Get("class"), bastion.ZoneClass)
-    defenseStation.Location.XElement.SetAttributeValue(XName.Get("macro"), bastion.ZoneName)
-    defenseStation.Location.XElement.SetAttributeValue(XName.Get("matchextension"), "false") // without this, game ignores mods touching things outside their scope
-    defenseStation.Location.XElement.SetAttributeValue("solitary", null) // VIG faction has this attribute set that may cause station placement to fail
+    let location = station.Element(XName.Get "location")
+    location.SetAttributeValue(XName.Get "class", bastion.ZoneClass)
+    location.SetAttributeValue(XName.Get "macro", bastion.ZoneName)
+    location.SetAttributeValue(XName.Get "matchextension", "false") // without this, game ignores mods touching things outside their scope
+    location.SetAttributeValue(XName.Get "solitary", null) // VIG faction has this attribute set that may cause station placement to fail
 
     // Now update the precise position within the zone to the caculated spot in a circle near the gate.
     let position =
-        match defenseStation.Position with
-        | Some position -> position.XElement
-        | None ->
-            printfn "   No position found for station %s" defenseStation.Id
-            let posXml = new XElement("position")
-            defenseStation.XElement.Add(posXml)
+        match station.Element(XName.Get "position") with
+        | null ->
+            printfn "   No position found for station %s" bastion.Id
+            let posXml = new XElement(XName.Get "position")
+            station.Add posXml
             posXml
+        | position -> position
 
-    position.SetAttributeValue(XName.Get("x"), bastion.Position.X)
-    position.SetAttributeValue(XName.Get("y"), bastion.Position.Y)
-    position.SetAttributeValue(XName.Get("z"), bastion.Position.Z)
+    position.SetAttributeValue(XName.Get "x", bastion.Position.X)
+    position.SetAttributeValue(XName.Get "y", bastion.Position.Y)
+    position.SetAttributeValue(XName.Get "z", bastion.Position.Z)
 
-    logAddStation "ADDING" defenseStation
-    defenseStation.XElement
+    logAddStation "ADDING" station
+    station
 
 // Render a new Xenon station placed from a template.
 let private renderXenonStation (directive: XenonTemplateStation) =
-    let station =
-        new X4GodMod.Station(new XElement(xenonStationTemplate directive.Kind))
+    let station = new XElement(xenonStationTemplate directive.Kind)
 
     // Update the location and ID of our new station.
-    station.Location.XElement.SetAttributeValue(XName.Get("class"), directive.LocationClass)
-    station.Location.XElement.SetAttributeValue(XName.Get("macro"), directive.LocationMacro)
-    station.XElement.SetAttributeValue(XName.Get("id"), station.Id + directive.LocationMacro) // Give it a new unique ID
+    let location = station.Element(XName.Get "location")
+    location.SetAttributeValue(XName.Get "class", directive.LocationClass)
+    location.SetAttributeValue(XName.Get "macro", directive.LocationMacro)
+    station.SetAttributeValue(XName.Get "id", (station |> attrOr "" "id") + directive.LocationMacro) // Give it a new unique ID
     logAddStation "ADDING" station
-    station.XElement
+    station
 
 // Render a new Xenon solar power plant product.
 let private renderSolarProduct (directive: XenonSolarProduct) =
@@ -316,11 +312,7 @@ let private renderSolarProduct (directive: XenonSolarProduct) =
 // <replace sel="/god/products/product[@id='arg_graphene']/quotas/quota/@galaxy">18</replace>
 let private product_replace_xml (id: string) (quota_type: string) (quota: int) =
     let xml =
-        new XElement(
-            "replace",
-            new XAttribute("sel", $"//god/products/product[@id='{id}']/quotas/quota/@{quota_type}"),
-            quota
-        )
+        replaceOp $"//god/products/product[@id='{id}']/quotas/quota/@{quota_type}" quota
 
     printfn "  REPLACING PRODUCT %s with quota %s:%i using:\n %s" id quota_type quota (xml.ToString())
     xml
@@ -336,55 +328,35 @@ let writeGodFile
     (solarProducts: XenonSolarProduct list)
     (productDirectives: ProductDirective list)
     =
-    let (addStations, removeStations, moveStations) =
-        [ for directive in stationDirectives -> renderStationDirective directive ]
-        |> splitTuples
-
-    let replaceProducts = [
-        for directive in productDirectives ->
-            product_replace_xml directive.ProductId directive.QuotaType directive.Quota
-    ]
-
-    let newDefenseStations = [ for bastion in bastions -> renderBastionStation bastion ]
-    let newXenonStations = [ for station in xenonStations -> renderXenonStation station ]
-    let newXenonProducts = [ for product in solarProducts -> renderSolarProduct product ]
-
-    // This is our template output file structure, with the broad sections already created.
-    // We have set up the 'add' 'replace' sections with appropriate selectors. We can then
-    // extract each Add section by the selector element value, and populate it's underlying
-    // XElement in place. eg, search for "//god/stations" to find the 'add' XElement for
-    // stations.
-    let outGodFile =
-        X4GodMod.Parse(
-            "<?xml version=\"1.0\" encoding=\"utf-8\"?>
-        <diff>
-            <add sel=\"//god/stations\">
-            </add>
-            <add sel=\"//god/products\">
-            </add>
-        </diff>
-    "
-        )
-
-    let stationsAddElem = find_add_selector "//god/stations" outGodFile.Adds
-    let productsAddElem = find_add_selector "//god/products" outGodFile.Adds
-
     // The stations we're replacing with Xenon, followed by the new defense stations
     // near gates, then the extra Xenon wharfs/shipyards applying pressure in specific
     // sectors.
-    for element in List.concat [ addStations; newDefenseStations; newXenonStations ] do
-        stationsAddElem.XElement.Add(element)
+    let stationsAdd =
+        addOp "//god/stations" [
+            yield! stationDirectives |> List.choose renderReplacementStation
+            yield! bastions |> List.map renderBastionStation
+            yield! xenonStations |> List.map renderXenonStation
+        ]
 
-    for element in newXenonProducts do
-        productsAddElem.XElement.Add(element)
+    let productsAdd =
+        addOp "//god/products" (solarProducts |> List.map renderSolarProduct)
 
-    // Add our 'remove' and 'replace' tags to the end of the diff block.
-    let diff = outGodFile.XElement // the root element is actually the 'diff' tag.
+    // The two add sections first, then the 'remove' and 'replace' operations.
+    let diff = newDiff ()
+    diff.Add stationsAdd
+    diff.Add productsAdd
 
     let changes =
-        List.concat [ removeStations; replaceProducts; (List.concat moveStations) ]
+        List.concat [
+            renderStationRemovals stationDirectives
+            [
+                for directive in productDirectives ->
+                    product_replace_xml directive.ProductId directive.QuotaType directive.Quota
+            ]
+            renderStationMoves stationDirectives
+        ]
 
     for element in changes do
         diff.Add(element)
 
-    X4.WriteModfiles.write_xml_file "core" filename outGodFile.XElement
+    X4.WriteModfiles.write_xml_file "core" filename diff
