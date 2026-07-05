@@ -280,7 +280,6 @@ let private renderBastionStation (bastion: BastionStation) =
             printfn "   No position found for station %s" defenseStation.Id
             let posXml = new XElement("position")
             defenseStation.XElement.Add(posXml)
-            defenseStation.XElement.Add(new XText("\n")) // Add a newline after each element so the output is readible
             posXml
 
     position.SetAttributeValue(XName.Get("x"), bastion.Position.X)
@@ -315,21 +314,17 @@ let private renderSolarProduct (directive: XenonSolarProduct) =
             new XAttribute("ware", "energycells"),
             new XAttribute("owner", "xenon"),
             new XAttribute("type", "factory"),
-            new XText("\n"),
             new XElement("quotas", new XElement("quota", new XAttribute("galaxy", 2), new XAttribute("sector", 2))),
-            new XText("\n"),
             new XElement(
                 "location",
                 new XAttribute("class", locClass),
                 new XAttribute("macro", location),
                 new XAttribute("matchextension", "false")
             ),
-            new XText("\n"),
             new XElement(
                 "module",
                 new XElement("select", new XAttribute("ware", "energycells"), new XAttribute("race", "xenon"))
-            ),
-            new XText("\n")
+            )
         )
 
     printfn "   ADDING PRODUCT xen_solar to %s:%s" locClass location
@@ -398,11 +393,9 @@ let writeGodFile
     // sectors.
     for element in List.concat [ addStations; newDefenseStations; newXenonStations ] do
         stationsAddElem.XElement.Add(element)
-        stationsAddElem.XElement.Add(new XText("\n")) // Add a newline after each element so the output is readible
 
     for element in newXenonProducts do
         productsAddElem.XElement.Add(element)
-        productsAddElem.XElement.Add(new XText("\n")) // Add a newline after each element so the output is readible
 
     // Add our 'remove' and 'replace' tags to the end of the diff block.
     let diff = outGodFile.XElement // the root element is actually the 'diff' tag.
@@ -412,6 +405,5 @@ let writeGodFile
 
     for element in changes do
         diff.Add(element)
-        diff.Add(new XText("\n")) // Add a newline after each element so the output is readible
 
     X4.WriteModfiles.write_xml_file "core" filename outGodFile.XElement

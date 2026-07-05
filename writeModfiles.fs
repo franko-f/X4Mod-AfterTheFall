@@ -68,10 +68,25 @@ let clean_mod_directory () =
             printfn "Error cleaning mod directory: %s" ex.Message
 
 
+// The output trees are assembled from many sources - interpolated string templates,
+// provider-parsed vanilla clones, hand written seed files and code built elements -
+// each dragging its own whitespace into the tree, which used to give the output files
+// a patchwork of formatting styles. Strip every whitespace-only text node so the
+// XmlWriter is free to indent the whole document uniformly when it saves.
+let private stripWhitespaceTextNodes (xml: XElement) =
+    xml.DescendantNodes()
+    |> Seq.filter (fun node ->
+        match node with
+        | :? XText as text -> node.NodeType = System.Xml.XmlNodeType.Text && System.String.IsNullOrWhiteSpace text.Value
+        | _ -> false)
+    |> Seq.toList // materialise before mutating the tree we're iterating over
+    |> List.iter (fun node -> node.Remove())
+
 // Write our XML output to a directory called 'mod'. If the directrory doesn't exist, create it.
 let write_xml_file (dlc: string) (filename: string) (xml: XElement) =
     let fullname = (getDLCFileName dlc filename)
     check_and_create_dir fullname
+    stripWhitespaceTextNodes xml
     xml.Save(fullname)
 
 let copy_templates_to_mod () =

@@ -204,6 +204,5 @@ let writeJobsFile (filename: string) (directives: JobDirective list) =
     // Now add out job changes, one by one, to the mutable diff element
     for directive in directives do
         diff.Add(jobDirectiveXml directive)
-        diff.Add(new XText("\n")) // Add a newline after each element so the output is readible
 
     X4.WriteModfiles.write_xml_file "core" filename outJobFile.XElement

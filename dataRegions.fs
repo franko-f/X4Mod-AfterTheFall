@@ -128,9 +128,8 @@ let getMapDefaultsDatasetState (dlc: string) (sector: string) =
 
 // ==== WRITERS ====
 // All the mod's mining-resource XML is produced here from the pure directive records
-// in X4.Types. The interpolated string templates are inherited verbatim from the
-// original logic code, and are parsed with XmlTextReader (rather than XElement.Parse)
-// to preserve their whitespace exactly in the output files.
+// in X4.Types. The interpolated string templates are indented for readability here;
+// write_xml_file reformats the whole document uniformly on save.
 
 // One cluster map <add> operation placing a visual mining field region.
 let private regionPlacementXml (placement: RegionPlacement) =
@@ -156,8 +155,7 @@ let private regionPlacementXml (placement: RegionPlacement) =
     </add>
     """
 
-    let xtr = new System.Xml.XmlTextReader(new System.IO.StringReader(xml))
-    XElement.Load(xtr)
+    XElement.Parse(xml)
 
 // Write a DLC's cluster map diff placing the visual mining field regions.
 let writeClusterRegions (dlc: string) (filename: string) (placements: RegionPlacement list) =
@@ -173,7 +171,6 @@ let writeClusterRegions (dlc: string) (filename: string) (placements: RegionPlac
     // Now add the region changes, one by one, to the the xml diff.
     for placement in placements do
         diff.Add(regionPlacementXml placement)
-        diff.Add(new XText("\n")) // Add a newline after each element so the output is readible
 
     X4.WriteModfiles.write_xml_file dlc filename diff
 
@@ -226,9 +223,7 @@ let private sectorResourceAreasXml (grant: SectorResourceGrant) =
     </add>
     """
 
-    // Using the textreader instead of XElement.Parse preserves whitespace and carriage returns in our output.
-    let xtr = new System.Xml.XmlTextReader(new System.IO.StringReader(xml))
-    XElement.Load(xtr)
+    XElement.Parse(xml)
 
 // Write a DLC's mapdefaults diff granting sectors their resource areas.
 // The core game file already has a hand written template diff with a couple of
@@ -239,9 +234,7 @@ let private sectorResourceAreasXml (grant: SectorResourceGrant) =
 let writeMapDefaults (dlc: string) (grants: SectorResourceGrant list) =
     let diff =
         match dlc with
-        | "core" ->
-            let xtr = new System.Xml.XmlTextReader(__SOURCE_DIRECTORY__ + "/mod_xml/libraries/mapdefaults.xml")
-            XElement.Load(xtr)
+        | "core" -> XElement.Load(__SOURCE_DIRECTORY__ + "/mod_xml/libraries/mapdefaults.xml")
         | _ ->
             XElement.Parse(
                 "<?xml version=\"1.0\" encoding=\"utf-8\"?>
@@ -252,6 +245,5 @@ let writeMapDefaults (dlc: string) (grants: SectorResourceGrant list) =
 
     for grant in grants do
         diff.Add(sectorResourceAreasXml grant)
-        diff.Add(new XText("\n"))
 
     X4.WriteModfiles.write_xml_file dlc "libraries/mapdefaults.xml" diff

@@ -170,7 +170,6 @@ let makeBastionPlan (sourcePlan: XElement) (newId: string) (dlcPatch: (string * 
             position.SetAttributeValue(XName.Get "y", currentY + lift)
 
             plan.Add(clone)
-            plan.Add(new XText("\n"))
 
     // Declare the DLC the plan's modules come from, mirroring the pattern of the hand
     // written plans in the mod_xml constructionplans template.
@@ -194,11 +193,10 @@ let writeConstructionPlans (directives: BastionPlanDirective list) =
     printfn "======= Generating bastion construction plans"
 
     let plansOut =
-        XElement.Load(new System.Xml.XmlTextReader(__SOURCE_DIRECTORY__ + "/mod_xml/libraries/constructionplans.xml"))
+        XElement.Load(__SOURCE_DIRECTORY__ + "/mod_xml/libraries/constructionplans.xml")
 
     for directive in directives do
         printfn "  BASTION PLAN atf_bastion_%s (%ix %s)" directive.SourcePlanId GateDefence.BastionStrengthMultiplier directive.SourcePlanId
         plansOut.Add(makeBastionPlan (XmlSource.value directive.SourcePlan) directive.NewId directive.DlcPatch)
-        plansOut.Add(new XText("\n"))
 
     X4.WriteModfiles.write_xml_file "core" "libraries/constructionplans.xml" plansOut

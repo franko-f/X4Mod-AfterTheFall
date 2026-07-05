@@ -327,8 +327,8 @@ let allShipEquipment =
 
 // ==== WRITER ====
 // placedobjects.xml and loadouts.xml are produced here from the pure AbandonedShip
-// directives decided by the ships logic. The string templates are inherited verbatim
-// from the original code, parsed with XmlTextReader to preserve whitespace exactly.
+// directives decided by the ships logic. The string templates are indented for
+// readability here; write_xml_file reformats the whole document uniformly on save.
 
 // Generate a section of XML with a wrapper tag. used for groups and macros.
 // Could use XML classes, but loadouts are so simple that string manipulation is just easier.
@@ -385,8 +385,7 @@ let private loadoutElementXml (loadout: ShipLoadout) =
         </add>
         """
 
-    // Using the textreader instead of XElement.Parse preserves whitespace and carriage returns in our output.
-    XElement.Load(new System.Xml.XmlTextReader(new System.IO.StringReader(xml)))
+    XElement.Parse(xml)
 
 // The placedobjects.xml <add> operation that spawns one abandoned ship.
 let private abandonedShipXml (ship: AbandonedShip) =
@@ -415,8 +414,7 @@ let private abandonedShipXml (ship: AbandonedShip) =
     </add>
     """
 
-    // Using the textreader instead of XElement.Parse preserves whitespace and carriage returns in our output.
-    XElement.Load(new System.Xml.XmlTextReader(new System.IO.StringReader(xml)))
+    XElement.Parse(xml)
 
 // Write placedobjects.xml and loadouts.xml from the abandoned ship directives.
 let writeAbandonedShips (placedObjectsFilename: string) (loadoutFilename: string) (ships: AbandonedShip list) =
@@ -431,16 +429,12 @@ let writeAbandonedShips (placedObjectsFilename: string) (loadoutFilename: string
     let placedXML = XElement(xmlTemplate)
     let loadoutXML = XElement(xmlTemplate)
 
-    let addElementsToDiff (diff: XElement) (elements: XElement list) =
-        elements
-        |> List.iter (fun element ->
-            diff.Add(element)
-            diff.Add(new XText("\n")) // Add a newline after each element so the output is readible
-        )
+    // Now add the abandoned ships, one by one, to the xml diffs.
+    for ship in ships do
+        placedXML.Add(abandonedShipXml ship)
 
-    // Now add the abandoned ships, one by one, to the the xml diff.
-    addElementsToDiff placedXML (ships |> List.map abandonedShipXml)
-    addElementsToDiff loadoutXML (ships |> List.choose (fun ship -> ship.Loadout) |> List.map loadoutElementXml)
+    for loadout in ships |> List.choose (fun ship -> ship.Loadout) do
+        loadoutXML.Add(loadoutElementXml loadout)
 
     X4.WriteModfiles.write_xml_file "core" placedObjectsFilename placedXML
     X4.WriteModfiles.write_xml_file "core" loadoutFilename loadoutXML
