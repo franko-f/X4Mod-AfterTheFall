@@ -137,7 +137,7 @@ module GateDefence =
     // geometry) plus this value, so plans of any height get the same daylight between
     // decks. The hardpoint-derived extents are a lower bound on the real meshes, so
     // keep this generous.
-    let BastionCopyClearance = 1000.0
+    let BastionCopyClearance = 700.0
 
     // Equipment fill level (0..1) written to every bastion's <loadout><level>. The
     // clone source (each faction's vanilla defence god entry) often has NO loadout
