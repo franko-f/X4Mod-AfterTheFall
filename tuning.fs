@@ -139,6 +139,14 @@ module GateDefence =
     // keep this generous.
     let BastionCopyClearance = 1000.0
 
+    // Equipment fill level (0..1) written to every bastion's <loadout><level>. The
+    // clone source (each faction's vanilla defence god entry) often has NO loadout
+    // level at all (hatikvah, argon, teladi, paranid, split...), and such stations
+    // spawn with the game's sparse default fit - near-unarmed turret hardpoints.
+    // The defence plans hardcode no weapons themselves, so this level is what arms
+    // the bastion. 1.0 = fully fitted.
+    let BastionLoadoutLevel = 1.0
+
 
 // ===== ABANDONED SHIPS =====
 // How many claimable wrecks are scattered around the galaxy, and where.
