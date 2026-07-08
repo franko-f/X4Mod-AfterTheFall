@@ -10,6 +10,7 @@ X4.WriteModfiles.clean_mod_directory ()
 X4.WriteModfiles.copy_templates_to_mod ()
 
 X4.God.generate_god_file "libraries/god.xml"
+X4.Data.Wares.writeWareOwnerGrants "libraries/wares.xml" X4.Tuning.GateDefence.FactionWareGrants
 X4.Jobs.generate_job_file "libraries/jobs.xml"
 X4.Resources.generate_resource_definitions_file ()
 X4.Ships.generate_abandoned_ships_file "/md/placedobjects.xml" "/libraries/loadouts.xml"

@@ -250,6 +250,9 @@ type BastionStation = {
     ZoneName: string
     Position: Position
     PlanId: string // the atf_bastion_* construction plan to build
+    // Explicit <loadout><level> to write on the station; None inherits whatever the
+    // cloned god entry carried (usually nothing - the game's sparse default fit).
+    LoadoutLevel: float option
 }
 
 /// A new Xenon station placed from a template at a specific location.

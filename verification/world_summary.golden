@@ -1057,6 +1057,9 @@ region-def atf_ice_field_high
 region-def atf_methane_highyield_field
 region-def atf_wreckfield_xenon_battle
 
+== libraries/wares.xml (1) ==
+op add /wares/ware[@id='turret_arg_l_plasma_01_mk1']
+
 == maps/xu_ep2_universe/clusters.xml (46) ==
 region Cluster_07_macro: atf_helium_highyield_field @ (38533,-3050,61926)
 region Cluster_07_macro: atf_hydrogen_highyield_field @ (-45444,-4792,-58427)

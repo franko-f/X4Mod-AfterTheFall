@@ -242,20 +242,22 @@ let private renderBastionStation (bastion: BastionStation) =
 
     stationSpec.SetAttributeValue(XName.Get "constructionplan", bastion.PlanId)
 
-    // Bastions always spawn fully fitted. Most factions' vanilla defence god entries
-    // carry no <loadout> level (hatikvah, argon, teladi...), and without one the game
-    // fits almost no turrets - the plan hardcodes none. Replace whatever the clone
-    // inherited with an explicit level.
-    match stationSpec.Element(XName.Get "loadout") with
-    | null -> ()
-    | loadout -> loadout.Remove()
+    // A bastion only gets an explicit equipment level when its directive carries one
+    // (the logic layer decides per faction); otherwise it inherits whatever <loadout>
+    // the cloned god entry had - usually none, meaning the game's sparse default fit.
+    match bastion.LoadoutLevel with
+    | None -> ()
+    | Some level ->
+        match stationSpec.Element(XName.Get "loadout") with
+        | null -> ()
+        | loadout -> loadout.Remove()
 
-    stationSpec.Add(
-        new XElement(
-            XName.Get "loadout",
-            new XElement(XName.Get "level", new XAttribute(XName.Get "exact", X4.Tuning.GateDefence.BastionLoadoutLevel))
+        stationSpec.Add(
+            new XElement(
+                XName.Get "loadout",
+                new XElement(XName.Get "level", new XAttribute(XName.Get "exact", level))
+            )
         )
-    )
 
     // update location and set the location of the station copy to be the zone of the gate,
     let location = station.Element(XName.Get "location")

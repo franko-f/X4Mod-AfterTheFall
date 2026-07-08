@@ -139,13 +139,22 @@ module GateDefence =
     // keep this generous.
     let BastionCopyClearance = 700.0
 
-    // Equipment fill level (0..1) written to every bastion's <loadout><level>. The
-    // clone source (each faction's vanilla defence god entry) often has NO loadout
-    // level at all (hatikvah, argon, teladi, paranid, split...), and such stations
-    // spawn with the game's sparse default fit - near-unarmed turret hardpoints.
-    // The defence plans hardcode no weapons themselves, so this level is what arms
-    // the bastion. 1.0 = fully fitted.
+    // Equipment fill level (0..1) written to a bastion's <loadout><level> - applied
+    // to HATIKVAH bastions only (see god.fs bastionLoadoutLevel); everyone else
+    // inherits their vanilla defence entry's loadout. Hatikvah's entry has no level
+    // at all, and such stations spawn with the game's sparse default fit -
+    // near-unarmed turret hardpoints. The defence plans hardcode no weapons
+    // themselves, so this level is what arms the bastion. 1.0 = fully fitted.
     let BastionLoadoutLevel = 1.0
+
+    // Equipment ware ownership granted to factions via a wares.xml diff, as
+    // (faction, ware id) pairs. The game fills a <loadout> level only with wares the
+    // owning faction has in wares.xml, and hatikvah's vanilla list holds a single L
+    // combat turret - the pulse laser - so without a grant even a full loadout mounts
+    // nothing stronger. Plasma only, deliberately not beam.
+    let FactionWareGrants = [
+        "hatikvah", "turret_arg_l_plasma_01_mk1"
+    ]
 
 
 // ===== ABANDONED SHIPS =====

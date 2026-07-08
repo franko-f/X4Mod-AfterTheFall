@@ -339,6 +339,15 @@ let bastionPlanSources =
         "scavenger", { PlanId = "rip_defence"; Dlc = Some("ego_dlc_pirate", "Tides of Avarice") }
     ]
 
+// Only hatikvah bastions get an explicit <loadout> level; every other faction
+// inherits whatever its cloned god entry carried. Hatikvah needs the help twice
+// over: their vanilla defence entry has no loadout level (near-unarmed default
+// fit), and their wares.xml ownership contains a single L combat turret (the
+// pulse laser) - see Tuning.GateDefence.FactionWareGrants for the ware fix that
+// lets the level actually mount plasma.
+let bastionLoadoutLevel (faction: string) =
+    if faction = "hatikvah" then Some X4.Tuning.GateDefence.BastionLoadoutLevel else None
+
 // The id of the generated bastion plan a faction's gate stations will reference.
 // Shared between factions that use the same vanilla defence plan.
 let bastionPlanId (faction: string) =
@@ -389,6 +398,7 @@ let gateBastions () =
                 ZoneName = gate.Zone
                 Position = location
                 PlanId = bastionPlanId gate.Faction
+                LoadoutLevel = bastionLoadoutLevel gate.Faction
             }
     ]
 
