@@ -373,3 +373,6 @@ FodyWeavers.xsd
 ## Verification harness working data (baselines are regenerated from git refs)
 verification/cache/
 verification/last_run.log
+
+## Stats datasheets: regenerate with stats/l_turret_stats.py
+stats/processed/
