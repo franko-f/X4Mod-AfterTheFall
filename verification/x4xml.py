@@ -14,6 +14,7 @@ Only the python stdlib is used (no lxml on this machine).
 """
 
 import copy
+import os
 import re
 import xml.etree.ElementTree as ET
 
@@ -31,6 +32,30 @@ EXTENSION_ORDER = [
 ]
 
 DIFF_OP_TAGS = {"add", "replace", "remove"}
+
+
+def classify_extensions(vanilla_dir):
+    """Split the unpack's extensions into (official DLC in load order, foreign).
+
+    The simulation baseline is the stock game plus official Egosoft DLC - the
+    world our mod patches on top of. Any OTHER extension is foreign: a subscribed
+    workshop mod, or (the trap that bit us) our own mod copied back into the
+    unpack by a full re-extract. Layering a mod into the 'vanilla' baseline makes
+    every remove/replace selector miss and every add collide, so foreign
+    extensions are excluded here and reported by the caller.
+    """
+    ext_root = os.path.join(vanilla_dir, "extensions")
+    if not os.path.isdir(ext_root):
+        return [], []
+    found = sorted(
+        d for d in os.listdir(ext_root)
+        if os.path.isdir(os.path.join(ext_root, d))
+    )
+    official = [d for d in found if d in EXTENSION_ORDER or d.startswith("ego_")]
+    foreign = [d for d in found if d not in official]
+    ordered = [e for e in EXTENSION_ORDER if e in official] + \
+              [e for e in official if e not in EXTENSION_ORDER]
+    return ordered, foreign
 
 
 def load(path):
@@ -234,18 +259,15 @@ def build_virtual_doc(vanilla_dir, relpath, extra_problems=None):
     Works for core paths ('libraries/god.xml') and for extension-scoped paths
     ('extensions/ego_dlc_split/libraries/mapdefaults.xml', which later
     extensions could mirror-patch). Returns None if no vanilla file exists."""
-    import os
-
     base_path = os.path.join(vanilla_dir, relpath)
     if not os.path.exists(base_path):
         return None
     doc = load(base_path)
 
-    found = sorted(
-        d for d in os.listdir(os.path.join(vanilla_dir, "extensions"))
-        if os.path.isdir(os.path.join(vanilla_dir, "extensions", d))
-    ) if os.path.isdir(os.path.join(vanilla_dir, "extensions")) else []
-    order = [e for e in EXTENSION_ORDER if e in found] + [e for e in found if e not in EXTENSION_ORDER]
+    # Only stock DLC layers into the baseline - never a foreign mod (see
+    # classify_extensions). This is what keeps our own mod, if it leaks into the
+    # unpack, from poisoning the "vanilla" document it is meant to patch.
+    order, _foreign = classify_extensions(vanilla_dir)
 
     for ext in order:
         ext_path = os.path.join(vanilla_dir, "extensions", ext, relpath)

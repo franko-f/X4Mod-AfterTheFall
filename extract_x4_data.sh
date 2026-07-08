@@ -197,6 +197,19 @@ if [ -d "$X4_EXT_DIR" ]; then
     for ext_sub_dir in "$X4_EXT_DIR"/*/; do
         EXT_NAME=$(basename "$ext_sub_dir")
 
+        # Only official Egosoft DLC (ego_*) belong in a clean vanilla unpack. Skip
+        # installed mods - our own "after_the_fall", subscribed "ws_*" workshop
+        # items, etc. - so they can't contaminate the extracted data. The
+        # verification harness treats everything under extensions/ as stock game +
+        # DLC, so a mod leaking in there makes every mod selector miss or collide.
+        case "$EXT_NAME" in
+            ego*) ;;
+            *)
+                echo "Skipping non-official extension: extensions/$EXT_NAME"
+                continue
+                ;;
+        esac
+
         if compgen -G "$ext_sub_dir"/*.cat > /dev/null; then
             echo "Processing extension: extensions/$EXT_NAME"
             SUBDIR_START=$SECONDS

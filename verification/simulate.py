@@ -176,6 +176,15 @@ def main(argv):
 
     if not quiet:
         print(f"simulating {mod_dir} against {vanilla_dir}")
+
+    # The baseline is stock game + official DLC only. A foreign extension in the
+    # unpack (a subscribed workshop mod, or our own mod copied back in by a full
+    # re-extract) is ignored, not layered in - warn so it's never a silent trap.
+    _official, foreign = x4xml.classify_extensions(vanilla_dir)
+    if foreign:
+        print(f"NOTE: ignoring {len(foreign)} non-vanilla extension(s) in the unpack, "
+              f"not part of the baseline: {', '.join(foreign)}")
+
     problems, warnings, ops = simulate(mod_dir, vanilla_dir, dump_dir, quiet)
     if warnings and not quiet:
         print(f"\n{len(warnings)} vanilla-layering warning(s) (not failures):")
