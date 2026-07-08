@@ -292,8 +292,6 @@ def compute(t, p):
         sus_shield = shield_hit * per_trigger * sus_rate
         shot_hull = hull_hit * per_trigger
         shot_shield = shield_hit * per_trigger
-        if p["speed"]:
-            extras.append(f"{p['speed']:,.0f} m/s")
         if shots:
             extras.append(f"overheats after ~{shots:.0f} shots")
 
@@ -325,7 +323,8 @@ def compute(t, p):
         "cls": {"XEN": "xen", "KHA": "kha", "PIR": "pir"}.get(race, ""),
         "mount": mount, "size": size,
         "type": weapon_type(t["name"], group), "group": group,
-        "range": round(rng or 0), "rof": rof_txt, "rofSort": round(rof_sort, 3),
+        "range": round(rng or 0), "speed": round(p["speed"]) if p["speed"] else 0,
+        "rof": rof_txt, "rofSort": round(rof_sort, 3),
         "shotHull": round(shot_hull), "shotShield": round(shot_shield),
         "susHull": round(sus_hull or 0), "susShield": round(sus_shield or 0),
         "burstHull": round(burst_hull or 0),
@@ -384,13 +383,14 @@ def weapon_level_changes(old_weapons, new_weapons, new_names):
 def write_markdown(path, rows, changes, version, other_versions):
     with open(path, "w") as f:
         f.write(f"# X4 {version} — weapons (all mounts and sizes)\n\n")
-        f.write("| Weapon | Maker | Mount | Size | Type | Range m | Rate of fire | Dmg/shot hull "
-                "| Dmg/shot shield | Sust. DPS hull | Sust. DPS shield | Burst DPS hull "
-                "| Magazine | Track °/s | Notes |\n")
-        f.write("|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n")
+        f.write("| Weapon | Maker | Mount | Size | Type | Range m | Speed m/s | Rate of fire "
+                "| Dmg/shot hull | Dmg/shot shield | Sust. DPS hull | Sust. DPS shield "
+                "| Burst DPS hull | Magazine | Track °/s | Notes |\n")
+        f.write("|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|\n")
         for r in rows:
+            sp = "instant" if r["speed"] >= 1_000_000 else f"{r['speed']:,}" if r["speed"] else "—"
             f.write(f"| {r['name']} | {r['race']} | {r['mount']} | {r['size']} | {r['type']} "
-                    f"| {r['range']:,} | {r['rof']} | {r['shotHull']:,} | {r['shotShield']:,} "
+                    f"| {r['range']:,} | {sp} | {r['rof']} | {r['shotHull']:,} | {r['shotShield']:,} "
                     f"| {r['susHull']:,} | {r['susShield']:,} | {r['burstHull']:,} "
                     f"| {r['mag']} | {r['track']:g} | {r['notes']} |\n")
         for ver, chg in zip(other_versions, changes):
@@ -554,7 +554,7 @@ HTML_TEMPLATE = r"""<title>X4 __VERSION__ — Weapons Datasheet</title>
   .tablebox { background: var(--surface); border: 1px solid var(--line); border-radius: 6px;
     overflow: auto; max-height: calc(100vh - 20px); }
   /* border-collapse:collapse detaches borders from sticky headers in Chrome */
-  table { border-collapse: separate; border-spacing: 0; width: 100%; min-width: 1500px; }
+  table { border-collapse: separate; border-spacing: 0; width: 100%; min-width: 1580px; }
   thead th { position: sticky; top: 0; z-index: 2; background: var(--surface);
     border-bottom: 2px solid var(--line);
     font-family: "Avenir Next Condensed", "Arial Narrow", sans-serif; font-weight: 600;
@@ -651,6 +651,7 @@ __TILES__
         <th class="txt" data-k="size" data-t="s">Size</th>
         <th class="txt" data-k="type" data-t="s">Type</th>
         <th data-k="range" data-t="n">Range m</th>
+        <th data-k="speed" data-t="n">Speed m/s</th>
         <th class="txt" data-k="rofSort" data-t="n">Rate of fire</th>
         <th data-k="shotHull" data-t="n">Dmg/shot hull</th>
         <th data-k="shotShield" data-t="n">Dmg/shot shield</th>
@@ -707,6 +708,7 @@ function render() {
       <td class="txt">${r.size}</td>
       <td class="txt">${r.type}</td>
       <td>${fmt(r.range)}</td>
+      <td>${r.speed >= 1000000 ? "instant" : r.speed ? fmt(r.speed) : "—"}</td>
       <td class="txt">${r.rof}</td>
       <td>${fmt(r.shotHull)}</td>
       <td class="shieldnum">${fmt(r.shotShield)}</td>
