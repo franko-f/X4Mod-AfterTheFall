@@ -21,10 +21,12 @@ Stat conventions (from bullet_*/missile_* macros):
   (duration = lifetime); cycle = max(reload time, lifetime)
 - missiles: explosiondamage@value per missile, amount missiles per launch
 - range = bullet@range if present, else speed * lifetime
-- main weapons overheat (turrets don't): sustained duty cycle modelled as
-  fire-to-overheat (overheat / heat-per-second) followed by a full cooldown
-  (overheatcooldelay + overheat / coolrate); the tighter of the heat and
-  magazine limits governs sustained DPS
+- main weapons overheat (turrets carry no heat data): the engine cools only
+  cooldelay seconds after the last shot, so continuous fire always climbs to
+  overheat, while pauses (slow-fire gaps, magazine reloads, beam recharge and
+  charge-up) cool at coolrate. Sustained DPS models heat 0 -> overheat -> full
+  cooldown (overheatcooldelay + overheat/coolrate), compounded with the
+  magazine limit; heat per trigger = bullet heat (+initial) x barrelamount
 """
 import datetime
 import glob
@@ -133,6 +135,7 @@ def parse_weapon(path):
         "storage": fattr(props.find("storage"), "capacity"),
         "overheat": fattr(heat, "overheat"),
         "coolrate": fattr(heat, "coolrate"),
+        "cooldelay": fattr(heat, "cooldelay", 0.0),
         "ohdelay": fattr(heat, "overheatcooldelay", 0.0),
     }
 
@@ -167,6 +170,7 @@ def parse_projectile(path):
         "ammo_val": fattr(ammo, "value"),
         "ammo_reload": fattr(ammo, "reload"),
         "heat": fattr(props.find("heat"), "value", 0.0),
+        "heat_initial": fattr(props.find("heat"), "initial", 0.0),
         "rate": fattr(rel, "rate"),
         "time": fattr(rel, "time"),
     }
@@ -197,6 +201,30 @@ def weapon_type(name, group):
     return {"missile": "Missile", "beam": "Beam", "gun": "Gun"}.get(group, "Gun")
 
 
+def heat_cycle(t, heat_per_cycle, pauses, cycle_time):
+    """Overheat duty factor for a repeating fire cycle (one shot, one magazine,
+    or one beam shot per cycle).
+
+    The engine only cools a weapon `cooldelay` seconds after its last shot, so
+    heat always climbs while firing; each pause inside the cycle (gap between
+    shots, magazine reload, beam recharge) cools at coolrate once past
+    cooldelay. Sustained fire is modelled as heat 0 -> overheat, then a full
+    cooldown back to 0 (overheatcooldelay + overheat/coolrate) - the
+    '0-100-0' convention roguey also uses.
+    Returns (duty, shots_to_overheat) - (1.0, None) when heat never wins.
+    """
+    if not t["overheat"] or not t["coolrate"] or not heat_per_cycle:
+        return 1.0, None
+    cooling = sum(max(0.0, gap - (t["cooldelay"] or 0)) for gap in pauses) * t["coolrate"]
+    net = heat_per_cycle - cooling
+    if net <= 0:
+        return 1.0, None
+    cycles = t["overheat"] / net
+    t_fire = cycles * cycle_time
+    cooldown = (t["ohdelay"] or 0) + t["overheat"] / t["coolrate"]
+    return t_fire / (t_fire + cooldown), cycles
+
+
 def compute(t, p):
     """Derived stats for one weapon."""
     is_beam = p["attach"] and p["class"] == "bullet"
@@ -220,12 +248,16 @@ def compute(t, p):
     mount = MOUNTS.get(t["class"], "Main")
     extras = []
 
+    # heat per trigger pull: each barrel builds heat; pellets (amount) share the charge
+    hpt = (p["heat"] + p["heat_initial"]) * (p["barrels"] or 1) if mount == "Main" else 0
+
     if is_beam:
         dur = p["lifetime"] or 0
         # charge-up (e.g. the Kha'ak Obliterator) delays every shot, so it extends the cycle
         cyc = max(p["time"] or 0, dur) + (p["chargetime"] or 0)
+        heat_duty, shots = heat_cycle(t, hpt, [max(0.0, cyc - dur)], cyc) if cyc else (1.0, None)
         burst_hull = hull_hit * (p["barrels"] or 1)  # dps while the beam is on
-        duty = dur / cyc if cyc else 0
+        duty = (dur / cyc if cyc else 0) * heat_duty
         sus_hull = burst_hull * duty
         sus_shield = shield_hit * (p["barrels"] or 1) * duty
         rof_txt = "continuous beam" if dur >= cyc else f"{dur:g}s beam per {cyc:g}s"
@@ -233,23 +265,25 @@ def compute(t, p):
         shot_hull = hull_hit * dur * (p["barrels"] or 1)
         shot_shield = shield_hit * dur * (p["barrels"] or 1)
         extras.append(f"{burst_hull:,.0f} DPS while on" if dur < cyc else "beam")
+        if shots:
+            extras.append(f"overheats after ~{shots:.1f} shots")
     else:
-        mag_duty = 1.0
-        if p["ammo_val"] and rate:
-            cyc = p["ammo_val"] / rate + (p["ammo_reload"] or 0)
-            mag_duty = (p["ammo_val"] / cyc) / rate
-        heat_duty = 1.0
-        if mount == "Main" and p["heat"] and rate and t["overheat"] and t["coolrate"]:
-            heat_per_sec = p["heat"] * rate
-            if heat_per_sec > t["coolrate"]:
-                tto = t["overheat"] / heat_per_sec
-                cooldown = (t["ohdelay"] or 0) + t["overheat"] / t["coolrate"]
-                heat_duty = tto / (tto + cooldown)
-        duty = min(mag_duty, heat_duty)
+        mag_duty, heat_duty, shots = 1.0, 1.0, None
+        if rate:
+            if p["ammo_val"]:
+                mag_cycle = p["ammo_val"] / rate + (p["ammo_reload"] or 0)
+                mag_duty = (p["ammo_val"] / mag_cycle) / rate
+                # cooling happens between shots and during the magazine reload
+                pauses = [1.0 / rate] * int(p["ammo_val"] - 1) + [p["ammo_reload"] or 0]
+                heat_duty, cycles = heat_cycle(t, p["ammo_val"] * hpt, pauses, mag_cycle)
+                shots = cycles * p["ammo_val"] if cycles else None
+            else:
+                heat_duty, shots = heat_cycle(t, hpt, [1.0 / rate], 1.0 / rate)
+        duty = mag_duty * heat_duty
         sus_rate = (rate or 0) * duty
         rof_sort = sus_rate
         if rate and duty < 1:
-            heat_tag = " (heat)" if heat_duty < mag_duty else ""
+            heat_tag = " (heat)" if heat_duty < 1 else ""
             rof_txt = f"{rate:.2f} burst / {sus_rate:.2f} sust{heat_tag}"
         else:
             rof_txt = f"{rate:.2f}" if rate else "?"
@@ -260,6 +294,8 @@ def compute(t, p):
         shot_shield = shield_hit * per_trigger
         if p["speed"]:
             extras.append(f"{p['speed']:,.0f} m/s")
+        if shots:
+            extras.append(f"overheats after ~{shots:.0f} shots")
 
     if is_missile:
         extras.append("guided" if p["guided"] else "dumbfire")
@@ -379,9 +415,12 @@ From `bullet_*` / `missile_*` macros:
 - Range = `bullet@range` where present, else projectile speed × lifetime.
 - Beams: `damage@value` treated as damage per second while the beam is active (`lifetime`),
   cycled by reload — relative ordering is robust; verify absolute beam DPS in-game.
-- Main weapons overheat (turrets don't): sustained duty modelled as fire-to-overheat
-  followed by a full cooldown (`overheatcooldelay` + `overheat`/`coolrate`); the tighter
-  of the heat and magazine limits governs sustained DPS. Heat is not modelled for beams.
+- Main weapons overheat (turrets carry no heat data): the engine cools only `cooldelay`
+  seconds after the last shot, so continuous fire always climbs to overheat, while pauses
+  (gaps between slow shots, magazine reloads, beam recharge/charge-up) cool at `coolrate`.
+  Sustained DPS models heat 0 -> overheat -> full cooldown (`overheatcooldelay` +
+  `overheat`/`coolrate`), compounded with the magazine limit. Heat per trigger is taken as
+  bullet `heat` (+`initial`) x `barrelamount` (pellets share one charge).
 - Missile launchers/turrets fire their default missile; per-shot figure is one full launch.
   Missile weapons need ammunition resupply.
 - Excluded: scenario/story variants, spacesuit gear, mines.
@@ -635,7 +674,7 @@ __CHANGE_SECTIONS__
       <li>Rate of fire = <code>reload@rate</code>, or 1/<code>reload@time</code> (+ <code>chargetime</code> where present). Magazine weapons: sustained cycle = mag ÷ rate + magazine reload.</li>
       <li>Range = <code>bullet@range</code> where present, else projectile speed × lifetime.</li>
       <li>Beams: <code>damage@value</code> treated as damage per second while the beam is active (<code>lifetime</code>), cycled by reload — relative ordering is robust; verify absolute beam DPS in-game.</li>
-      <li>Main weapons overheat (turrets don't): sustained duty modelled as fire-to-overheat followed by a full cooldown; the tighter of the heat and magazine limits governs sustained DPS. Heat is not modelled for beams.</li>
+      <li>Main weapons overheat (turrets carry no heat data): cooling only runs <code>cooldelay</code> after the last shot, so continuous fire climbs to overheat, while pauses (slow-fire gaps, magazine reloads, beam recharge/charge-up) cool at <code>coolrate</code>. Sustained DPS models heat 0 &rarr; overheat &rarr; full cooldown, compounded with the magazine limit; heat-limited rows say so and note shots-to-overheat.</li>
       <li>Missile launchers/turrets fire their default missile; per-shot figure is one full launch. Missile weapons need ammunition resupply.</li>
       <li>Excluded: scenario/story variants, spacesuit gear, mines. Generated by <code>stats/weapon_stats.py</code>.</li>
     </ul>
