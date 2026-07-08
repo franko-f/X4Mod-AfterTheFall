@@ -222,7 +222,8 @@ def compute(t, p):
 
     if is_beam:
         dur = p["lifetime"] or 0
-        cyc = max(p["time"] or 0, dur)
+        # charge-up (e.g. the Kha'ak Obliterator) delays every shot, so it extends the cycle
+        cyc = max(p["time"] or 0, dur) + (p["chargetime"] or 0)
         burst_hull = hull_hit * (p["barrels"] or 1)  # dps while the beam is on
         duty = dur / cyc if cyc else 0
         sus_hull = burst_hull * duty
