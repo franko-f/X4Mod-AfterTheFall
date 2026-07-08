@@ -509,10 +509,13 @@ HTML_TEMPLATE = r"""<title>X4 __VERSION__ — Weapons Datasheet</title>
     color: var(--accent); font-weight: 600; }
   .chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
   .hint { color: var(--muted); font-size: 12.5px; margin-left: auto; }
+  /* The box is the scroll container in BOTH axes, capped near the viewport height,
+     so the sticky header pins to its top like a frozen spreadsheet row. */
   .tablebox { background: var(--surface); border: 1px solid var(--line); border-radius: 6px;
-    overflow-x: auto; }
-  table { border-collapse: collapse; width: 100%; min-width: 1500px; }
-  thead th { position: sticky; top: 0; background: var(--surface);
+    overflow: auto; max-height: calc(100vh - 20px); }
+  /* border-collapse:collapse detaches borders from sticky headers in Chrome */
+  table { border-collapse: separate; border-spacing: 0; width: 100%; min-width: 1500px; }
+  thead th { position: sticky; top: 0; z-index: 2; background: var(--surface);
     border-bottom: 2px solid var(--line);
     font-family: "Avenir Next Condensed", "Arial Narrow", sans-serif; font-weight: 600;
     text-transform: uppercase; letter-spacing: 0.07em; font-size: 11.5px; color: var(--muted);
