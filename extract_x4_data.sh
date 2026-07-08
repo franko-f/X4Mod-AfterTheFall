@@ -27,7 +27,7 @@ DIR_BLACKLIST=(
     "assets/textures"
     "assets/cutscenes"
     "assets/environments"
-    "assets/fx"
+#    "assets/fx"
     "assets/legacy"
     "assets/characters"
     "assets/cutscenecore"
