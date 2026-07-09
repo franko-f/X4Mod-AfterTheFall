@@ -145,7 +145,7 @@ module GateDefence =
     // at all, and such stations spawn with the game's sparse default fit -
     // near-unarmed turret hardpoints. The defence plans hardcode no weapons
     // themselves, so this level is what arms the bastion. 1.0 = fully fitted.
-    let BastionLoadoutLevel = 1.0
+    let BastionLoadoutLevel = 0.8
 
     // Equipment ware ownership granted to factions via a wares.xml diff, as
     // (faction, ware id) pairs. The game fills a <loadout> level only with wares the
