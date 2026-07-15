@@ -70,8 +70,12 @@ let makeResourceAreaRef (size: string) (ware: string) (yieldTier: string) (speed
     $"{boundary}_{ware}_{yieldTier}_{speed}"
 
 // The vanilla mapdefaults file for the core game and for each DLC we generate
-// resources for. Diff patches for a DLC's sectors must go in that DLC's own
-// extensions/<dlc>/libraries/mapdefaults.xml so they only load when the DLC exists.
+// resources for. These are consulted only to decide each sector's diff op shape;
+// the ops themselves ALL go in the mod's core libraries/mapdefaults.xml. The game
+// merges every extension's own mapdefaults into one patchable document (like
+// defaults.xml) and never reads nested extensions/<dlc>/libraries copies - verified
+// in game: nested cluster map diffs apply, nested mapdefaults diffs are ignored,
+// while the core file's access ops patch Terran DLC datasets successfully.
 let private mapDefaultsDocs =
     Map [
         "core", X4UnpackedDataFolder + "/libraries/mapdefaults.xml"
@@ -218,19 +222,18 @@ let private sectorResourceAreasXml (grant: SectorResourceGrant) =
 
     XElement.Parse(xml)
 
-// Write a DLC's mapdefaults diff granting sectors their resource areas.
-// The core game file already has a hand written template diff with a couple of
-// access licence fixes (mod_xml/libraries/mapdefaults.xml). Program.fs copies the
-// templates into the mod directory before we run, and our write below replaces
-// that copy - so load the template as the seed document and append to it. The
-// DLC files have no template and start from an empty diff.
-let writeMapDefaults (dlc: string) (grants: SectorResourceGrant list) =
+// Write the mod's single mapdefaults diff granting every sector its resource areas,
+// DLC sectors included: their datasets are reachable from the core file because the
+// game merges all extensions' mapdefaults into one document (see mapDefaultsDocs).
+// The file already has a hand written template diff with a couple of access licence
+// fixes (mod_xml/libraries/mapdefaults.xml). Program.fs copies the templates into
+// the mod directory before we run, and our write below replaces that copy - so load
+// the template as the seed document and append to it.
+let writeMapDefaults (grants: SectorResourceGrant list) =
     let diff =
-        match dlc with
-        | "core" -> XElement.Load(__SOURCE_DIRECTORY__ + "/mod_xml/libraries/mapdefaults.xml")
-        | _ -> X4.WriteModfiles.newDiff ()
+        XElement.Load(__SOURCE_DIRECTORY__ + "/mod_xml/libraries/mapdefaults.xml")
 
     for grant in grants do
         diff.Add(sectorResourceAreasXml grant)
 
-    X4.WriteModfiles.write_xml_file dlc "libraries/mapdefaults.xml" diff
+    X4.WriteModfiles.write_xml_file "core" "libraries/mapdefaults.xml" diff

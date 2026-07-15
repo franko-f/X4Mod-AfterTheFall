@@ -102,8 +102,8 @@ let sectorResourceGrant (dlc: string) (sector: string) (resources: string list) 
         |> List.map (fun area -> makeResourceAreaRef area.size area.ware area.yieldTier area.speed, area.amount)
 }
 
-let generateDLCMapDefaults (dlc: string) assignments =
-    printfn "======= Generating mapdefaults resource areas for DLC: %s" dlc
+let computeDLCMapDefaultGrants (dlc: string) assignments =
+    printfn "======= Computing mapdefaults resource areas for DLC: %s" dlc
 
     // One grant per sector: gather every resource assigned to the sector together,
     // so the NoDataset case can't produce two competing <dataset> nodes.
@@ -114,7 +114,6 @@ let generateDLCMapDefaults (dlc: string) assignments =
 
     bySector
     |> List.map (fun (sector, resources) -> sectorResourceGrant dlc sector resources)
-    |> writeMapDefaults dlc
 
 
 let generate_resource_definitions_file () =
@@ -128,7 +127,19 @@ let generate_resource_definitions_file () =
         "pirate", "maps/xu_ep2_universe/dlc_pirate_clusters.xml"
     ]
 
-    for (dlc, clusterFile) in dlcClusterFiles do
-        let assignments = computeResourceAssignments dlc
-        generateDLCVisualRegions dlc clusterFile assignments // the physical asteroid/gas fields
-        generateDLCMapDefaults dlc assignments // the minable yields that fill them
+    // The two halves need OPPOSITE file placement. Cluster maps are patched per file
+    // path, so a DLC cluster can only be reached from extensions/<dlc>/maps/... in
+    // our mod. mapdefaults is the reverse: the game merges every extension's own
+    // libraries/mapdefaults.xml into one patchable document and never reads nested
+    // extensions/<dlc>/libraries copies - so ALL resource area ops, DLC sectors
+    // included, must go in the mod's single core mapdefaults diff. (Verified in
+    // game: nested cluster diffs apply, nested mapdefaults diffs are ignored, and
+    // the core file's access ops successfully patch Terran DLC datasets.)
+    let allGrants = [
+        for (dlc, clusterFile) in dlcClusterFiles do
+            let assignments = computeResourceAssignments dlc
+            generateDLCVisualRegions dlc clusterFile assignments // the physical asteroid/gas fields
+            yield! computeDLCMapDefaultGrants dlc assignments // the minable yields that fill them
+    ]
+
+    writeMapDefaults allGrants
