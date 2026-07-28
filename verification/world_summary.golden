@@ -1100,6 +1100,9 @@ region Cluster_714_macro: atf_asteroid_field_high @ (-54731,-3320,77278)
 region Cluster_714_macro: atf_helium_highyield_field @ (17931,2951,41697)
 region Cluster_714_macro: atf_methane_highyield_field @ (17973,-433,57683)
 
+== md/afterfallmod_resource_retrofit.xml (1) ==
+op cues 
+
 == md/factionlogic.xml (2) ==
 op replace //cue[@name='TerranFactionLogic_Manager']/param[@name='PreferredHQSpaceMacro']/@value
 op replace //cue[@name='TerranFactionLogic_Manager']/param[@name='PreferredHQTypes']/@value

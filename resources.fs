@@ -139,7 +139,18 @@ let generate_resource_definitions_file () =
         for (dlc, clusterFile) in dlcClusterFiles do
             let assignments = computeResourceAssignments dlc
             generateDLCVisualRegions dlc clusterFile assignments // the physical asteroid/gas fields
-            yield! computeDLCMapDefaultGrants dlc assignments // the minable yields that fill them
+
+            for grant in computeDLCMapDefaultGrants dlc assignments do // the minable yields that fill them
+                yield dlc, grant
     ]
 
-    writeMapDefaults allGrants
+    writeMapDefaults (allGrants |> List.map snd)
+
+    // mapdefaults grants only seed at game start, so existing saves need the DLC
+    // sector resource areas created at runtime by a run-once MD script. Base game
+    // grants are excluded: every existing modded save already received them at game
+    // start (the base half always worked), so recreating them would duplicate.
+    allGrants
+    |> List.filter (fun (dlc, _) -> dlc <> "core")
+    |> List.map snd
+    |> writeResourceRetrofitMD

@@ -222,7 +222,89 @@ let private sectorResourceAreasXml (grant: SectorResourceGrant) =
 
     XElement.Parse(xml)
 
-// Write the mod's single mapdefaults diff granting every sector its resource areas,
+// The canonically cased sector macro a grant applies to (every state case carries it).
+let private grantSectorMacro (grant: SectorResourceGrant) =
+    match grant.State with
+    | HasResourceAreas macro -> macro
+    | HasProperties(macro, _) -> macro
+    | NoDataset macro -> macro
+
+// One retrofit block per sector: look the sector up (skipping it gracefully when the
+// player doesn't own that DLC), then create each resource area 'amount' times —
+// create_resource_area's yieldname is exactly the mapdefaults <resourcearea> ref.
+let private sectorRetrofitXml (grant: SectorResourceGrant) =
+    let macro = grantSectorMacro grant
+
+    let creates =
+        grant.Areas
+        |> List.map (fun (ref, amount) ->
+            $"""          <do_all exact="{amount}">
+            <create_resource_area sector="$Sector" yieldname="'{ref}'" />
+          </do_all>""")
+        |> String.concat "\n"
+
+    $"""        <find_sector name="$Sector" macro="macro.{macro}" />
+        <do_if value="$Sector.exists">
+{creates}
+          <debug_text text="'AfterFallMod: granted resource areas in {macro}'" />
+        </do_if>"""
+
+// Write the run-once MD script that grants the DLC sector resource areas to EXISTING
+// saves. mapdefaults <resourcearea> entries are seeded into a save at game start, so
+// saves from before this mod version never receive the DLC grants — this script
+// creates them at runtime on the first load instead. Two save-persisted guards stop
+// it re-applying: the Retrofit cue completes after firing once, and the versioned
+// md.$ flag on the global blackboard survives even a disable/re-enable of the mod.
+// New games are covered by mapdefaults, so the GameStart path just sets the flag.
+// NOTE for future releases that change resource grants: this flag is stamped with the
+// content.xml version. A new version's script must grant only the DELTA to saves that
+// carry an older flag (or use <patch sinceversion> on the Retrofit cue) — re-emitting
+// the full list under a new flag would duplicate areas in retrofitted saves.
+let writeResourceRetrofitMD (grants: SectorResourceGrant list) =
+    let modVersion =
+        XDocument
+            .Load(__SOURCE_DIRECTORY__ + "/mod_xml/content.xml")
+            .Root.Attribute(XName.Get "version")
+            .Value
+
+    let flag = $"md.$AfterFallMod_DLCResourceRetrofit_v{modVersion}"
+    let sectorBlocks = grants |> List.map sectorRetrofitXml |> String.concat "\n"
+
+    let xml =
+        $"""<mdscript name="AfterFallMod_ResourceRetrofit" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="md.xsd">
+  <cues>
+    <!-- New game: mapdefaults already seeded every resource area, so just mark this
+         save as granted. md.Setup.GameStart is only signalled at genuine game start,
+         never when loading a save. -->
+    <cue name="NewGame" namespace="this" version="1">
+      <conditions>
+        <event_cue_signalled cue="md.Setup.GameStart" />
+      </conditions>
+      <actions>
+        <set_value name="{flag}" exact="1" />
+        <cancel_cue cue="Retrofit" />
+      </actions>
+    </cue>
+    <!-- Existing save loaded with this mod version for the first time: create the DLC
+         sector resource areas that mapdefaults could not deliver retroactively. Base
+         game sector grants are excluded - they already applied at game start in every
+         existing modded save. -->
+    <cue name="Retrofit" namespace="this" version="1">
+      <conditions>
+        <event_game_loaded />
+      </conditions>
+      <actions>
+        <do_if value="not {flag}?">
+          <set_value name="{flag}" exact="1" />
+{sectorBlocks}
+        </do_if>
+        <cancel_cue cue="NewGame" />
+      </actions>
+    </cue>
+  </cues>
+</mdscript>"""
+
+    X4.WriteModfiles.write_xml_file "core" "md/afterfallmod_resource_retrofit.xml" (XElement.Parse(xml))
 // DLC sectors included: their datasets are reachable from the core file because the
 // game merges all extensions' mapdefaults into one document (see mapDefaultsDocs).
 // The file already has a hand written template diff with a couple of access licence
